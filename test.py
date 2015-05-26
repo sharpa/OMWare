@@ -1,3 +1,3 @@
 #!/usr/bin/python
 
-import Assemble.BioNano.ParameterSearch
+import Assemble.BioNano.BNGAssembly
