@@ -1,3 +1,3 @@
 #!/usr/bin/python
 
-import POMMIO
+import Assemble.BioNano.ParameterSearch
