@@ -1,3 +1,5 @@
 #!/usr/bin/python
 
-import Assemble.BioNano.BNGAssembly
+from Assemble.BioNano.BNGAssembly import Assembly
+obj=Assembly()
+obj.write_code()

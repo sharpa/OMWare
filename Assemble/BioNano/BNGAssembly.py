@@ -5,6 +5,7 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
+from Utils.MacbookProResources import MacbookProResources
 
 class Assembly:
 	def __init__(self):
@@ -12,7 +13,7 @@ class Assembly:
 		self.work_dir="/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_data_dir"
 		self.assembler_bin="/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/Assembler"
 
-		self.resources=Resources()
+		self.resources=MacbookProResources()
 
 		self.color=1
 		self.fp=1.5
@@ -61,7 +62,7 @@ class Assembly:
 		self.prereqs=[self.sort, self.split, self.pairwise_alignment, self.molecule_stats]
 #		self.step_dir=""
 
-	def write_code(self):
+	def writeCode(self):
 		param_values={
 			"-if": self.split.getListFile(),
 			"-XmapStatRead": self.molecule_stats.getStatsFile(),
@@ -89,8 +90,8 @@ class Assembly:
 			"-draftsize": "1",
 			"-SideBranch": self.min_duplicat_len,
 			"-contigs_format": "1" if self.binary_output else "0",
-			"-maxthreads": self.resources.max_threads,
-			"-maxmem": self.resources.maxmem,
+			"-maxthreads": self.resources.getMaxThreads(),
+			"-maxmem": self.resources.getMaxMem(),
 			"-minlen": self.min_molecule_len,
 			"-minsites": self.min_molecule_sites,
 			"-minSNR": self.min_snr,
