@@ -13,3 +13,11 @@
 # Wizard
 # I'm envisioning a sort of question and answer command line interface experience that will allow
 # new users to choose input parameter values with confidence.  It will include helpful hints.
+
+# Rarefactor
+# A question that has been a big deal in my lab is this: what amount of coverage is necessary?
+# As part of the answer to that question, we reduced a single input dataset by random molecule removal
+
+# CD
+# Every "step" has a working directory that is separate from the code directory.  This class
+# encapsulates the process of changing directories, and is very careful to change back once complete
