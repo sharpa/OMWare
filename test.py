@@ -1,9 +1,6 @@
 #!/usr/bin/python
 
-from Assemble.BioNano.BNGAssembly import Assembly
-obj=Assembly()
-obj.writeCode()
+from Assemble.BioNano.BNGReferenceAlignment import ReferenceAlignment
 
-obj.pairwise_alignment.writeCode()
-obj.split.writeCode()
-obj.sort.writeCode()
+obj=ReferenceAlignment("unrefined.cmap", "Dgenome_v2.1.cmap")
+obj.writeCode()
