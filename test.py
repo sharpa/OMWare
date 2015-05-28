@@ -2,4 +2,8 @@
 
 from Assemble.BioNano.BNGAssembly import Assembly
 obj=Assembly()
-obj.write_code()
+obj.writeCode()
+
+obj.pairwise_alignment.writeCode()
+obj.split.writeCode()
+obj.sort.writeCode()
