@@ -59,7 +59,7 @@ class POMMIO_iter:
 				if line [0] != "0":
 					raise Exception("this file is incorrectly formatted")
 				molecule_data=line.split()
-				new_molecule=Molecule(molecule_data[1], molecule_data[2])
+				new_molecule=Molecule(molecule_data[1], float(molecule_data[2]))
 				new_molecule.average_intensity=molecule_data[3]
 				new_molecule.snr=molecule_data[4]
 				new_molecule.num_labels=molecule_data[5]

@@ -58,20 +58,12 @@ class Rarefactor:
 					excess_distance=removed_length-target_removed_length
 					abridged[candidate]=excess_distance
 
-			print(total_length)
-			target_kept_length=total_length-target_removed_length ###
-#			print(molecule_lengths)
-#			print(removed)
-#			print(abridged)
-			total_length=0 ###
 			for molecule in pommio.parse("bnx"):
 				if molecule.id in removed:
 					continue
 				if molecule.id in abridged:
 					molecule.shrink(abridged[molecule.id])
-				total_length += molecule.length ###	
 				pommio.write(molecule, o_file, "bnx")
 
-			print (str(total_length) + " / " + str(target_kept_length)) ###
 
 
