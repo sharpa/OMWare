@@ -117,3 +117,6 @@ class PairwiseAlignment:
 				print(" ".join(param_list))
 
 				currentJob += 1
+
+	def getListFile(self):
+		return "align.list"

@@ -5,6 +5,7 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
+from collections import OrderedDict
 from Utils.MacbookProResources import MacbookProResources
 from Assemble.BioNano.BNGSort import Sort
 from Assemble.BioNano.BNGSplit import Split
@@ -63,43 +64,46 @@ class Assembly:
 		self.molecule_stats=self.sort.getMoleculeStats()
 		
 		self.prereqs=[self.sort, self.split, self.pairwise_alignment, self.molecule_stats]
-#		self.step_dir=""
+		self.step_dir=self.getStepDir()
 
 	def writeCode(self):
-		param_values={
-			"-if": str(self.split.getListFile()),
-			"-XmapStatRead": str(self.molecule_stats.getStatsFile()),
-			"-usecolor": str(self.color),
-			"-FP": str(self.fp),
-			"-FN": str(self.fn),
-			"-sd": str(self.sd),
-			"-sf": str(self.sf),
-			"-sr": str(self.sr),
-			"-res": str(self.res),
-			"-T": str(self.pval),
-			"-S": str(self.alignment_score_threshold),
-			"-MaxRelCoverage": " ".join([str(self.max_rel_coverage_multiple), str(self.max_rel_coverage_absolute), str(self.max_rel_coverage_absolute_2)]),
-			"-BulgeCoverage": str(self.bulge_coverage),
-			"-MaxCoverage": str(self.max_coverage),
-			"-MinCov": str(self.min_coverage),
-			"-MinAvCov": str(self.min_average_coverage),
-			"-MinMaps": str(self.min_maps),
-			"-MinContigLen": str(self.min_contig_len),
-			"-EndTrim": str(self.end_trim),
-			"-refine": str(0),
-			"-PVchim": " ".join([str(self.chimera_pval),str(self.chimera_num)]),
-			"-FastBulge": str(self.fast_bulge),
-			"-FragilePreserve": str("1" if self.fragile_preserve else "0"),
-			"-draftsize": str("1"),
-			"-SideBranch": str(self.min_duplicate_len),
-			"-contigs_format": str("1" if self.binary_output else "0"),
-			"-maxthreads": str(self.resources.getMaxThreads()),
-			"-maxmem": str(self.resources.getMaxMem()),
-			"-minlen": str(self.min_molecule_len),
-			"-minsites": str(self.min_molecule_sites),
-			"-minSNR": str(self.min_snr),
-			"-o": str(self.output_prefix),
-		}
+		print("mkdir " + self.getStepDir())
+		print("cd " + self.getStepDir())
+		param_values=OrderedDict()
+		param_values["-if"]= str(self.split.getListFile())
+		param_values["-af"]= str(self.pairwise_alignment.getListFile())
+		param_values["-XmapStatRead"]= str(self.molecule_stats.getStatsFile())
+		param_values["-usecolor"]= str(self.color)
+		param_values["-FP"]= str(self.fp)
+		param_values["-FN"]= str(self.fn)
+		param_values["-sd"]= str(self.sd)
+		param_values["-sf"]= str(self.sf)
+		param_values["-sr"]= str(self.sr)
+		param_values["-res"]= str(self.res)
+		param_values["-T"]= str(self.pval)
+		param_values["-S"]= str(self.alignment_score_threshold)
+		param_values["-MaxRelCoverage"]= " ".join([str(self.max_rel_coverage_multiple), str(self.max_rel_coverage_absolute), str(self.max_rel_coverage_absolute_2)])
+		param_values["-BulgeCoverage"]= str(self.bulge_coverage)
+		param_values["-MaxCoverage"]= str(self.max_coverage)
+		param_values["-MinCov"]= str(self.min_coverage)
+		param_values["-MinAvCov"]= str(self.min_average_coverage)
+		param_values["-MinMaps"]= str(self.min_maps)
+		param_values["-MinContigLen"]= str(self.min_contig_len)
+		param_values["-EndTrim"]= str(self.end_trim)
+		param_values["-refine"]= str(0)
+		param_values["-PVchim"]= " ".join([str(self.chimera_pval),str(self.chimera_num)])
+		param_values["-FastBulge"]= str(self.fast_bulge)
+		param_values["-FragilePreserve"]= str("1" if self.fragile_preserve else "0")
+		param_values["-draftsize"]= str("1")
+		param_values["-SideBranch"]= str(self.min_duplicate_len)
+		param_values["-contigs_format"]= str("1" if self.binary_output else "0")
+		param_values["-maxthreads"]= str(self.resources.getMaxThreads())
+		param_values["-maxmem"]= str(self.resources.getMaxMem())
+		param_values["-minlen"]= str(self.min_molecule_len)
+		param_values["-minsites"]= str(self.min_molecule_sites)
+		param_values["-minSNR"]= str(self.min_snr)
+		param_values["-o"]= str(self.output_prefix)
+		
 		if self.add_alignment_filter:
 			param_values["-AlignmentFilter"] = " ".join([str(self.alignment_filter_threshold), str(self.alignment_filter_minlen_change), str(self.alignment_filter_pval_change)])
 		if self.overwrite_output:
@@ -116,4 +120,8 @@ class Assembly:
 			param_list.append(key)
 			param_list.append(param_values[key])
 		print(" ".join(param_list))
+		print("cd ..")
+
+	def getStepDir(self):
+		return self.work_dir + "/" + "_".join(["assembly", self.input_file, "fp"+str(self.fp), "fn"+str(self.fn), "pval"+str(self.pval), "minlen"+str(self.min_molecule_len), "minsites"+str(self.min_molecule_sites)])
 
