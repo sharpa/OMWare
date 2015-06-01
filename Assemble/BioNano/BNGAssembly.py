@@ -5,27 +5,16 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
-from collections import OrderedDict
-from Utils.MacbookProResources import MacbookProResources
+from Assemble.Step import Step
 from Assemble.BioNano.BNGSort import Sort
 from Assemble.BioNano.BNGSplit import Split
 from Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
+from collections import OrderedDict
 
-class Assembly:
+class Assembly(Step):
 	def __init__(self, workspace, vital_parameters):
-		# Workspace
-		self.work_dir=workspace.work_dir
-		self.input_file=workspace.input_file
-		self.assembler_bin=workspace.binaries['bng_assembler']
-
-		self.resources=MacbookProResources()
-
-		# Parameters
-		self.fp=vital_parameters.fp
-		self.fn=vital_parameters.fn
-		self.pval=vital_parameters.pval
-		self.min_molecule_len=vital_parameters.min_molecule_len
-		self.min_molecule_sites=vital_parameters.min_molecule_sites
+		self.workspace=workspace
+		self.vital_parameters=vital_parameters
 
 		self.sd=0.2
 		self.sf=0.2
@@ -62,22 +51,23 @@ class Assembly:
 		self.send_errors_to_file=True
 
 	def writeCode(self):
-		self.establishPrereqs()
-		print("cd " + self.work_dir)
+		self.writePrereqCode()
+
+		print("cd " + self.workspace.work_dir)
 		print("mkdir " + self.getStepDir())
 		print("cd " + self.getStepDir())
 		param_values=OrderedDict()
 		param_values["-if"]= str(self.split.getListFile())
 		param_values["-af"]= str(self.pairwise_alignment.getListFile())
-		param_values["-XmapStatRead"]= str(self.molecule_stats.getStatsFile())
+		param_values["-XmapStatRead"]= str(self.molecule_stats.getOutputFile())
 		param_values["-usecolor"]= str(self.color)
-		param_values["-FP"]= str(self.fp)
-		param_values["-FN"]= str(self.fn)
+		param_values["-FP"]= str(self.vital_parameters.fp)
+		param_values["-FN"]= str(self.vital_parameters.fn)
 		param_values["-sd"]= str(self.sd)
 		param_values["-sf"]= str(self.sf)
 		param_values["-sr"]= str(self.sr)
 		param_values["-res"]= str(self.res)
-		param_values["-T"]= str(self.pval)
+		param_values["-T"]= str(self.vital_parameters.pval)
 		param_values["-S"]= str(self.alignment_score_threshold)
 		param_values["-MaxRelCoverage"]= " ".join([str(self.max_rel_coverage_multiple), str(self.max_rel_coverage_absolute), str(self.max_rel_coverage_absolute_2)])
 		param_values["-BulgeCoverage"]= str(self.bulge_coverage)
@@ -94,10 +84,10 @@ class Assembly:
 		param_values["-draftsize"]= str("1")
 		param_values["-SideBranch"]= str(self.min_duplicate_len)
 		param_values["-contigs_format"]= str("1" if self.binary_output else "0")
-		param_values["-maxthreads"]= str(self.resources.getMaxThreads())
-		param_values["-maxmem"]= str(self.resources.getMaxMem())
-		param_values["-minlen"]= str(self.min_molecule_len)
-		param_values["-minsites"]= str(self.min_molecule_sites)
+		param_values["-maxthreads"]= str(self.workspace.resources.getMaxThreads())
+		param_values["-maxmem"]= str(self.workspace.resources.getMaxMem())
+		param_values["-minlen"]= str(self.vital_parameters.min_molecule_len)
+		param_values["-minsites"]= str(self.vital_parameters.min_molecule_sites)
 		param_values["-minSNR"]= str(self.min_snr)
 		param_values["-o"]= str(self.output_prefix)
 		
@@ -112,18 +102,18 @@ class Assembly:
 		if self.send_errors_to_file:
 			param_values["-stderr"] = ""
 
-		param_list=[self.assembler_bin]
+		param_list=[self.workspace.binaries["bng_assembler"]]
 		for key in param_values:
 			param_list.append(key)
 			param_list.append(param_values[key])
 		print(" ".join(param_list))
 
 	def getStepDir(self):
-		return self.work_dir + "/" + "_".join(["assembly", self.input_file, "fp"+str(self.fp), "fn"+str(self.fn), "pval"+str(self.pval), "minlen"+str(self.min_molecule_len), "minsites"+str(self.min_molecule_sites)])
+		return self.workspace.work_dir + "/" + "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
 
-	def establishPrereqs(self):
-		self.sort=Sort(self.input_file)
-		self.split=Split(self.input_file)
-		self.pairwise_alignment=PairwiseAlignment(self.split)
+	def fetchPrereqs(self):
+		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
-		self.prereqs=[self.sort, self.split, self.pairwise_alignment, self.molecule_stats]
+		self.split=Split(self.workspace, self.vital_parameters)
+		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
+		self.prereqs=[self.sort, self.split, self.pairwise_alignment]

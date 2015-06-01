@@ -5,40 +5,39 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create sort an input dataset
-from Utils.MacbookProResources import MacbookProResources
+from Assemble.Step import Step
 from Assemble.BioNano.BNGMoleculeStats import MoleculeStats
+from collections import OrderedDict
 
-class Sort:
-	def __init__(self, input_file):
-		self.input_file=input_file
-		self.ref_aligner_bin="/Users/sharap/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/RefAligner"
+class Sort(Step):
+	def __init__(self, workspace, vital_parameters):
+		self.workspace=workspace
+		self.vital_parameters=vital_parameters
 
-		self.resources=MacbookProResources()
-
-		self.output_prefix="all_sorted"
-		self.min_molecule_len=100
-		self.min_molecule_sites=6
+		self.output_prefix="sorted"
 		self.min_snr=2
 		self.overwrite_output=True
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
-		self.molecule_stats=self.getMoleculeStats()
-		self.prereqs=[]
-
 	def writeCode(self):
-		param_values={
-			"-i": self.input_file,
-			"-maxthreads": str(self.resources.getMaxThreads()),
-			"-merge": "",
-			"-sort-idinc": "",
-			"-bnx": "",
-			"-o": self.output_prefix,
-			"-minlen": str(self.min_molecule_len),
-			"-minsites": str(self.min_molecule_sites),
-			"-minSNR": str(self.min_snr),
-			"-XmapStatWrite": self.molecule_stats.getStatsFile()
-		}
+		self.writePrereqCode()
+
+		print("cd " + self.workspace.work_dir)
+		print("mkdir -p " + self.getStepDir())
+		print("cd " + self.getStepDir())
+		param_values=OrderedDict()
+		param_values["-i"] =  self.workspace.input_file
+		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
+		param_values["-merge"] =  ""
+		param_values["-sort-idinc"] =  ""
+		param_values["-bnx"] =  ""
+		param_values["-o"] =  self.output_prefix
+		param_values["-minlen"] =  str(self.vital_parameters.min_molecule_len)
+		param_values["-minsites"] =  str(self.vital_parameters.min_molecule_sites)
+		param_values["-minSNR"] =  str(self.min_snr)
+		param_values["-XmapStatWrite"] =  self.molecule_stats.getOutputFile()
+
 		if self.overwrite_output:
 			param_values["-f"] = ""
 		if self.send_output_to_file:
@@ -46,13 +45,24 @@ class Sort:
 		if self.send_errors_to_file:
 			param_values["-stderr"] = ""
 		
-		param_list=[self.ref_aligner_bin]
+		param_list=[self.workspace.binaries["bng_ref_aligner"]]
 		for key in param_values:
 			param_list.append(key)
 			param_list.append(param_values[key])
 		print(" ".join(param_list))
 
+	def getOutputFile(self):
+		return self.getStepDir() + "/" + self.output_prefix + ".bnx"
+
+	def getStepDir(self):
+		return "_".join(["sorted",self.workspace.input_file, "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
+
+	def fetchPrereqs(self):
+		self.molecule_stats=self.getMoleculeStats()
+		self.prereqs=[]
+
+
+
 	def getMoleculeStats(self):
-		return MoleculeStats(self.input_file)
-	def getSortedFile(self):
-		return self.output_prefix + ".bnx"
+		return MoleculeStats(self.getStepDir())
+

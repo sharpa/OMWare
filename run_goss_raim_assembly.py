@@ -9,7 +9,7 @@ from Utils.Workspace import Workspace
 from Utils.CD import CD
 
 work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir"
-input_file="all_abridged.bnx"
+input_file="all.bnx"
 workspace=Workspace(work_dir, input_file)
 workspace.addBinary("bng_assembler", "/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/Assembler")
 workspace.addBinary("bng_ref_aligner", "/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/RefAligner")

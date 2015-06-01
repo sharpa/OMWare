@@ -5,9 +5,9 @@
 # 
 # Despite the poor name, this actually only refers to my
 # own laptop, on which I am programming this module... Sorry...
-from Utils.Resources import Resources
+import Utils.Resources
 
-class MacbookProResources(Resources):
+class Resources(Utils.Resources.Resources):
 	def getMaxThreads(self):
 		return 2
 	def getMaxMem(self):

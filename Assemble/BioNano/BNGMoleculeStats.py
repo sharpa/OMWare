@@ -7,7 +7,7 @@
 # a given input file to the associated molecule stats file
 
 class MoleculeStats:
-	def __init__(self, input_file):
-		self.input_file=input_file
-	def getStatsFile(self):
-		return "molecule_stats.txt"
+	def __init__(self, step_dir):
+		self.step_dir=step_dir
+	def getOutputFile(self):
+		return self.step_dir+"/molecule_stats.txt"

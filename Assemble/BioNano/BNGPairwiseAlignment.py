@@ -5,26 +5,21 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner to create a set of pairwise alignments
-from Utils.MacbookProResources import MacbookProResources
+from Assemble.Step import Step
 from Assemble.BioNano.BNGSort import Sort
 from Assemble.BioNano.BNGSplit import Split
+from collections import OrderedDict
 
-class PairwiseAlignment:
-	def __init__(self, input_file):
-		self.input_file=input_file
-		self.work_dir="/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_data_dir"
-		self.ref_aligner_bin="/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/RefAligner"
-
-		self.resources=MacbookProResources()
+class PairwiseAlignment(Step):
+	def __init__(self, workspace, vital_parameters):
+		self.workspace=workspace
+		self.vital_parameters=vital_parameters
 
 		self.color=1
-		self.fp=1.5
-		self.fn=.308
 		self.sd=0.2
 		self.sf=0.2
 		self.sr=0.03
 		self.res=3.3
-		self.pval=1.11e-8
 		self.min_alignment_sites=5
 		self.min_alignment_score=1
 		self.outlier_pval=0.0001
@@ -49,45 +44,44 @@ class PairwiseAlignment:
 		self.send_output_to_file=True
 		self.send_error_to_file=True
 
-		self.sort=Sort(self.input_file)
-		self.split=Split(self.input_file)
-		self.molecule_stats=self.sort.getMoleculeStats()
-		prereqs=[self.sort, self.split, self.molecule_stats]
-
 	def writeCode(self):
-		param_values={
-			"-usecolor": str(self.color),
-			"-FP": str(self.fp),
-			"-FN": str(self.fn),
-			"-sd": str(self.sd),
-			"-sf": str(self.sf),
-			"-sr": str(self.sr),
-			"-res": str(self.res),
-			"-T": str(self.pval),
-			"-maxmem": str(self.resources.getMaxMem()),
-			"-A": str(self.min_alignment_sites),
-			"-S": str(self.min_alignment_score),
-			"-outlier": str(self.outlier_pval),
-			"-endoutlier": str(self.endoutlier_pval),
-			"-RepeatMask": " ".join([str(self.repeat_max_shift), str(self.repeat_pval_change)]),
-			"-RepeatRec": " ".join([str(self.repeat_pval_ratio), str(self.repeat_min_change)]),
-			"-hashgen": " ".join([str(self.hash_window), str(self.hash_min_sites), str(self.hash_sd_max), str(self.hash_sd_rms), str(self.hash_relative_error), str(self.hash_offset_kb), str(self.hash_max_insert_errors), str(self.hash_max_probe_errors), str(self.hash_max_unresolved_sites)]),
-			"-hash": "",
-			"-mres": str(self.target_resolution),
-			"-nosplit": "2" if self.allow_no_splits else "0" if self.allow_infinite_splits else "1",
-			"-maxthreads": str(self.resources.getMaxThreads()),
-			"-XmapStatRead": str(self.molecule_stats.getStatsFile())
-		}
+		self.writePrereqCode()
+
+		print("cd " + self.workspace.work_dir)
+		print("mkdir -p " + self.getStepDir())
+		print("cd " + self.getStepDir())
+
+		param_values=OrderedDict()
+		param_values["-usecolor"] =  str(self.color)
+		param_values["-FP"] =  str(self.vital_parameters.fp)
+		param_values["-FN"] =  str(self.vital_parameters.fn)
+		param_values["-sd"] =  str(self.sd)
+		param_values["-sf"] =  str(self.sf)
+		param_values["-sr"] =  str(self.sr)
+		param_values["-res"] =  str(self.res)
+		param_values["-T"] =  str(self.vital_parameters.pval)
+		param_values["-maxmem"] =  str(self.workspace.resources.getMaxMem())
+		param_values["-A"] =  str(self.min_alignment_sites)
+		param_values["-S"] =  str(self.min_alignment_score)
+		param_values["-outlier"] =  str(self.outlier_pval)
+		param_values["-endoutlier"] =  str(self.endoutlier_pval)
+		param_values["-RepeatMask"] =  " ".join([str(self.repeat_max_shift), str(self.repeat_pval_change)])
+		param_values["-RepeatRec"] =  " ".join([str(self.repeat_pval_ratio), str(self.repeat_min_change)])
+		param_values["-hashgen"] =  " ".join([str(self.hash_window), str(self.hash_min_sites), str(self.hash_sd_max), str(self.hash_sd_rms), str(self.hash_relative_error), str(self.hash_offset_kb), str(self.hash_max_insert_errors), str(self.hash_max_probe_errors), str(self.hash_max_unresolved_sites)])
+		param_values["-hash"] =  ""
+		param_values["-mres"] =  str(self.target_resolution)
+		param_values["-nosplit"] =  "2" if self.allow_no_splits else "0" if self.allow_infinite_splits else "1"
+		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
+		param_values["-XmapStatRead"] =  str(self.molecule_stats.getOutputFile())
+
 		if self.overwrite_output:
 			param_values["-f"]=""
-#		if not self.generate_hash: # Order matters...
-#			param_values["-hash"]
 		if self.send_output_to_file:
 			param_values["-stdout"]=""
 		if self.send_error_to_file:
 			param_values["-stderr"]=""
 		
-		totalBlocks=self.split.getBlockCount()
+		totalBlocks=self.split.block_count
 		totalJobs=totalBlocks*(totalBlocks+1)/2 
 		currentJob = 0
 		for i in range(1,totalBlocks+1):
@@ -110,7 +104,7 @@ class PairwiseAlignment:
 
 				param_values["-o"]='pairwise%dof%d' % (currentJob+1, totalJobs)
 
-				param_list=[self.ref_aligner_bin]
+				param_list=[self.workspace.binaries["bng_ref_aligner"]]
 				for key in param_values:
 					param_list.append(key)
 					param_list.append(param_values[key])
@@ -118,5 +112,15 @@ class PairwiseAlignment:
 
 				currentJob += 1
 
+	def getStepDir(self):
+		return "_".join(["pairwise", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval)])
+
+	def fetchPrereqs(self):
+		self.sort=Sort(self.workspace, self.vital_parameters)
+		self.split=Split(self.workspace, self.vital_parameters)
+		self.molecule_stats=self.sort.getMoleculeStats()
+		self.prereqs=[self.sort, self.split]
+
 	def getListFile(self):
 		return "align.list"
+

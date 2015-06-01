@@ -5,8 +5,8 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run compare a BNG assembly to an in silico digested reference map
-from collections import OrderedDict
 from Utils.MacbookProResources import MacbookProResources
+from collections import OrderedDict
 
 class ReferenceAlignment:
 	def __init__(self, input_file, reference_file):
