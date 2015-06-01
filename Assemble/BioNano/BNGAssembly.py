@@ -12,21 +12,26 @@ from Assemble.BioNano.BNGSplit import Split
 from Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
 
 class Assembly:
-	def __init__(self):
-		self.input_file="all.bnx"
-		self.work_dir="/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_data_dir"
-		self.assembler_bin="/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/Assembler"
+	def __init__(self, workspace, vital_parameters):
+		# Workspace
+		self.work_dir=workspace.work_dir
+		self.input_file=workspace.input_file
+		self.assembler_bin=workspace.binaries['bng_assembler']
 
 		self.resources=MacbookProResources()
 
-		self.color=1
-		self.fp=1.5
-		self.fn=.308
+		# Parameters
+		self.fp=vital_parameters.fp
+		self.fn=vital_parameters.fn
+		self.pval=vital_parameters.pval
+		self.min_molecule_len=vital_parameters.min_molecule_len
+		self.min_molecule_sites=vital_parameters.min_molecule_sites
+
 		self.sd=0.2
 		self.sf=0.2
 		self.sr=0.03
 		self.res=3.3
-		self.pval=1.11e-8
+		self.color=1
 		self.alignment_score_threshold=1
 		self.max_rel_coverage_multiple=100
 		self.max_rel_coverage_absolute=200
@@ -45,8 +50,6 @@ class Assembly:
 		self.draftsize=1
 		self.min_duplicate_len=1
 		self.binary_output=True
-		self.min_molecule_len=100
-		self.min_molecule_sites=6
 		self.min_snr=2
 		self.output_prefix="unrefined"
 		self.add_alignment_filter=True
@@ -58,15 +61,8 @@ class Assembly:
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
-		self.sort=Sort(self.input_file)
-		self.split=Split(self.input_file)
-		self.pairwise_alignment=PairwiseAlignment(self.split)
-		self.molecule_stats=self.sort.getMoleculeStats()
-		
-		self.prereqs=[self.sort, self.split, self.pairwise_alignment, self.molecule_stats]
-		self.step_dir=self.getStepDir()
-
 	def writeCode(self):
+		self.establishPrereqs()
 		print("cd " + self.work_dir)
 		print("mkdir " + self.getStepDir())
 		print("cd " + self.getStepDir())
@@ -125,3 +121,9 @@ class Assembly:
 	def getStepDir(self):
 		return self.work_dir + "/" + "_".join(["assembly", self.input_file, "fp"+str(self.fp), "fn"+str(self.fn), "pval"+str(self.pval), "minlen"+str(self.min_molecule_len), "minsites"+str(self.min_molecule_sites)])
 
+	def establishPrereqs(self):
+		self.sort=Sort(self.input_file)
+		self.split=Split(self.input_file)
+		self.pairwise_alignment=PairwiseAlignment(self.split)
+		self.molecule_stats=self.sort.getMoleculeStats()
+		self.prereqs=[self.sort, self.split, self.pairwise_alignment, self.molecule_stats]

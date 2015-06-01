@@ -21,3 +21,7 @@
 # CD
 # Every "step" has a working directory that is separate from the code directory.  This class
 # encapsulates the process of changing directories, and is very careful to change back once complete
+
+# Workspace
+# Encapsulates information that every code-generator needs to know, and can only get from the outside
+# For example, executables, work dirs, and input datasets
