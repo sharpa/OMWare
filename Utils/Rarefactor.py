@@ -42,7 +42,7 @@ class Rarefactor:
 			target_removed_length=total_length*(1.0-proportion)
 			removed_length=0
 			total_molecules=len(molecule_ids)
-			removed=[]
+			removed=set()
 			abridged={}
 			while removed_length < target_removed_length:
 				list_index=int(random.random()*total_molecules)
@@ -53,7 +53,7 @@ class Rarefactor:
 				total_molecules-=1
 				
 				if removed_length <= target_removed_length:
-					removed.append(candidate)
+					removed.add(candidate)
 				else:
 					excess_distance=removed_length-target_removed_length
 					abridged[candidate]=excess_distance

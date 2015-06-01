@@ -67,6 +67,7 @@ class Assembly:
 		self.step_dir=self.getStepDir()
 
 	def writeCode(self):
+		print("cd " + self.work_dir)
 		print("mkdir " + self.getStepDir())
 		print("cd " + self.getStepDir())
 		param_values=OrderedDict()
@@ -120,7 +121,6 @@ class Assembly:
 			param_list.append(key)
 			param_list.append(param_values[key])
 		print(" ".join(param_list))
-		print("cd ..")
 
 	def getStepDir(self):
 		return self.work_dir + "/" + "_".join(["assembly", self.input_file, "fp"+str(self.fp), "fn"+str(self.fn), "pval"+str(self.pval), "minlen"+str(self.min_molecule_len), "minsites"+str(self.min_molecule_sites)])
