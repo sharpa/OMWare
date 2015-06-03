@@ -43,7 +43,8 @@ class Split(Step):
 		print("cd " + self.getStepDir())
 
 		param_values=OrderedDict()
-		param_values["-i"] =  self.sort.getOutputFile()
+		param_values["-i"] =  "../" + self.sort.getOutputFile()
+		param_values["-o"] =  "placeholder"
 		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
 		param_values["-merge"] =  ""
 		param_values["-bnx"] =  ""
@@ -67,7 +68,7 @@ class Split(Step):
 			i+=1
 
 	def getListFile(self):
-		return "split.list"
+		return self.getStepDir() + "split.list"
 
 	def getStepDir(self):
 		return "_".join(["split", self.workspace.input_file, "blockCount"+str(self.block_count)])
@@ -79,5 +80,5 @@ class Split(Step):
 
 
 
-	def getBlock(self, block_num):
-		return "split_" + str(block_num) + "_of_" + str(self.block_count) + ".bnx"
+	def getOutputFile(self, block_num):
+		return self.getStepDir() + "/split_" + str(block_num) + "_of_" + str(self.block_count) + ".bnx"

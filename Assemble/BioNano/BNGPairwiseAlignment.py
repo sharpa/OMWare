@@ -61,6 +61,7 @@ class PairwiseAlignment(Step):
 		param_values["-res"] =  str(self.res)
 		param_values["-T"] =  str(self.vital_parameters.pval)
 		param_values["-maxmem"] =  str(self.workspace.resources.getMaxMem())
+		param_values["-o"] =  "placeholder"
 		param_values["-A"] =  str(self.min_alignment_sites)
 		param_values["-S"] =  str(self.min_alignment_score)
 		param_values["-outlier"] =  str(self.outlier_pval)
@@ -85,9 +86,9 @@ class PairwiseAlignment(Step):
 		totalJobs=totalBlocks*(totalBlocks+1)/2 
 		currentJob = 0
 		for i in range(1,totalBlocks+1):
-			file1=self.split.getBlock(i)
+			file1="../" + self.split.getOutputFile(i)
 			for j in range(i,totalBlocks + 1):
-				file2=self.split.getBlock(j)
+				file2="../" + self.split.getOutputFile(j)
 
 				param_values["-i"]=file1
 				if i==j :
@@ -119,8 +120,8 @@ class PairwiseAlignment(Step):
 		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
-		self.prereqs=[self.sort, self.split]
+		self.prereqs=[self.split]
 
 	def getListFile(self):
-		return "align.list"
+		return self.getStepDir() + "align.list"
 

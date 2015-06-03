@@ -57,9 +57,9 @@ class Assembly(Step):
 		print("mkdir " + self.getStepDir())
 		print("cd " + self.getStepDir())
 		param_values=OrderedDict()
-		param_values["-if"]= str(self.split.getListFile())
-		param_values["-af"]= str(self.pairwise_alignment.getListFile())
-		param_values["-XmapStatRead"]= str(self.molecule_stats.getOutputFile())
+		param_values["-if"]= "../" + str(self.split.getListFile())
+		param_values["-af"]= "../" + str(self.pairwise_alignment.getListFile())
+		param_values["-XmapStatRead"]= "../" + str(self.molecule_stats.getOutputFile())
 		param_values["-usecolor"]= str(self.color)
 		param_values["-FP"]= str(self.vital_parameters.fp)
 		param_values["-FN"]= str(self.vital_parameters.fn)
@@ -116,4 +116,4 @@ class Assembly(Step):
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
-		self.prereqs=[self.sort, self.split, self.pairwise_alignment]
+		self.prereqs=[self.pairwise_alignment]

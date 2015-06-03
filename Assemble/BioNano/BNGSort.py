@@ -27,7 +27,7 @@ class Sort(Step):
 		print("mkdir -p " + self.getStepDir())
 		print("cd " + self.getStepDir())
 		param_values=OrderedDict()
-		param_values["-i"] =  self.workspace.input_file
+		param_values["-i"] =  "../" + self.workspace.input_file
 		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
 		param_values["-merge"] =  ""
 		param_values["-sort-idinc"] =  ""
@@ -36,7 +36,7 @@ class Sort(Step):
 		param_values["-minlen"] =  str(self.vital_parameters.min_molecule_len)
 		param_values["-minsites"] =  str(self.vital_parameters.min_molecule_sites)
 		param_values["-minSNR"] =  str(self.min_snr)
-		param_values["-XmapStatWrite"] =  self.molecule_stats.getOutputFile()
+		param_values["-XmapStatWrite"] =  "../" + self.molecule_stats.getOutputFile()
 
 		if self.overwrite_output:
 			param_values["-f"] = ""
