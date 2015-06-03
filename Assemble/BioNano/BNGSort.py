@@ -53,7 +53,7 @@ class Sort(Step):
 			param_list.append(param_values[key])
 		code += " ".join(param_list) + "\n"
 
-		return code
+		return [code]
 
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + ".bnx"

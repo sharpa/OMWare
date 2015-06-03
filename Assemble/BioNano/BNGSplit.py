@@ -35,13 +35,11 @@ class Split(Step):
 				blocks=site_blocks
 			self.block_count=blocks
 
-	def writeCode(self):
-		code=""
-		self.fetchPrereqs()
+		self.max_job_count=self.getTime()*(60/5)-3
 
-		code += "cd " + self.workspace.work_dir + "\n"
-		code += "mkdir -p " + self.getStepDir() + "\n"
-		code += "cd " + self.getStepDir() + "\n"
+	def writeCode(self):
+		code_parts=[]
+		self.fetchPrereqs()
 
 		param_values=OrderedDict()
 		param_values["-i"] =  "../" + self.sort.getOutputFile()
@@ -57,18 +55,31 @@ class Split(Step):
 		if self.send_error_to_file:
 			param_values["-stderr"] = ""
 
-		i=1
-		while i <= self.block_count:
+		tmp_code=""
+		cur_jobs=0
+		for cur_block in xrange(1, self.block_count+1):
 			param_list=[self.workspace.binaries["bng_ref_aligner"]]
-			param_values["-o"]="split_" + str(i) + "_of_" + str(self.block_count)
-			param_values["-subsetbin"]=str(i) + " " + str(self.block_count)
+			param_values["-o"]="split_" + str(cur_block) + "_of_" + str(self.block_count)
+			param_values["-subsetbin"]=str(cur_block) + " " + str(self.block_count)
 			for key in param_values:
 				param_list.append(key)
 				param_list.append(param_values[key])
-			code += " ".join(param_list) + "\n"
-			i+=1
 
-		return code
+			tmp_code += " ".join(param_list) + "\n"
+			cur_jobs+=1
+
+			if cur_jobs>=self.max_job_count or cur_block==self.block_count:
+				code = "cd " + self.workspace.work_dir + "\n"
+				code += "mkdir -p " + self.getStepDir() + "\n"
+				code += "cd " + self.getStepDir() + "\n"
+				code += tmp_code
+
+				code_parts.append(code)
+
+				cur_jobs=0
+				tmp_code=""
+
+		return code_parts
 
 	def getListFile(self):
 		return self.getStepDir() + "split.list"

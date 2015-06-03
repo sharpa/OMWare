@@ -16,9 +16,9 @@ class CodeFormatter (Assemble.CodeFormatter.CodeFormatter):
 		for prereq in prereqs:
 			self.formatCode(prereq)
 		
-		print("#!/bin/bash")
-		print("#SBATCH --mem " + str(1024*step.getMem()) + "M")
-		print("#SBATCH --time " + str(step.getTime()) + ":00:00")
-		print("#SBATCH --ntasks " + str(step.getThreads()))
-		print(step.writeCode())
-		
+		for part in step.writeCode():
+			print("#!/bin/bash")
+			print("#SBATCH --mem " + str(1024*step.getMem()) + "M")
+			print("#SBATCH --time " + str(step.getTime()) + ":00:00")
+			print("#SBATCH --ntasks " + str(step.getThreads()))
+			print(part)

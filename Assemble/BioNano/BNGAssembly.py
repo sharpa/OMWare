@@ -113,7 +113,7 @@ class Assembly(Step):
 			param_list.append(param_values[key])
 		code += " ".join(param_list) + "\n"
 
-		return code
+		return [code]
 
 	def getStepDir(self):
 		return self.workspace.work_dir + "/" + "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])

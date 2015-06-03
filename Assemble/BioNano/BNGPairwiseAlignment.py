@@ -44,13 +44,11 @@ class PairwiseAlignment(Step):
 		self.send_output_to_file=True
 		self.send_error_to_file=True
 
-	def writeCode(self):
-		code=""
-		self.fetchPrereqs()
+		self.max_job_count=self.getTime() * (60/60) - 3
 
-		code += "cd " + self.workspace.work_dir + "\n"
-		code += "mkdir -p " + self.getStepDir() + "\n"
-		code += "cd " + self.getStepDir() + "\n"
+	def writeCode(self):
+		code_parts=[]
+		self.fetchPrereqs()
 
 		param_values=OrderedDict()
 		param_values["-usecolor"] =  str(self.color)
@@ -86,10 +84,12 @@ class PairwiseAlignment(Step):
 		if self.send_error_to_file:
 			param_values["-stderr"]=""
 		
+		tmp_code=""
+		cur_jobs=0
 		totalBlocks=self.split.block_count
 		totalJobs=totalBlocks*(totalBlocks+1)/2 
 		currentJob = 0
-		for i in range(1,totalBlocks+1):
+		for i in xrange(1,totalBlocks+1):
 			file1="../" + self.split.getOutputFile(i)
 			for j in range(i,totalBlocks + 1):
 				file2="../" + self.split.getOutputFile(j)
@@ -108,16 +108,27 @@ class PairwiseAlignment(Step):
 					param_values["-i "]=file2
 
 				param_values["-o"]='pairwise%dof%d' % (currentJob+1, totalJobs)
+				currentJob += 1
 
 				param_list=[self.workspace.binaries["bng_ref_aligner"]]
 				for key in param_values:
 					param_list.append(key)
 					param_list.append(param_values[key])
-				code += " ".join(param_list) + "\n"
+				tmp_code += " ".join(param_list) + "\n"
 
-				currentJob += 1
+				cur_jobs+=1
+				if cur_jobs>=self.max_job_count or currentJob==totalJobs:
+					code = "cd " + self.workspace.work_dir + "\n"
+					code += "mkdir -p " + self.getStepDir() + "\n"
+					code += "cd " + self.getStepDir() + "\n"
+					code += tmp_code
+					code_parts.append(code)
 
-		return code
+					tmp_code=""
+					cur_jobs=0
+
+
+		return code_parts
 
 	def getStepDir(self):
 		return "_".join(["pairwise", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval)])
