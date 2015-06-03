@@ -45,11 +45,12 @@ class PairwiseAlignment(Step):
 		self.send_error_to_file=True
 
 	def writeCode(self):
-		self.writePrereqCode()
+		code=""
+		self.fetchPrereqs()
 
-		print("cd " + self.workspace.work_dir)
-		print("mkdir -p " + self.getStepDir())
-		print("cd " + self.getStepDir())
+		code += "cd " + self.workspace.work_dir + "\n"
+		code += "mkdir -p " + self.getStepDir() + "\n"
+		code += "cd " + self.getStepDir() + "\n"
 
 		param_values=OrderedDict()
 		param_values["-usecolor"] =  str(self.color)
@@ -60,7 +61,10 @@ class PairwiseAlignment(Step):
 		param_values["-sr"] =  str(self.sr)
 		param_values["-res"] =  str(self.res)
 		param_values["-T"] =  str(self.vital_parameters.pval)
-		param_values["-maxmem"] =  str(self.workspace.resources.getMaxMem())
+		maxmem=int(self.getMem()/self.getThreads())
+		if maxmem < 1:
+			maxmem=1
+		param_values["-maxmem"] =  str(maxmem)
 		param_values["-o"] =  "placeholder"
 		param_values["-A"] =  str(self.min_alignment_sites)
 		param_values["-S"] =  str(self.min_alignment_score)
@@ -72,7 +76,7 @@ class PairwiseAlignment(Step):
 		param_values["-hash"] =  ""
 		param_values["-mres"] =  str(self.target_resolution)
 		param_values["-nosplit"] =  "2" if self.allow_no_splits else "0" if self.allow_infinite_splits else "1"
-		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
+		param_values["-maxthreads"] =  str(self.getThreads())
 		param_values["-XmapStatRead"] =  str(self.molecule_stats.getOutputFile())
 
 		if self.overwrite_output:
@@ -109,9 +113,11 @@ class PairwiseAlignment(Step):
 				for key in param_values:
 					param_list.append(key)
 					param_list.append(param_values[key])
-				print(" ".join(param_list))
+				code += " ".join(param_list) + "\n"
 
 				currentJob += 1
+
+		return code
 
 	def getStepDir(self):
 		return "_".join(["pairwise", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval)])
@@ -121,6 +127,13 @@ class PairwiseAlignment(Step):
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.prereqs=[self.split]
+
+	def getMem(self):
+		return self.workspace.resources.getLargeMemory()
+	def getTime(self):
+		return self.workspace.resources.getLargeTime()
+	def getThreads(self):
+		return self.workspace.resources.getLargeThreads()
 
 	def getListFile(self):
 		return self.getStepDir() + "align.list"

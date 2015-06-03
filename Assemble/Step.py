@@ -11,19 +11,24 @@ class Step(object):
 		self.vital_parameters=vital_parameters
 
 	def writeCode(self):
-		pass
-
-	def writePrereqCode(self):
-		self.fetchPrereqs()
-		for step in self.prereqs:
-			if not step.isComplete():
-				step.writeCode()
+		raise Exception("Abstract method called")
 
 	def getStepDir(self):
-		pass
+		raise Exception("Abstract method called")
 
 	def fetchPrereqs(self):
-		pass
+		raise Exception("Abstract method called")
+
+	def getPrereqs(self):
+		self.fetchPrereqs()
+		return self.prereqs
 
 	def isComplete(self):
 		return False
+
+	def getMem(self):
+		raise Exception("Abstract method called")
+	def getTime(self):
+		raise Exception("Abstract method called")
+	def getThreads(self):
+		raise Exception("Abstract method called")

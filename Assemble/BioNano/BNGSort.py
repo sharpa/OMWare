@@ -21,14 +21,16 @@ class Sort(Step):
 		self.send_errors_to_file=True
 
 	def writeCode(self):
-		self.writePrereqCode()
+		code = ""
+		self.fetchPrereqs()
 
-		print("cd " + self.workspace.work_dir)
-		print("mkdir -p " + self.getStepDir())
-		print("cd " + self.getStepDir())
+		code += "cd " + self.workspace.work_dir + "\n"
+		code += "mkdir -p " + self.getStepDir() + "\n"
+		code += "cd " + self.getStepDir() + "\n"
+
 		param_values=OrderedDict()
 		param_values["-i"] =  "../" + self.workspace.input_file
-		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
+		param_values["-maxthreads"] =  str(self.getThreads())
 		param_values["-merge"] =  ""
 		param_values["-sort-idinc"] =  ""
 		param_values["-bnx"] =  ""
@@ -49,7 +51,9 @@ class Sort(Step):
 		for key in param_values:
 			param_list.append(key)
 			param_list.append(param_values[key])
-		print(" ".join(param_list))
+		code += " ".join(param_list) + "\n"
+
+		return code
 
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + ".bnx"
@@ -60,6 +64,13 @@ class Sort(Step):
 	def fetchPrereqs(self):
 		self.molecule_stats=self.getMoleculeStats()
 		self.prereqs=[]
+
+	def getMem(self):
+		return self.workspace.resources.getMediumMemory()
+	def getTime(self):
+		return self.workspace.resources.getSmallTime()
+	def getThreads(sef):
+		return 1
 
 
 

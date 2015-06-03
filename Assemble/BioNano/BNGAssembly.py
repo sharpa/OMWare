@@ -51,11 +51,13 @@ class Assembly(Step):
 		self.send_errors_to_file=True
 
 	def writeCode(self):
-		self.writePrereqCode()
+		code=""
+		self.fetchPrereqs()
 
-		print("cd " + self.workspace.work_dir)
-		print("mkdir " + self.getStepDir())
-		print("cd " + self.getStepDir())
+		code += "cd " + self.workspace.work_dir + "\n"
+		code += "mkdir " + self.getStepDir() + "\n"
+		code += "cd " + self.getStepDir() + "\n"
+
 		param_values=OrderedDict()
 		param_values["-if"]= "../" + str(self.split.getListFile())
 		param_values["-af"]= "../" + str(self.pairwise_alignment.getListFile())
@@ -84,8 +86,11 @@ class Assembly(Step):
 		param_values["-draftsize"]= str("1")
 		param_values["-SideBranch"]= str(self.min_duplicate_len)
 		param_values["-contigs_format"]= str("1" if self.binary_output else "0")
-		param_values["-maxthreads"]= str(self.workspace.resources.getMaxThreads())
-		param_values["-maxmem"]= str(self.workspace.resources.getMaxMem())
+		param_values["-maxthreads"]= str(self.getThreads())
+		maxmem=int(self.getMem()/self.getThreads())
+		if maxmem<1:
+			maxmem=1
+		param_values["-maxmem"]= str(maxmem)
 		param_values["-minlen"]= str(self.vital_parameters.min_molecule_len)
 		param_values["-minsites"]= str(self.vital_parameters.min_molecule_sites)
 		param_values["-minSNR"]= str(self.min_snr)
@@ -106,7 +111,9 @@ class Assembly(Step):
 		for key in param_values:
 			param_list.append(key)
 			param_list.append(param_values[key])
-		print(" ".join(param_list))
+		code += " ".join(param_list) + "\n"
+
+		return code
 
 	def getStepDir(self):
 		return self.workspace.work_dir + "/" + "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
@@ -117,3 +124,10 @@ class Assembly(Step):
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
 		self.prereqs=[self.pairwise_alignment]
+
+	def getMem(self):
+		return self.workspace.resources.getLargeMemory()
+	def getTime(self):
+		return self.workspace.resources.getSmallTime()
+	def getThreads(self):
+		return 1

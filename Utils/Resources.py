@@ -9,7 +9,24 @@
 class Resources():
 	def __init__(self):
 		pass
-	def getMaxThreads(self):
+
+	def getSmallMemory(self):
 		raise Exception("Abstract method called")
-	def getMaxMem(self):
+	def getMediumMemory(self):
+		raise Exception("Abstract method called")
+	def getLargeMemory(self):
+		raise Exception("Abstract method called")
+
+	def getSmallTime(self):
+		raise Exception("Abstract method called")
+	def getMediumTime(self):
+		raise Exception("Abstract method called")
+	def getLargeTime(self):
+		raise Exception("Abstract method called")
+
+	def getSmallThreads(self):
+		raise Exception("Abstract method called")
+	def getMediumThreads(self):
+		raise Exception("Abstract method called")
+	def getLargeThreads(self):
 		raise Exception("Abstract method called")

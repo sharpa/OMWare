@@ -4,7 +4,7 @@
 # Date: 06/01/2015
 # 
 # The purpose of this module is encapsulate and provide services for a Workspace
-from Utils.MacbookProResources import Resources
+from Utils.FultonResources import Resources
 
 class Workspace:
 	def __init__(self, work_dir=None, input_file=None):

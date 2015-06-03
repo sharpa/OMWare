@@ -1,31 +1,33 @@
-# Module: Utils.MacbookProResources
+# Module: Utils.FultonResources
 # Version: 0.1
 # Author: Aaron Sharp
-# Date: 05/27/2015
+# Date: 06/03/2015
 # 
-# Despite the poor name, this actually only refers to my
-# own laptop, on which I am programming this module... Sorry...
+# The purpose of this module is to encapsulate the available
+# hardware resources of the Fulton Supercomputing Lab
 import Utils.Resources
 
 class Resources(Utils.Resources.Resources):
+	def __init__(self):
+		pass
+
 	def getSmallMemory(self):
 		return 1
 	def getMediumMemory(self):
-		return 3
+		return 8
 	def getLargeMemory(self):
-		return 7
+		return 24
 
 	def getSmallTime(self):
-		return 24
+		return 1
 	def getMediumTime(self):
-		return 183*24
+		return 12
 	def getLargeTime(self):
-		return 365*24
+		return 24
 
 	def getSmallThreads(self):
-		return 1
-	def getMediumThreads(self):
-		return 1
-	def getLargeThreads(self):
 		return 2
-
+	def getMediumThreads(self):
+		return 6
+	def getLargeThreads(self):
+		return 12

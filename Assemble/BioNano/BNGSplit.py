@@ -36,16 +36,17 @@ class Split(Step):
 			self.block_count=blocks
 
 	def writeCode(self):
-		self.writePrereqCode()
+		code=""
+		self.fetchPrereqs()
 
-		print("cd " + self.workspace.work_dir)
-		print("mkdir -p " + self.getStepDir())
-		print("cd " + self.getStepDir())
+		code += "cd " + self.workspace.work_dir + "\n"
+		code += "mkdir -p " + self.getStepDir() + "\n"
+		code += "cd " + self.getStepDir() + "\n"
 
 		param_values=OrderedDict()
 		param_values["-i"] =  "../" + self.sort.getOutputFile()
 		param_values["-o"] =  "placeholder"
-		param_values["-maxthreads"] =  str(self.workspace.resources.getMaxThreads())
+		param_values["-maxthreads"] =  str(self.getThreads())
 		param_values["-merge"] =  ""
 		param_values["-bnx"] =  ""
 
@@ -64,8 +65,10 @@ class Split(Step):
 			for key in param_values:
 				param_list.append(key)
 				param_list.append(param_values[key])
-			print(" ".join(param_list))
+			code += " ".join(param_list) + "\n"
 			i+=1
+
+		return code
 
 	def getListFile(self):
 		return self.getStepDir() + "split.list"
@@ -78,7 +81,12 @@ class Split(Step):
 		self.prereqs=[self.sort]
 
 
-
+	def getMem(self):
+		return self.workspace.resources.getSmallMemory()
+	def getTime(self):
+		return self.workspace.resources.getSmallTime()
+	def getThreads(self):
+		return self.workspace.resources.getSmallThreads()
 
 	def getOutputFile(self, block_num):
 		return self.getStepDir() + "/split_" + str(block_num) + "_of_" + str(self.block_count) + ".bnx"
