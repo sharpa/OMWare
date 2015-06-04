@@ -22,4 +22,4 @@ assembly=Assembly(workspace, vital_parameters)
 
 with CD(work_dir):
 	formatter=CodeFormatter()
-	formatter.formatCode(assembly)
+	formatter.serializeCode(assembly)
