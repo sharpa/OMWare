@@ -23,6 +23,12 @@ class CodeFormatter (Assemble.CodeFormatter.CodeFormatter):
 			batch_step_part+="#SBATCH --mem " + str(1024*step.getMem()) + "M\n"
 			batch_step_part+="#SBATCH --time " + str(step.getTime()) + ":00:00\n"
 			batch_step_part+="#SBATCH --ntasks " + str(step.getThreads()) + "\n"
+
+			errorNotificationEmail=step.getErrorNotificationEmail()
+			if errorNotificationEmail is not None:
+				batch_step_part+="#SBATCH --mail-user=" + errorNotificationEmail + "\n"
+				batch_step_part+="#SBATCH --mail-type=FAIL\n"
+
 			batch_step_part+=part + "\n"
 			batch_step_parts.append(batch_step_part)
 		batch_steps.append(batch_step_parts)

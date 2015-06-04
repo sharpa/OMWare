@@ -13,6 +13,8 @@ class Workspace:
 		self.binaries={}
 
 		self.resources=Resources()
+
+		self.errorNotificationEmail=None
 		
 	def addBinary(self, name, path):
 		self.binaries[name]=path

@@ -32,3 +32,6 @@ class Step(object):
 		raise Exception("Abstract method called")
 	def getThreads(self):
 		raise Exception("Abstract method called")
+
+	def getErrorNotificationEmail(self):
+		return self.workspace.errorNotificationEmail
