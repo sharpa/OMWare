@@ -3,8 +3,7 @@
 # The purpose of this script is to run a whole assembly
 #	with automatic prereg generation
 
-#from Assemble.BioNano.BNGAssembly import Assembly
-from Assemble.BioNano.BNGSort import Sort 
+from Assemble.BioNano.BNGAssembly import Assembly
 from Assemble.BioNano.BNGVitalParameters import VitalParameters
 from Utils.Workspace import Workspace
 from Utils.CD import CD
@@ -20,8 +19,7 @@ workspace.addBinary("bng_ref_aligner", "/Users/sharpa/Dropbox/Stars/GossRaim_BNG
 
 vital_parameters=VitalParameters(1.5, .386, 1.11e-6, 100, 10)
 
-#assembly=Assembly(workspace, vital_parameters)
-assembly=Sort(workspace, vital_parameters)
+assembly=Assembly(workspace, vital_parameters)
 
 with CD(work_dir):
 	formatter=CodeFormatter()

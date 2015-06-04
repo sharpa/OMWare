@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGAssembly
+# Module: Assemble.BioNano.BNGSplit
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/27/2015
@@ -33,7 +33,7 @@ class Split(Step):
 			site_blocks=int(math.ceil(site_count/1e6))
 			if site_blocks>blocks:
 				blocks=site_blocks
-			self.block_count=blocks
+			self.total_job_count=blocks
 
 		self.max_job_count=self.getTime()*(60/5)-3
 
@@ -57,10 +57,10 @@ class Split(Step):
 
 		tmp_code=""
 		cur_jobs=0
-		for cur_block in xrange(1, self.block_count+1):
+		for cur_block in xrange(1, self.total_job_count+1):
 			param_list=[self.workspace.binaries["bng_ref_aligner"]]
-			param_values["-o"]="split_" + str(cur_block) + "_of_" + str(self.block_count)
-			param_values["-subsetbin"]=str(cur_block) + " " + str(self.block_count)
+			param_values["-o"]="split_" + str(cur_block) + "_of_" + str(self.total_job_count)
+			param_values["-subsetbin"]=str(cur_block) + " " + str(self.total_job_count)
 			for key in param_values:
 				param_list.append(key)
 				param_list.append(param_values[key])
@@ -68,7 +68,7 @@ class Split(Step):
 			tmp_code += " ".join(param_list) + "\n"
 			cur_jobs+=1
 
-			if cur_jobs>=self.max_job_count or cur_block==self.block_count:
+			if cur_jobs>=self.max_job_count or cur_block==self.total_job_count:
 				code = "cd " + self.workspace.work_dir + "\n"
 				code += "mkdir -p " + self.getStepDir() + "\n"
 				code += "cd " + self.getStepDir() + "\n"
@@ -82,10 +82,10 @@ class Split(Step):
 		return code_parts
 
 	def getListFile(self):
-		return self.getStepDir() + "split.list"
+		return self.getStepDir() + "/split.list"
 
 	def getStepDir(self):
-		return "_".join(["split", self.workspace.input_file, "blockCount"+str(self.block_count)])
+		return "_".join(["split", self.workspace.input_file, "blockCount"+str(self.total_job_count)])
 
 	def fetchPrereqs(self):
 		self.sort=Sort(self.workspace, self.vital_parameters)
@@ -100,4 +100,4 @@ class Split(Step):
 		return self.workspace.resources.getSmallThreads()
 
 	def getOutputFile(self, block_num):
-		return self.getStepDir() + "/split_" + str(block_num) + "_of_" + str(self.block_count) + ".bnx"
+		return self.getStepDir() + "/split_" + str(block_num) + "_of_" + str(self.total_job_count) + ".bnx"

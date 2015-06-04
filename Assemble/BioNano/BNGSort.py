@@ -53,6 +53,8 @@ class Sort(Step):
 			param_list.append(param_values[key])
 		code += " ".join(param_list) + "\n"
 
+		code += "result=`tail -n 1 ../" + self.getOutputFile() + "`\n"
+		code += "if [[ $result != \"END of output\" ]]; then exit 1; fi\n"
 		return [code]
 
 	def getOutputFile(self):

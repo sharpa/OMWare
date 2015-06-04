@@ -9,6 +9,7 @@ from Assemble.Step import Step
 from Assemble.BioNano.BNGSort import Sort
 from Assemble.BioNano.BNGSplit import Split
 from Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
+from Assemble.BioNano.BNGSummarize import Summarize
 from collections import OrderedDict
 
 class Assembly(Step):
@@ -113,6 +114,9 @@ class Assembly(Step):
 			param_list.append(param_values[key])
 		code += " ".join(param_list) + "\n"
 
+		code += "result=`tail -n 1 ../" + self.getOutputFile() + "`\n"
+		code += "if [[ $result != \"END of output\" ]]; then exit 1; fi\n"
+
 		return [code]
 
 	def getStepDir(self):
@@ -123,7 +127,7 @@ class Assembly(Step):
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
-		self.prereqs=[self.pairwise_alignment]
+		self.prereqs=[Summarize(self.workspace, self.pairwise_alignment)]
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()

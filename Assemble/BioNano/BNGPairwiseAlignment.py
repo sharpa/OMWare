@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGAssembly
+# Module: Assemble.BioNano.BNGPairwiseAlignment
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/26/2015
@@ -8,6 +8,7 @@
 from Assemble.Step import Step
 from Assemble.BioNano.BNGSort import Sort
 from Assemble.BioNano.BNGSplit import Split
+from Assemble.BioNano.BNGSummarize import Summarize
 from collections import OrderedDict
 
 class PairwiseAlignment(Step):
@@ -43,6 +44,10 @@ class PairwiseAlignment(Step):
 		self.overwrite_output=True
 		self.send_output_to_file=True
 		self.send_error_to_file=True
+
+		split=Split(self.workspace, self.vital_parameters)
+		total_blocks=split.total_job_count
+		self.total_job_count=total_blocks*(total_blocks+1)/2 
 
 		self.max_job_count=self.getTime() * (60/60) - 3
 
@@ -86,8 +91,7 @@ class PairwiseAlignment(Step):
 		
 		tmp_code=""
 		cur_jobs=0
-		totalBlocks=self.split.block_count
-		totalJobs=totalBlocks*(totalBlocks+1)/2 
+		totalBlocks=self.split.total_job_count
 		currentJob = 0
 		for i in xrange(1,totalBlocks+1):
 			file1="../" + self.split.getOutputFile(i)
@@ -107,7 +111,7 @@ class PairwiseAlignment(Step):
 					param_values["-1"]=""
 					param_values["-i "]=file2
 
-				param_values["-o"]='pairwise%dof%d' % (currentJob+1, totalJobs)
+				param_values["-o"]='pairwise%dof%d' % (currentJob+1, self.total_job_count)
 				currentJob += 1
 
 				param_list=[self.workspace.binaries["bng_ref_aligner"]]
@@ -117,7 +121,7 @@ class PairwiseAlignment(Step):
 				tmp_code += " ".join(param_list) + "\n"
 
 				cur_jobs+=1
-				if cur_jobs>=self.max_job_count or currentJob==totalJobs:
+				if cur_jobs>=self.max_job_count or currentJob==self.total_job_count:
 					code = "cd " + self.workspace.work_dir + "\n"
 					code += "mkdir -p " + self.getStepDir() + "\n"
 					code += "cd " + self.getStepDir() + "\n"
@@ -137,7 +141,7 @@ class PairwiseAlignment(Step):
 		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
-		self.prereqs=[self.split]
+		self.prereqs=[Summarize(self.workspace, self.split)]
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()
@@ -147,5 +151,5 @@ class PairwiseAlignment(Step):
 		return self.workspace.resources.getLargeThreads()
 
 	def getListFile(self):
-		return self.getStepDir() + "align.list"
+		return self.getStepDir() + "/align.list"
 
