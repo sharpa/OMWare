@@ -26,7 +26,7 @@ class POMMIO:
 		return POMMIO_iter(self.input_file)
 	def write(self, molecule, o_file, format):
 
-		o_file.write("	".join(["0", str(molecule.id), str(molecule.length), str(molecule.average_intensity), str(molecule.snr), str(molecule.num_labels), molecule.other_data]) + "\n")
+		o_file.write("	".join(["0", str(molecule.id), str(molecule.length), str(molecule.average_intensity), str(molecule.snr), str(molecule.num_labels), str(molecule.original_id), str(molecule.scan_id), str(molecule.scan_direction), str(molecule.chip_id), str(molecule.flowcell), str(molecule.run_id), str(molecule.global_scan_id)]) + "\n")
 
 		label_data=["1", "0.0"]
 		label_data.extend([str(i) for i in molecule.labels])
@@ -60,10 +60,17 @@ class POMMIO_iter:
 					raise Exception("this file is incorrectly formatted")
 				molecule_data=line.split()
 				new_molecule=Molecule(molecule_data[1], float(molecule_data[2]))
+
 				new_molecule.average_intensity=molecule_data[3]
 				new_molecule.snr=molecule_data[4]
 				new_molecule.num_labels=molecule_data[5]
-				new_molecule.other_data="	".join(molecule_data[6:len(molecule_data)])
+				new_molecule.original_id=molecule_data[6]
+				new_molecule.scan_id=molecule_data[7]
+				new_molecule.scan_direction=molecule_data[8]
+				new_molecule.chip_id=molecule_data[9]
+				new_molecule.flowcell=molecule_data[10]
+				new_molecule.run_id=molecule_data[11]
+				new_molecule.global_scan_id=molecule_data[12]
 
 				label_line=self.i_file.readline()
 				if label_line[0] != "1":
