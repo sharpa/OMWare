@@ -5,9 +5,9 @@
 # 
 # The purpose of this module is take as input "code" for a code generator (step)
 # class, and format it for a specific platform, namely SBATCH
-import Assemble.CodeFormatter
+import Operations.CodeFormatter
 
-class CodeFormatter (Assemble.CodeFormatter.CodeFormatter):
+class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 	def __init__(self):
 		pass
 	def formatCode(self, step):

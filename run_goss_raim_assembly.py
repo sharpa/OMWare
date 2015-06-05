@@ -3,11 +3,11 @@
 # The purpose of this script is to run a whole assembly
 #	with automatic prereg generation
 
-from Assemble.BioNano.BNGAssembly import Assembly
-from Assemble.BioNano.BNGVitalParameters import VitalParameters
+from Operations.Assemble.BioNano.BNGAssembly import Assembly
+from Operations.Assemble.BioNano.BNGVitalParameters import VitalParameters
 from Utils.Workspace import Workspace
 from Utils.CD import CD
-from Assemble.SBATCHCodeFormatter import CodeFormatter
+from Operations.SBATCHCodeFormatter import CodeFormatter
 
 work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir"
 input_file="all.bnx"

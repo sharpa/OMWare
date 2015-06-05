@@ -6,7 +6,7 @@
 # The purpose of this module is to WRITE CODE that will wait 
 # until all jobs of a certain step are complete,
 # then summarize them in a list file
-from Assemble.Step import Step
+from Operations.Step import Step
 
 class Summarize(Step):
 	def __init__(self, workspace, step):

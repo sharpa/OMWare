@@ -6,8 +6,8 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # split a single bnx file into "good sized" chunks of molecules
 # for more efficient parallel assembly
-from Assemble.Step import Step
-from Assemble.BioNano.BNGSort import Sort
+from Operations.Step import Step
+from Operations.Assemble.BioNano.BNGSort import Sort
 import math
 from collections import OrderedDict
 

@@ -5,11 +5,11 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
-from Assemble.Step import Step
-from Assemble.BioNano.BNGSort import Sort
-from Assemble.BioNano.BNGSplit import Split
-from Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
-from Assemble.BioNano.BNGSummarize import Summarize
+from Operations.Step import Step
+from Operations.Assemble.BioNano.BNGSort import Sort
+from Operations.Assemble.BioNano.BNGSplit import Split
+from Operations.Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
+from Operations.Assemble.BioNano.BNGSummarize import Summarize
 from collections import OrderedDict
 
 class Assembly(Step):
@@ -121,6 +121,8 @@ class Assembly(Step):
 
 	def getStepDir(self):
 		return self.workspace.work_dir + "/" + "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
+	def getOutputFile(self):
+		return self.getStepDir() + "/" + self.output_prefix + ".contigs"
 
 	def fetchPrereqs(self):
 		self.sort=Sort(self.workspace, self.vital_parameters)

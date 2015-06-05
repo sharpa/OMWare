@@ -5,10 +5,10 @@
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner to create a set of pairwise alignments
-from Assemble.Step import Step
-from Assemble.BioNano.BNGSort import Sort
-from Assemble.BioNano.BNGSplit import Split
-from Assemble.BioNano.BNGSummarize import Summarize
+from Operations.Step import Step
+from Operations.Assemble.BioNano.BNGSort import Sort
+from Operations.Assemble.BioNano.BNGSplit import Split
+from Operations.Assemble.BioNano.BNGSummarize import Summarize
 from collections import OrderedDict
 
 class PairwiseAlignment(Step):
