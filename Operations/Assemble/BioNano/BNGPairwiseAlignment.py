@@ -49,7 +49,7 @@ class PairwiseAlignment(Step):
 		total_blocks=split.total_job_count
 		self.total_job_count=total_blocks*(total_blocks+1)/2 
 
-		self.max_job_count=self.getTime() * (60/60) - 3
+		self.max_job_count=self.getTime() * (60.0/120.0) - 3
 
 	def writeCode(self):
 		code_parts=[]
