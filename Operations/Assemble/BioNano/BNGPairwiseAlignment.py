@@ -80,7 +80,7 @@ class PairwiseAlignment(Step):
 		param_values["-mres"] =  str(self.target_resolution)
 		param_values["-nosplit"] =  "2" if self.allow_no_splits else "0" if self.allow_infinite_splits else "1"
 		param_values["-maxthreads"] =  str(self.getThreads())
-		param_values["-XmapStatRead"] =  str(self.molecule_stats.getOutputFile())
+		param_values["-XmapStatRead"] =  "../" + str(self.molecule_stats.getOutputFile())
 
 		if self.overwrite_output:
 			param_values["-f"]=""
@@ -152,4 +152,6 @@ class PairwiseAlignment(Step):
 
 	def getListFile(self):
 		return self.getStepDir() + "/align.list"
+	def getOutputFileExtension(self):
+		return "align"
 

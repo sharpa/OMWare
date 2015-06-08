@@ -16,6 +16,9 @@ class Step(object):
 	def getStepDir(self):
 		raise Exception("Abstract method called")
 
+	def getOutputFileExtension(self):
+		raise Exception("Abstract method called")
+
 	def fetchPrereqs(self):
 		raise Exception("Abstract method called")
 

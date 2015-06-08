@@ -20,12 +20,15 @@ class Summarize(Step):
 		code += "rm -f " + self.step.getListFile() + "\n"
 		code += "let errors=0\n"
 		code += "let total=0\n"
-		code += "for output_file in " + self.getStepDir() + "/*.stdout\n"
+		code += "for stdout_file in " + self.getStepDir() + "/*.stdout\n"
 		code += "do\n"
 		code += "  let total+=1\n"
-		code += "  result=`tail -n 1 $output_file`\n"
+		code += "  result=`tail -n 1 $stdout_file`\n"
 		code += "  if [[ $result != \"END of output\" ]]; then let errors+=1\n"
-		code += "  else echo $wd/$file >> " + self.step.getListFile() + "; fi\n"
+		code += "  else\n"
+		code += "    file=`echo $stdout_file | sed 's/\.stdout/\." + self.step.getOutputFileExtension() + "/'`\n"
+		code += "    echo $wd/$file >> " + self.step.getListFile() + ";\n"
+		code += "  fi\n"
 		code += "done\n"
 		code += "if [ $total -ne " + str(self.step.total_job_count) + " ]; then let errors+=1; fi\n"
 
@@ -37,6 +40,8 @@ class Summarize(Step):
 		return self.step.getStepDir()
 	def fetchPrereqs(self):
 		self.prereqs=[self.step]
+	def getOutputFileExtension(self):
+		return "list"
 
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()

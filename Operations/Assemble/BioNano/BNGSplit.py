@@ -101,3 +101,5 @@ class Split(Step):
 
 	def getOutputFile(self, block_num):
 		return self.getStepDir() + "/split_" + str(block_num) + "_of_" + str(self.total_job_count) + ".bnx"
+	def getOutputFileExtension(self):
+		return "bnx"

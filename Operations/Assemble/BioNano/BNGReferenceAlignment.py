@@ -101,3 +101,5 @@ class ReferenceAlignment:
 			param_list.append(param_values[key])
 		print(" ".join(param_list))
 
+	def getOutputFileExtension(self):
+		return "cmap"

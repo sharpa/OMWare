@@ -59,6 +59,8 @@ class Sort(Step):
 
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + ".bnx"
+	def getOutputFileExtension(self):
+		return "bnx"
 
 	def getStepDir(self):
 		return "_".join(["sorted",self.workspace.input_file, "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])

@@ -120,9 +120,11 @@ class Assembly(Step):
 		return [code]
 
 	def getStepDir(self):
-		return self.workspace.work_dir + "/" + "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
+		return "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + ".contigs"
+	def getOutputFileExtension(self):
+		return "contigs"
 
 	def fetchPrereqs(self):
 		self.sort=Sort(self.workspace, self.vital_parameters)
