@@ -23,7 +23,6 @@ class Subsetter(object):
 			for molecule in pommio.parse("bnx"):
 				if criteria(molecule):
 					pommio.write(molecule, o_file, "bnx")
-				break
 
 	def keep_greater(self, attribute, limit):
 		if attribute=="length":
@@ -35,13 +34,8 @@ class Subsetter(object):
 	def remove_equals(self, attribute, values):
 		if attribute=="run_id":
 			def criteria(molecule):
-				print(molecule)
-				print(molecule.run_id)
-				print(values)
 				if molecule.run_id in values:
-					print("False")
 					return False
-				print("True")
 				return True
 		# TODO many more to implement...
 		self.subset(criteria)
