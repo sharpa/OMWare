@@ -15,7 +15,8 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 		
 		prereqs=step.getPrereqs()
 		for prereq in prereqs:
-			batch_steps.extend(self.formatCode(prereq))
+			if not prereq.isComplete():
+				batch_steps.extend(self.formatCode(prereq))
 		
 		batch_step_parts=[]
 		for part in step.writeCode():

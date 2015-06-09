@@ -115,7 +115,7 @@ class Assembly(Step):
 		code += " ".join(param_list) + "\n"
 
 		code += "result=`tail -n 1 ../" + self.getStepDir()  + "/" + self.output_prefix + ".stdout`\n"
-		code += "if [[ \"$result\" != \"END of output\" ]]; then exit 1; fi\n"
+		code += "if [[ \"$result\" != \"END of output\" ]]; then exit 1; else touch Complete.status; fi\n"
 
 		return [code]
 

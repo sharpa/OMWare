@@ -4,6 +4,7 @@
 # Date: 06/01/2015
 # 
 # The purpose of this module is abstractify code generator step classes
+from os import path
 
 class Step(object):
 	def __init__(self, workspace, vital_parameters):
@@ -27,7 +28,7 @@ class Step(object):
 		return self.prereqs
 
 	def isComplete(self):
-		return False
+		return path.exists(self.getStepDir() + "/Complete.status")
 
 	def getMem(self):
 		raise Exception("Abstract method called")
