@@ -13,8 +13,9 @@ class Summarize(Step):
 		self.workspace=workspace
 		self.step=step
 
+		self.autoGeneratePrereqs()
+
 	def writeCode(self):
-		self.fetchPrereqs()
 
 		code = "wd=`pwd`\n"
 		code += "rm -f " + self.step.getListFile() + "\n"
@@ -38,8 +39,10 @@ class Summarize(Step):
 
 	def getStepDir(self):
 		return self.step.getStepDir()
-	def fetchPrereqs(self):
-		self.prereqs=[self.step]
+	def autoGeneratePrereqs(self):
+		pass
+	def getPrereqs(self):
+		return [self.step]
 	def getOutputFileExtension(self):
 		return "list"
 

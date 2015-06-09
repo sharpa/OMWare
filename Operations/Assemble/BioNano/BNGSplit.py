@@ -37,9 +37,10 @@ class Split(Step):
 
 		self.max_job_count=self.getTime()*(60/5)-3
 
+		self.autoGeneratePrereqs()
+
 	def writeCode(self):
 		code_parts=[]
-		self.fetchPrereqs()
 
 		param_values=OrderedDict()
 		param_values["-i"] =  "../" + self.sort.getOutputFile()
@@ -87,9 +88,11 @@ class Split(Step):
 	def getStepDir(self):
 		return "_".join(["split", self.workspace.input_file, "blockCount"+str(self.total_job_count)])
 
-	def fetchPrereqs(self):
+	def autoGeneratePrereqs(self):
 		self.sort=Sort(self.workspace, self.vital_parameters)
-		self.prereqs=[self.sort]
+
+	def getPrereqs(self):
+		return [self.sort]
 
 
 	def getMem(self):

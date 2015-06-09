@@ -11,6 +11,8 @@ class Step(object):
 		self.workspace=workspace
 		self.vital_parameters=vital_parameters
 
+		self.autoGeneratePrereqs()
+
 	def writeCode(self):
 		raise Exception("Abstract method called")
 
@@ -20,12 +22,11 @@ class Step(object):
 	def getOutputFileExtension(self):
 		raise Exception("Abstract method called")
 
-	def fetchPrereqs(self):
+	def autoGeneratePrereqs(self):
 		raise Exception("Abstract method called")
 
 	def getPrereqs(self):
-		self.fetchPrereqs()
-		return self.prereqs
+		raise Exception("Abstract method called")
 
 	def isComplete(self):
 		return path.exists(self.getStepDir() + "/Complete.status")

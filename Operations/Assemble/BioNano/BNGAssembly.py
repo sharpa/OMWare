@@ -51,11 +51,10 @@ class Assembly(Step):
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
-	def writeCode(self):
-		code=""
-		self.fetchPrereqs()
+		self.autoGeneratePrereqs()
 
-		code += "cd " + self.workspace.work_dir + "\n"
+	def writeCode(self):
+		code = "cd " + self.workspace.work_dir + "\n"
 		code += "mkdir " + self.getStepDir() + "\n"
 		code += "cd " + self.getStepDir() + "\n"
 
@@ -126,12 +125,14 @@ class Assembly(Step):
 	def getOutputFileExtension(self):
 		return "contigs"
 
-	def fetchPrereqs(self):
+	def autoGeneratePrereqs(self):
 		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
-		self.prereqs=[Summarize(self.workspace, self.pairwise_alignment)]
+
+	def getPrereqs(self):
+		return [Summarize(self.workspace, self.pairwise_alignment)]
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()

@@ -20,11 +20,10 @@ class Sort(Step):
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
-	def writeCode(self):
-		code = ""
-		self.fetchPrereqs()
+		self.autoGeneratePrereqs()
 
-		code += "cd " + self.workspace.work_dir + "\n"
+	def writeCode(self):
+		code = "cd " + self.workspace.work_dir + "\n"
 		code += "mkdir -p " + self.getStepDir() + "\n"
 		code += "cd " + self.getStepDir() + "\n"
 
@@ -65,9 +64,11 @@ class Sort(Step):
 	def getStepDir(self):
 		return "_".join(["sorted",self.workspace.input_file, "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
 
-	def fetchPrereqs(self):
+	def autoGeneratePrereqs(self):
 		self.molecule_stats=self.getMoleculeStats()
-		self.prereqs=[]
+
+	def getPrereqs(self):
+		return []
 
 	def getMem(self):
 		return self.workspace.resources.getMediumMemory()

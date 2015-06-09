@@ -51,9 +51,10 @@ class PairwiseAlignment(Step):
 
 		self.max_job_count=self.getTime() * (60.0/120.0) - 3
 
+		self.autoGeneratePrereqs()
+
 	def writeCode(self):
 		code_parts=[]
-		self.fetchPrereqs()
 
 		param_values=OrderedDict()
 		param_values["-usecolor"] =  str(self.color)
@@ -137,11 +138,13 @@ class PairwiseAlignment(Step):
 	def getStepDir(self):
 		return "_".join(["pairwise", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval)])
 
-	def fetchPrereqs(self):
+	def autoGeneratePrereqs(self):
 		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
-		self.prereqs=[Summarize(self.workspace, self.split)]
+
+	def getPrereqs(self):
+		return [Summarize(self.workspace, self.split)]
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()
