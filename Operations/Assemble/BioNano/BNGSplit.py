@@ -96,7 +96,7 @@ class Split(Step):
 
 
 	def getMem(self):
-		return self.workspace.resources.getSmallMemory()
+		return self.workspace.resources.getMediumMemory()
 	def getTime(self):
 		return self.workspace.resources.getSmallTime()
 	def getThreads(self):
