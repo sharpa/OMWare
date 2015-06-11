@@ -10,6 +10,7 @@ from Operations.Assemble.BioNano.BNGSort import Sort
 from Operations.Assemble.BioNano.BNGSplit import Split
 from Operations.Assemble.BioNano.BNGSummarize import Summarize
 from collections import OrderedDict
+from os import path
 
 class PairwiseAlignment(Step):
 	def __init__(self, workspace, vital_parameters):
@@ -49,7 +50,9 @@ class PairwiseAlignment(Step):
 		total_blocks=split.total_job_count
 		self.total_job_count=total_blocks*(total_blocks+1)/2 
 
-		self.max_job_count=self.getTime() * (60.0/120.0) - 3
+		self.max_job_count=self.getTime() * (60.0/270.0) - 1
+		if self.max_job_count<1:
+			self.max_job_count=1
 
 		self.autoGeneratePrereqs()
 
@@ -99,6 +102,11 @@ class PairwiseAlignment(Step):
 			for j in range(i,totalBlocks + 1):
 				file2="../" + self.split.getOutputFile(j)
 
+				currentJob += 1
+				param_values["-o"]='pairwise%dof%d' % (currentJob, self.total_job_count)
+				if path.exists(self.getStepDir() + "/" + param_values["-o"] + ".align"):
+					continue
+
 				param_values["-i"]=file1
 				if i==j :
 					if "-first" in param_values:
@@ -112,14 +120,14 @@ class PairwiseAlignment(Step):
 					param_values["-1"]=""
 					param_values["-i "]=file2
 
-				param_values["-o"]='pairwise%dof%d' % (currentJob+1, self.total_job_count)
-				currentJob += 1
-
 				param_list=[self.workspace.binaries["bng_ref_aligner"]]
 				for key in param_values:
 					param_list.append(key)
 					param_list.append(param_values[key])
-				tmp_code += " ".join(param_list) + "\n"
+				tmp_code += "if [ ! -e " + param_values["-o"] + ".align ]\n"
+				tmp_code += "then\n"
+				tmp_code += "  " + " ".join(param_list) + "\n"
+				tmp_code += "fi\n"
 
 				cur_jobs+=1
 				if cur_jobs>=self.max_job_count or currentJob==self.total_job_count:
@@ -132,7 +140,8 @@ class PairwiseAlignment(Step):
 					tmp_code=""
 					cur_jobs=0
 
-
+		if len(code_parts)==0:
+			return ["# do nothing"]
 		return code_parts
 
 	def getStepDir(self):

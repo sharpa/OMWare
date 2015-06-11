@@ -36,6 +36,8 @@ class Split(Step):
 			self.total_job_count=blocks
 
 		self.max_job_count=self.getTime()*(60/5)-3
+		if self.max_job_count<1:
+			self.max_job_count=1
 
 		self.autoGeneratePrereqs()
 
