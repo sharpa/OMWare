@@ -12,6 +12,12 @@ class Step(object):
 		self.vital_parameters=vital_parameters
 
 		self.autoGeneratePrereqs()
+	def __eq__(self, other):
+		return self.__dict__ == other.__dict__
+	def __ne__(self, other):
+		return not self == other
+	def __str__(self):
+		return str(self.vital_parameters.__dict__)
 
 	def writeCode(self):
 		raise Exception("Abstract method called")
