@@ -46,18 +46,23 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 
 		print("#!/bin/bash\n")
 
-		print("afterok_done=\"\"")
-		print("afterok_build=\"\"\n")
 		for step_num, step in enumerate(steps_and_parts):
+			step_part_files=[]
 			for part_num, part in enumerate(step):
 				o_file_name="step" + str(step_num+1) + "_part" + str(part_num+1) + ".sh"
 				o_file=open(o_file_name, "w")
 				o_file.write(part)
-				print("sresult=`sbatch $afterok_done " + o_file_name + "`")
-				print("echo $sresult")
-				print("sid=`echo $sresult | awk '{print $NF}'`")
-				print("afterok_build=$afterok_build:$sid\n")
-
-			print("afterok_done=\"-d afterok\"$afterok_build")
-			print("afterok_build=\"\"\n")
+				step_part_files.append(o_file_name)
 				
+			step_name="step" + str(step_num+1)
+			dependency_clause="" if step_num==0 else "$step" + str(step_num)
+			self.runStepInContext(step_part_files, step_name, dependency_clause)
+
+	def runStepInContext(self, step_part_files, step_name, dependency_clause):
+		print("")
+		print(step_name + "=\"-d afterok\"")
+		for step_part_file in step_part_files:
+			print("sresult=`sbatch " + dependency_clause + " " + step_part_file + "`")
+			print("echo $sresult")
+			print("sid=`echo $sresult | awk '{print $NF}'`")
+			print(step_name + "=$" + step_name + ":$sid")
