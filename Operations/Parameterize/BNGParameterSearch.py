@@ -10,6 +10,7 @@ from Operations.Step import Step
 from Operations.Assemble.BioNano.BNGVitalParameters import VitalParameters
 from Operations.Assemble.BioNano.BNGAssembly import Assembly
 from Operations.Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
+from Operations.Assemble.BioNano.BNGSummarize import Summarize
 from Operations.SBATCHCodeFormatter import CodeFormatter
 
 class ParameterSearch(Step):
@@ -44,32 +45,24 @@ class ParameterSearch(Step):
 				for minlen in self.minlens:
 					for minsite in self.minsites:
 						self.createDumbAssembly(falsehood, pval, minlen, minsite)
-		new_sorts=set() ###
-		new_splits=set() ###
-		new_pas=set() ###
+		necessary_sorts=set()
+		necessary_splits=set()
+		necessary_pas=set()
 		for assembly in self.assemblies:
 			self.educateAssembly(assembly)			
-			new_sorts.add(assembly.sort)
-			new_splits.add(assembly.split)
-			new_pas.add(assembly.pairwise_alignment)
-			
-		print("sorts")
-		for x in new_sorts:
-			print(x)
-		print("splits")
-		for x in new_splits:
-			print(x)
-		print("pairwise_alignments")
-		for x in new_pas:
-			print(x)
-		print("assemblies")
-		for x in self.assemblies:
-			print(x)
+			necessary_sorts.add(assembly.sort)
+			necessary_splits.add(assembly.split)
+			necessary_pas.add(assembly.pairwise_alignment)
 
-#		step_parts=self.code_formatter.formatCode(assembly) ###
-		### modify steps ###
-#		self.code_formatter.serializeCode(step_parts) ###
-						
+		split_summaries=set()
+		for split in necessary_splits:
+			split_summaries.add(Summarize(self.workspace, split))
+
+		pairwise_summaries=set()
+		for pairwise in necessary_pas:
+			pairwise_summaries.add(Summarize(self.workspace, pairwise))
+
+		return [necessary_sorts, necessary_splits, split_summaries, necessary_pas, pairwise_summaries, self.assemblies]
 
 	# A dumb assembly uses it's own default prereqs, instead of someone else's
 	def createDumbAssembly(self, falsehood, pval, minlen, minsite):

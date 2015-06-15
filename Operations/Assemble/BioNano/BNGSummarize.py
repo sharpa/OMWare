@@ -15,6 +15,9 @@ class Summarize(Step):
 
 		self.autoGeneratePrereqs()
 
+	def __hash__(self):
+		return hash((self.workspace.input_file, self.workspace.work_dir, self.step.vital_parameters.pval, self.step.vital_parameters.fp, self.step.vital_parameters.fn, self.step.vital_parameters.min_molecule_len, self.step.vital_parameters.min_molecule_sites, self.__class__.__name__))
+
 	def writeCode(self):
 
 		code = "wd=`pwd`\n"

@@ -52,11 +52,37 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 				o_file_name="step" + str(step_num+1) + "_part" + str(part_num+1) + ".sh"
 				o_file=open(o_file_name, "w")
 				o_file.write(part)
+				o_file.close()
 				step_part_files.append(o_file_name)
 				
 			step_name="step" + str(step_num+1)
 			dependency_clause="" if step_num==0 else "$step" + str(step_num)
 			self.runStepInContext(step_part_files, step_name, dependency_clause)
+
+	def runSeveralSteps(self, levels):
+		step_names={}
+		for level_num, level in enumerate(levels):
+			for step_num, step in enumerate(level):
+				step_name="level" + str(level_num+1) + "_step" + str(step_num+1)
+				step_names[step]=step_name
+				step_parts=self.formatCode(step)
+
+				step_part_files=[]
+				for part_num, part in enumerate(step_parts):
+					o_file_name=step_name + "_part" + str(part_num+1) + ".sh"
+					o_file=open(o_file_name, "w")
+					o_file.write(part)
+					o_file.close()
+					step_part_files.append(o_file_name)
+
+				prereqs=step.getPrereqs()
+				if len(prereqs) == 0:
+					prereq=None
+				else:
+					prereq=prereqs[0]
+				dependency_clause="" if prereq is None else "$" + step_names[prereq]
+				self.runStepInContext(step_part_files, step_name, dependency_clause)
+				
 
 	def runStepInContext(self, step_part_files, step_name, dependency_clause):
 		print("")

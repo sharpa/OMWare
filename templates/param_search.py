@@ -17,4 +17,5 @@ genome_size_mb=900 ### SET ME
 parameter_search=ParameterSearch(workspace, genome_size_mb)
 
 with CD(work_dir):
-	parameter_search.writeCode()
+	formatter=CodeFormatter()
+	formatter.runSeveralSteps(parameter_search.writeCode())

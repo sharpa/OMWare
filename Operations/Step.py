@@ -12,6 +12,10 @@ class Step(object):
 		self.vital_parameters=vital_parameters
 
 		self.autoGeneratePrereqs()
+
+	def __hash__(self):
+		return hash((self.workspace.input_file, self.workspace.work_dir, self.vital_parameters.pval, self.vital_parameters.fp, self.vital_parameters.fn, self.vital_parameters.min_molecule_len, self.vital_parameters.min_molecule_sites, self.__class__.__name__))
+		
 	def __eq__(self, other):
 		return self.__dict__ == other.__dict__
 	def __ne__(self, other):
