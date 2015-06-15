@@ -11,13 +11,6 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 	def __init__(self):
 		pass
 	def formatCode(self, step):
-		batch_steps=[]
-		
-		prereqs=step.getPrereqs()
-		for prereq in prereqs:
-			if not prereq.isComplete():
-				batch_steps.extend(self.formatCode(prereq))
-		
 		batch_step_parts=[]
 		for part in step.writeCode():
 			batch_step_part="#!/bin/bash\n"
@@ -32,12 +25,24 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 
 			batch_step_part+=part + "\n"
 			batch_step_parts.append(batch_step_part)
-		batch_steps.append(batch_step_parts)
+		return batch_step_parts
 
-		return batch_steps
-
-	def serializeCode(self, step):
-		steps_and_parts=self.formatCode(step)
+	def runOneStep(self, step):
+		steps_retroorder=[]
+		
+		latest_prereqs=[step]
+		while latest_prereqs != []:
+			newest_prereqs=[]
+			for prereq in latest_prereqs:
+				if not prereq.isComplete():
+					steps_retroorder.append(prereq)
+					newest_prereqs.extend(prereq.getPrereqs())
+			latest_prereqs=newest_prereqs
+		steps=steps_retroorder[::-1]
+		
+		steps_and_parts=[]
+		for step in steps:
+			steps_and_parts.append(self.formatCode(step))
 
 		print("#!/bin/bash\n")
 

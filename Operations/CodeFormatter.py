@@ -12,4 +12,7 @@ class CodeFormatter:
 
 	def formatCode(self, step):
 		raise Exception("Abstract method called")
-		
+	def runOneStep(self, step):
+		raise Exception("Abstract method called")
+	def runSeveralSteps(self, tree): 
+		raise Exception("Abstract method called")
