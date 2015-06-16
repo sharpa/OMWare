@@ -130,7 +130,7 @@ class PairwiseAlignment(Step):
 				tmp_code += "fi\n"
 
 				cur_jobs+=1
-				if cur_jobs>=self.max_job_count or currentJob==self.total_job_count:
+				if cur_jobs>=self.max_job_count:
 					code = "cd " + self.workspace.work_dir + "\n"
 					code += "mkdir -p " + self.getStepDir() + "\n"
 					code += "cd " + self.getStepDir() + "\n"
@@ -139,6 +139,15 @@ class PairwiseAlignment(Step):
 
 					tmp_code=""
 					cur_jobs=0
+		if tmp_code != "":
+			code = "cd " + self.workspace.work_dir + "\n"
+			code += "mkdir -p " + self.getStepDir() + "\n"
+			code += "cd " + self.getStepDir() + "\n"
+			code += tmp_code
+			code_parts.append(code)
+
+			tmp_code=""
+			cur_jobs=0
 
 		if len(code_parts)==0:
 			return ["# do nothing"]
