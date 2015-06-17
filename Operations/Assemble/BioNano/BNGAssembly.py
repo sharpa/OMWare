@@ -137,6 +137,6 @@ class Assembly(Step):
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()
 	def getTime(self):
-		return self.workspace.resources.getSmallTime()
+		return self.workspace.resources.getMediumTime()
 	def getThreads(self):
 		return 1
