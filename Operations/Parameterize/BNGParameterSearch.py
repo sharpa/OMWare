@@ -11,7 +11,6 @@ from Operations.Assemble.BioNano.BNGVitalParameters import VitalParameters
 from Operations.Assemble.BioNano.BNGAssembly import Assembly
 from Operations.Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
 from Operations.Assemble.BioNano.BNGSummarize import Summarize
-from Operations.SBATCHCodeFormatter import CodeFormatter
 
 class ParameterSearch(Step):
 	def __init__(self, workspace, genome_size_mb):
@@ -36,7 +35,7 @@ class ParameterSearch(Step):
 		self.splits=set()
 		self.sorts=set()
 
-		self.code_formatter=CodeFormatter()
+		self.input_file_blocks=None
 		
 
 	def writeCode(self):
@@ -67,11 +66,16 @@ class ParameterSearch(Step):
 	# A dumb assembly uses it's own default prereqs, instead of someone else's
 	def createDumbAssembly(self, falsehood, pval, minlen, minsite):
 		vital_params=VitalParameters(falsehood[0], falsehood[1], pval, minlen, minsite)
+		vital_params.blocks=self.input_file_blocks
+
 		assembly=Assembly(self.workspace, vital_params)
 		self.assemblies.add(assembly)
 		self.pairwise_alignments.add(assembly.pairwise_alignment)
 		self.splits.add(assembly.split)
 		self.sorts.add(assembly.sort)
+
+		if self.input_file_blocks is None:
+			self.input_file_blocks=assembly.split.total_job_count
 
 	def educateAssembly(self, assembly):
 		lowest_sort=None

@@ -12,4 +12,4 @@ class VitalParameters:
 		self.pval=pval
 		self.min_molecule_len=min_molecule_len
 		self.min_molecule_sites=min_molecule_sites
-		
+		self.blocks=None

@@ -12,7 +12,7 @@ import math
 from collections import OrderedDict
 
 class Split(Step):
-	def __init__(self, workspace, vital_parameters, blocks=None):
+	def __init__(self, workspace, vital_parameters):
 		self.workspace=workspace
 		self.vital_parameters=vital_parameters
 
@@ -20,7 +20,7 @@ class Split(Step):
 		self.send_output_to_file=True
 		self.send_error_to_file=True
 
-		if blocks is None:
+		if vital_parameters.blocks is None:
 			with open(self.workspace.work_dir + "/" + self.workspace.input_file) as iFile:
 				count=0
 				site_count=0
@@ -35,8 +35,9 @@ class Split(Step):
 				if site_blocks>blocks:
 					blocks=site_blocks
 				self.total_job_count=blocks
+				self.vital_parameters.blocks=blocks
 		else:
-			self.total_job_count=blocks
+			self.total_job_count=vital_parameters.blocks
 
 		self.max_job_count=self.getTime()*(60/5)-3
 		if self.max_job_count<1:
