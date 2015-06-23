@@ -16,6 +16,10 @@ workspace.addBinary("bng_ref_aligner", "/Users/sharpa/Dropbox/Stars/GossRaim_BNG
 genome_size_mb=900 ### SET ME
 parameter_search=ParameterSearch(workspace, genome_size_mb)
 
+#average_label_density=7.0 ### SET ME MAYBE
+#expected_label_density=13.5 ### SET ME MAYBE
+#parameter_search.optimizeFalsehoods(average_label_density, expected_label_density) ### UNCOMMENT ME MAYBE
+
 with CD(work_dir):
 	formatter=CodeFormatter()
 	formatter.runSeveralSteps(parameter_search.writeCode())

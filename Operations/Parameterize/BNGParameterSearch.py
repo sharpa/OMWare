@@ -37,6 +37,19 @@ class ParameterSearch(Step):
 
 		self.input_file_blocks=None
 		
+	def optimizeFalsehoods(self, avg_label_density, expected_label_density):
+		new_falsehoods=[]
+
+		fp=0.0
+		while fp <= 3.0:
+			true_label_density=avg_label_density-fp
+			fn=1.00 - (true_label_density/expected_label_density)
+			
+			new_falsehoods.append([fp, fn])
+
+			fp+=0.5
+
+		self.falsehoods=new_falsehoods
 
 	def writeCode(self):
 		for falsehood in self.falsehoods:
