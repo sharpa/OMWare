@@ -75,12 +75,18 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 					o_file.close()
 					step_part_files.append(o_file_name)
 
+				print("#!/bin/bash\n")
+
 				prereqs=step.getPrereqs()
 				if len(prereqs) == 0:
 					prereq=None
 				else:
 					prereq=prereqs[0]
-				dependency_clause="" if prereq is None else "$" + step_names[prereq]
+
+                                dependency_clause=""
+                                if prereq is not None:
+                                        if prereq in step_names:
+                                                dependency_clause= "$" + step_names[prereq]
 				self.runStepInContext(step_part_files, step_name, dependency_clause)
 				
 

@@ -53,28 +53,44 @@ class ParameterSearch(Step):
 
 	def writeCode(self):
 		for falsehood in self.falsehoods:
-			for pval in self.pvals:
-				for minlen in self.minlens:
-					for minsite in self.minsites:
-						self.createDumbAssembly(falsehood, pval, minlen, minsite)
-		necessary_sorts=set()
-		necessary_splits=set()
-		necessary_pas=set()
-		for assembly in self.assemblies:
-			self.educateAssembly(assembly)			
-			necessary_sorts.add(assembly.sort)
-			necessary_splits.add(assembly.split)
-			necessary_pas.add(assembly.pairwise_alignment)
+                        for pval in self.pvals:
+                                for minlen in self.minlens:
+                                        for minsite in self.minsites:
+                                                self.createDumbAssembly(falsehood, pval, minlen, minsite)
+                run_assemblies=set()
+                for assembly in self.assemblies:
+                        if not assembly.isComplete():
+                                run_assemblies.add(assembly)
 
-		split_summaries=set()
-		for split in necessary_splits:
-			split_summaries.add(Summarize(self.workspace, split))
+                necessary_sorts=set()
+                necessary_splits=set()
+                necessary_pas=set()
+                for assembly in run_assemblies:
+                        self.educateAssembly(assembly)
+                        necessary_sorts.add(assembly.sort)
+                        necessary_splits.add(assembly.split)
+                        necessary_pas.add(assembly.pairwise_alignment)
 
-		pairwise_summaries=set()
-		for pairwise in necessary_pas:
-			pairwise_summaries.add(Summarize(self.workspace, pairwise))
+                run_sorts=set()
+                for sort in necessary_sorts:
+                        if not sort.isComplete():
+                                run_sorts.add(sort)
 
-		return [necessary_sorts, necessary_splits, split_summaries, necessary_pas, pairwise_summaries, self.assemblies]
+                run_splits=set()
+                split_summaries=set()
+                for split in necessary_splits:
+                        if not split.isComplete():
+                                run_splits.add(split)
+                                split_summaries.add(Summarize(self.workspace, split))
+
+                run_pas=set()
+                pairwise_summaries=set()
+                for pairwise in necessary_pas:
+                        if not pairwise.isComplete():
+                                run_pas.add(pairwise)
+                                pairwise_summaries.add(Summarize(self.workspace, pairwise))
+
+                return [run_sorts, run_splits, split_summaries, run_pas, pairwise_summaries, run_assemblies]
 
 	# A dumb assembly uses it's own default prereqs, instead of someone else's
 	def createDumbAssembly(self, falsehood, pval, minlen, minsite):
