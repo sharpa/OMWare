@@ -16,9 +16,9 @@ def get_all_test_suites():
 	return test_suites
 	
 def get_utils_test_suites():
-	import Utils
+	import UnitTests.tUtils
 	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(Utils.CD))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tCD))
 	return test_suites
 
 if __name__=="__main__":
