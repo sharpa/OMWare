@@ -1,4 +1,4 @@
-# Module: UnitTests.TestAll.py
+# Module: UnitTests.tAll.py
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 06/25/2015
@@ -19,6 +19,11 @@ def get_utils_test_suites():
 	import UnitTests.tUtils
 	test_suites=[]
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tCD))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tResources))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tMacbookProResources))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tFultonResources))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tFultonResourcesLight))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tWorkspace))
 	return test_suites
 
 if __name__=="__main__":
