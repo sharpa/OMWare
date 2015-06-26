@@ -13,6 +13,7 @@ def run_suites(test_suites):
 def get_all_test_suites():
 	test_suites=[]
 	test_suites.extend(get_utils_test_suites())
+	test_suites.extend(get_operations_test_suites())
 	return test_suites
 	
 def get_utils_test_suites():
@@ -24,6 +25,12 @@ def get_utils_test_suites():
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tFultonResources))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tFultonResourcesLight))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tWorkspace))
+	return test_suites
+
+def get_operations_test_suites():
+	import UnitTests.tOperations
+	test_suites=[]
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tOperations.tStep))
 	return test_suites
 
 if __name__=="__main__":
