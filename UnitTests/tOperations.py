@@ -6,13 +6,14 @@
 # The purpose of this module is to provide unit tests for
 # classes that are directly in the Operations module (not submodules)
 import unittest
+import UnitTests.Helper
 import os
 import copy
 import Operations.Step
 
 class tStep(unittest.TestCase):
-	workspace=type("workspace", (object,), {"input_file": "input_file", "work_dir": "work_dir"})
-	vital_parameters=type("vital_parameters", (object,), { "pval":"pval", "fp":"fp", "fn":"fn", "min_molecule_len":"minlen", "min_molecule_sites":"minsites"})
+	workspace=UnitTests.Helper.Mock(input_file="input_file", work_dir="work_dir")
+	vital_parameters=UnitTests.Helper.Mock(pval="pval", fp="fp", fn="fn", min_molecule_len="minlen", min_molecule_sites="minsites")
 	native_autoGeneratePrereqs=Operations.Step.Step.autoGeneratePrereqs
 
 	def dummy_autoGeneratePrereqs(self):
@@ -57,7 +58,7 @@ class tStep(unittest.TestCase):
 		self.assertEqual([False, True, False], [before_change, after_change_one, after_change_two])
 
 	def test_str(self):
-		expected="{'fp': 'fp', '__module__': 'UnitTests.tOperations', 'min_molecule_sites': 'minsites', 'min_molecule_len': 'minlen', 'pval': 'pval', '__dict__': <attribute '__dict__' of 'vital_parameters' objects>, '__weakref__': <attribute '__weakref__' of 'vital_parameters' objects>, '__doc__': None, 'fn': 'fn'}"
+		expected="{'min_molecule_sites': 'minsites', 'fp': 'fp', 'min_molecule_len': 'minlen', 'fn': 'fn', 'pval': 'pval'}"
 		self.assertEqual(expected,str(self.obj))
 
 	def test_write_code(self):
