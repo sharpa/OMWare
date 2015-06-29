@@ -14,6 +14,7 @@ def get_all_test_suites():
 	test_suites=[]
 	test_suites.extend(get_utils_test_suites())
 	test_suites.extend(get_operations_test_suites())
+	test_suites.extend(get_bioNanoAssembly_test_suites())
 	return test_suites
 	
 def get_utils_test_suites():
@@ -31,6 +32,12 @@ def get_operations_test_suites():
 	import UnitTests.tOperations
 	test_suites=[]
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tOperations.tStep))
+	return test_suites
+
+def get_bioNanoAssembly_test_suites():
+	import UnitTests.tBioNanoAssembly
+	test_suites=[]
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tAssembly))
 	return test_suites
 
 if __name__=="__main__":
