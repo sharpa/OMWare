@@ -39,3 +39,28 @@ class Subsetter(object):
 				return True
 		# TODO many more to implement...
 		self.subset(criteria)
+
+class RunCharacterizer(object):
+	def __init__(self, input_file):
+		self.input_file=input_file
+		self.dataset_stats={}
+
+	def __str__(self):
+		output=""
+		for key in self.dataset_stats.keys():
+			output+=str(key) + "	" + str(self.dataset_stats[key]["density"]) + "\n"
+		return output
+
+	def characterize(self):
+		pommio=POMMIO(self.input_file)
+		for molecule in pommio.parse('bnx'):
+			run_id=molecule.run_id
+			if run_id not in self.dataset_stats:
+				self.dataset_stats[run_id]={"length": 0.0, "labels": 0.0}
+			self.dataset_stats[run_id]["length"] += float(molecule.length)
+			self.dataset_stats[run_id]["labels"] += float(molecule.num_labels)
+		for run_id in self.dataset_stats:
+			stats=self.dataset_stats[run_id]
+			stats["density"] = stats["labels"] / (stats["length"] / (1000 * 100))
+
+
