@@ -143,6 +143,7 @@ class PairwiseAlignment(Step):
 			code = "cd " + self.workspace.work_dir + "\n"
 			code += "mkdir -p " + self.getStepDir() + "\n"
 			code += "cd " + self.getStepDir() + "\n"
+			code += "pwd\n"
 			code += tmp_code
 			code_parts.append(code)
 

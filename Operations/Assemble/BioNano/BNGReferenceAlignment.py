@@ -58,6 +58,7 @@ class ReferenceAlignment:
 
 	def writeCode(self):
 		print("cd " + self.work_dir)
+		print("pwd")
 		param_values=OrderedDict()
 		param_values["-ref"]=  self.reference_file
 		param_values["-i"]=  self.input_file

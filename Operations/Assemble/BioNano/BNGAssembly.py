@@ -57,6 +57,7 @@ class Assembly(Step):
 		code = "cd " + self.workspace.work_dir + "\n"
 		code += "mkdir " + self.getStepDir() + "\n"
 		code += "cd " + self.getStepDir() + "\n"
+		code += "pwd\n"
 
 		param_values=OrderedDict()
 		param_values["-if"]= "../" + str(self.split.getListFile())

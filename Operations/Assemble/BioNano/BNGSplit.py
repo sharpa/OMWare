@@ -80,6 +80,7 @@ class Split(Step):
 				code += "mkdir -p " + self.getStepDir() + "\n"
 				code += "cd " + self.getStepDir() + "\n"
 				code += tmp_code
+				code += "pwd\n"
 
 				code_parts.append(code)
 

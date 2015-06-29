@@ -26,6 +26,7 @@ class Sort(Step):
 		code = "cd " + self.workspace.work_dir + "\n"
 		code += "mkdir -p " + self.getStepDir() + "\n"
 		code += "cd " + self.getStepDir() + "\n"
+		code += "pwd\n"
 
 		param_values=OrderedDict()
 		param_values["-i"] =  "../" + self.workspace.input_file
