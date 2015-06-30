@@ -1,4 +1,4 @@
-# Module: Parameterize.BNGParameterSearch
+# Module: Parameterize.ParameterSearch
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 06/11/2015
@@ -7,10 +7,10 @@
 # run many assemblies at a variety of input parameters to determine 
 # which set is most appropriate to the data
 from Operations.Step import Step
-from Operations.BioNano.Assemble.BNGVitalParameters import VitalParameters
-from Operations.BioNano.Assemble.BNGAssembly import Assembly
-from Operations.BioNano.Assemble.BNGPairwiseAlignment import PairwiseAlignment
-from Operations.BioNano.Assemble.BNGSummarize import Summarize
+from Operations.BioNano.Assemble.VitalParameters import VitalParameters
+from Operations.BioNano.Assemble.Assembly import Assembly
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Summarize import Summarize
 
 class ParameterSearch(Step):
 	def __init__(self, workspace, genome_size_mb):

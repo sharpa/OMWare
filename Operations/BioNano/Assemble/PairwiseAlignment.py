@@ -1,4 +1,4 @@
-# Module: Operations.BioNano.Assemble.BNGPairwiseAlignment
+# Module: Operations.BioNano.Assemble.PairwiseAlignment
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/26/2015
@@ -6,9 +6,9 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner to create a set of pairwise alignments
 from Operations.Step import Step
-from Operations.BioNano.Assemble.BNGSort import Sort
-from Operations.BioNano.Assemble.BNGSplit import Split
-from Operations.BioNano.Assemble.BNGSummarize import Summarize
+from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.Summarize import Summarize
 from collections import OrderedDict
 from os import path
 

@@ -1,4 +1,4 @@
-# Module: Operations.BioNano.Assemble.BNGAssembly
+# Module: Operations.BioNano.Assemble.MoleculeStats
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/27/2015

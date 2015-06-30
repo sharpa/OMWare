@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # The purpose of this script is to run an automated param search
-from Operations.BioNano.Parameterize.BNGParameterSearch import ParameterSearch
+from Operations.BioNano.Parameterize.ParameterSearch import ParameterSearch
 from Utils.Workspace import Workspace
 from Utils.CD import CD
 from Operations.SBATCHCodeFormatter import CodeFormatter

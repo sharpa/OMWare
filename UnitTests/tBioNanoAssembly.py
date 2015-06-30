@@ -7,12 +7,12 @@
 # all modules in  Operations.Assemble.BioNano
 import unittest
 import UnitTests.Helper
-from Operations.BioNano.Assemble.BNGAssembly import Assembly
-from Operations.BioNano.Assemble.BNGSummarize import Summarize
-from Operations.BioNano.Assemble.BNGSort import Sort
-from Operations.BioNano.Assemble.BNGSplit import Split
-from Operations.BioNano.Assemble.BNGPairwiseAlignment import PairwiseAlignment
-from Operations.BioNano.Assemble.BNGMoleculeStats import MoleculeStats
+from Operations.BioNano.Assemble.Assembly import Assembly
+from Operations.BioNano.Assemble.Summarize import Summarize
+from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.MoleculeStats import MoleculeStats
 
 class tAssembly(unittest.TestCase):
 	workspace=UnitTests.Helper.Mock(input_file="input_file", work_dir="work_dir")

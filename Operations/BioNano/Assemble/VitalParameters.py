@@ -1,4 +1,4 @@
-# Module: Operations.BioNano.Assemble.BNGAssembly
+# Module: Operations.BioNano.Assemble.VitalParameters
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 06/01/2015

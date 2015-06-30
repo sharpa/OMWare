@@ -1,4 +1,4 @@
-# Module: Operations.BioNano.Assemble.BNGAssembly
+# Module: Operations.BioNano.Assemble.Assembly
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/26/2015
@@ -6,10 +6,10 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
 from Operations.Step import Step
-from Operations.BioNano.Assemble.BNGSort import Sort
-from Operations.BioNano.Assemble.BNGSplit import Split
-from Operations.BioNano.Assemble.BNGPairwiseAlignment import PairwiseAlignment
-from Operations.BioNano.Assemble.BNGSummarize import Summarize
+from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Summarize import Summarize
 from collections import OrderedDict
 
 class Assembly(Step):
