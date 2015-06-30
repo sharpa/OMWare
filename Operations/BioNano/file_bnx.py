@@ -12,6 +12,9 @@ class BnxFile:
 		i_file.close()
 		self.input_file=input_file
 
+	def getExtension(self):
+		return "bnx"
+
 	def getHeaders(self):
 		headers=[]
 		with open(self.input_file, "r") as i_file:

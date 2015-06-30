@@ -77,8 +77,14 @@ class tAssembly(unittest.TestCase):
 
 		self.assertEqual(expectedCode(self.obj.writeCode()))
 
+	def dummy_inputDotGetStepDir(self):
+		return "input_file"
+
 	def test_default_get_step_dir(self):
+		UnitTests.Helper.Mock.getStepDir=tAssembly.dummy_inputDotGetStepDir.im_func
+		self.obj.inpt=UnitTests.Helper.Mock()
 		self.assertEqual("assembly_input_file_fpfp_fnfn_pvalpval_minlenminlen_minsitesminsites",self.obj.getStepDir())
+		del UnitTests.Helper.Mock.getStepDir
 
 	def dummy_getStepDir(self):
 		return "dummy"

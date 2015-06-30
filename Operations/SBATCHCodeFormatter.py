@@ -42,7 +42,9 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 		
 		steps_and_parts=[]
 		for step in steps:
-			steps_and_parts.append(self.formatCode(step))
+			parts=self.formatCode(step)
+			if len(parts)>0:
+				steps_and_parts.append(parts)
 
 		print("#!/bin/bash\n")
 

@@ -6,6 +6,7 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
 from Operations.Step import Step
+from Operations.BioNano.Assemble.Input import Input
 from Operations.BioNano.Assemble.Sort import Sort
 from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
@@ -120,13 +121,14 @@ class Assembly(Step):
 		return [code]
 
 	def getStepDir(self):
-		return "_".join(["assembly", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
+		return "_".join(["assembly", self.inpt.getStepDir(), "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + ".contigs"
 	def getOutputFileExtension(self):
 		return "contigs"
 
 	def autoGeneratePrereqs(self):
+		self.inpt=Input(self.workspace)
 		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.split=Split(self.workspace, self.vital_parameters)

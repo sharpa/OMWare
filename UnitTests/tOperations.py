@@ -99,6 +99,15 @@ class tStep(unittest.TestCase):
 		
 		self.assertEqual(False, self.obj.isComplete())
 
+	def test_get_quality_report(self):
+		self.assertEqual(1,2)
+	def test_get_quality_file(self):
+		self.assertEqual(1,2)
+	def test_generate_quality_file(self):
+		self.assertEqual(1,2)
+	def test_load_quality_report_items(self):
+		self.assertEqual(1,2)
+
 	def test_get_mem(self):
 		with self.assertRaises(Exception):
 			self.obj.getMem()

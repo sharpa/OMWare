@@ -6,6 +6,7 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner to create a set of pairwise alignments
 from Operations.Step import Step
+from Operations.BioNano.Assemble.Input import Input
 from Operations.BioNano.Assemble.Sort import Sort
 from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.Summarize import Summarize
@@ -155,9 +156,10 @@ class PairwiseAlignment(Step):
 		return code_parts
 
 	def getStepDir(self):
-		return "_".join(["pairwise", self.workspace.input_file, "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval)])
+		return "_".join(["pairwise", self.inpt.getStepDir(), "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval)])
 
 	def autoGeneratePrereqs(self):
+		self.inpt=Input(self.workspace)
 		self.sort=Sort(self.workspace, self.vital_parameters)
 		self.split=Split(self.workspace, self.vital_parameters)
 		self.molecule_stats=self.sort.getMoleculeStats()

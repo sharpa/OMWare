@@ -6,6 +6,7 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create sort an input dataset
 from Operations.Step import Step
+from Operations.BioNano.Assemble.Input import Input
 from Operations.BioNano.Assemble.MoleculeStats import MoleculeStats
 from collections import OrderedDict
 
@@ -29,7 +30,7 @@ class Sort(Step):
 		code += "pwd\n"
 
 		param_values=OrderedDict()
-		param_values["-i"] =  "../" + self.workspace.input_file
+		param_values["-i"] =  "../" + self.inpt.getOutputFile()
 		param_values["-maxthreads"] =  str(self.getThreads())
 		param_values["-merge"] =  ""
 		param_values["-sort-idinc"] =  ""
@@ -63,13 +64,14 @@ class Sort(Step):
 		return "bnx"
 
 	def getStepDir(self):
-		return "_".join(["sorted",self.workspace.input_file, "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
+		return "_".join(["sorted",self.inpt.getStepDir(), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
 
 	def autoGeneratePrereqs(self):
+		self.inpt=Input(self.workspace)
 		self.molecule_stats=self.getMoleculeStats()
 
 	def getPrereqs(self):
-		return []
+		return [self.inpt]
 
 	def getMem(self):
 		return self.workspace.resources.getMediumMemory()
