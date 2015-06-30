@@ -5,7 +5,6 @@
 from Operations.BioNano.Subset.Subsetter import RunCharacterizer
 from Utils.Workspace import Workspace
 from Utils.CD import CD
-from Operations.BioNano.POMMIO import POMMIO
 
 work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir" ### SET ME
 input_file="all_reduced_to_150.bnx" ### SET ME
