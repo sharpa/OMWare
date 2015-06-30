@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGAssembly
+# Module: Utils.Workspace
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 06/01/2015

@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGAssembly
+# Module: Operations.CodeFormatter
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 06/02/2015
