@@ -1,12 +1,12 @@
-# Module: POMMIO
+# Module: file_bnx
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/26/2015
 # 
-# The purpose of this module is to import and export optical maps
-# from/into a variety of file formats
+# The purpose of this module is to manipulate optical maps
+# as they appear in the BNG .bnx file format
 
-class POMMIO:
+class BnxFile:
 	def __init__(self, input_file):
 		i_file=open(input_file, "r")
 		i_file.close()
@@ -23,7 +23,7 @@ class POMMIO:
 		return headers
 
 	def parse(self, format):
-		return POMMIO_iter(self.input_file)
+		return BnxFile_iter(self.input_file)
 	def write(self, molecule, o_file, format):
 
 		o_file.write("	".join(["0", str(molecule.id), str(molecule.length), str(molecule.average_intensity), str(molecule.snr), str(molecule.num_labels), str(molecule.original_id), str(molecule.scan_id), str(molecule.scan_direction), str(molecule.chip_id), str(molecule.flowcell), str(molecule.run_id), str(molecule.global_scan_id)]) + "\n")
@@ -40,7 +40,7 @@ class POMMIO:
 		quality_two_data.extend(molecule.qualities_two)
 		o_file.write("	".join(quality_two_data) + "\n")
 
-class POMMIO_iter:
+class BnxFile_iter:
 	def __init__(self, input_file):
 		self.i_file=open(input_file, "r")
 	def __iter__(self):

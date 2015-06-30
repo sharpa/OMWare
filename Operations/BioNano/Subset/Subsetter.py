@@ -5,7 +5,7 @@
 # 
 # The purpose of this module remove molecules from (or keep them in)
 # an input .bnx file based on their attributes
-from Operations.BioNano.file_bnx import POMMIO
+from Operations.BioNano.file_bnx import BnxFile
 
 class Subsetter(object):
 	def __init__(self, input_file, output_file):
@@ -17,12 +17,12 @@ class Subsetter(object):
 			output_file=self.output_file
 
 		with open(output_file, "w") as o_file:
-			pommio=POMMIO(self.input_file)
-			for header in pommio.getHeaders():
+			bnx_file=BnxFile(self.input_file)
+			for header in bnx_file.getHeaders():
 				o_file.write(header)
-			for molecule in pommio.parse("bnx"):
+			for molecule in bnx_file.parse("bnx"):
 				if criteria(molecule):
-					pommio.write(molecule, o_file, "bnx")
+					bnx_file.write(molecule, o_file, "bnx")
 
 	def keep_greater(self, attribute, limit):
 		if attribute=="length":
@@ -52,8 +52,8 @@ class RunCharacterizer(object):
 		return output
 
 	def characterize(self):
-		pommio=POMMIO(self.input_file)
-		for molecule in pommio.parse('bnx'):
+		bnx_file=BnxFile(self.input_file)
+		for molecule in bnx_file.parse('bnx'):
 			run_id=molecule.run_id
 			if run_id not in self.dataset_stats:
 				self.dataset_stats[run_id]={"length": 0.0, "labels": 0.0}

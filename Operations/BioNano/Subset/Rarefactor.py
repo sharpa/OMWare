@@ -7,7 +7,7 @@
 # and return a new dataset that has a random subset of the input
 # by random removal of whole or partial molecules
 import random
-from Operations.BioNano.file_bnx import POMMIO
+from Operations.BioNano.file_bnx import BnxFile
 
 class Rarefactor:
 	def __init__(self, input_file):
@@ -21,8 +21,8 @@ class Rarefactor:
 			output_file=self.input_file + "_" + str(int(proportion*100))
 
 		with open(output_file, "w") as o_file:
-			pommio=POMMIO(self.input_file)
-			headers=pommio.getHeaders()
+			bnx_file=BnxFile(self.input_file)
+			headers=bnx_file.getHeaders()
 			for header in headers:
 				o_file.write(header)
 			o_file.write("# Reduced to " + str(proportion*100) + "% of the original\n")
@@ -30,7 +30,7 @@ class Rarefactor:
 			total_length=0.0
 			molecule_lengths={}
 			molecule_ids=[]
-			for molecule in pommio.parse("bnx"):
+			for molecule in bnx_file.parse("bnx"):
 				total_length+=molecule.length
 				molecule_lengths[molecule.id] = molecule.length
 				molecule_ids.append(molecule.id)
@@ -58,12 +58,12 @@ class Rarefactor:
 					excess_distance=removed_length-target_removed_length
 					abridged[candidate]=excess_distance
 
-			for molecule in pommio.parse("bnx"):
+			for molecule in bnx_file.parse("bnx"):
 				if molecule.id in removed:
 					continue
 				if molecule.id in abridged:
 					molecule.shrink(abridged[molecule.id])
-				pommio.write(molecule, o_file, "bnx")
+				bnx_file.write(molecule, o_file, "bnx")
 
 
 
