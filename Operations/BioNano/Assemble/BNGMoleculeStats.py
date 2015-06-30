@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGAssembly
+# Module: Operations.BioNano.Assemble.BNGAssembly
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/27/2015

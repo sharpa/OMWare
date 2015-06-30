@@ -7,10 +7,10 @@
 # run many assemblies at a variety of input parameters to determine 
 # which set is most appropriate to the data
 from Operations.Step import Step
-from Operations.Assemble.BioNano.BNGVitalParameters import VitalParameters
-from Operations.Assemble.BioNano.BNGAssembly import Assembly
-from Operations.Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
-from Operations.Assemble.BioNano.BNGSummarize import Summarize
+from Operations.BioNano.Assemble.BNGVitalParameters import VitalParameters
+from Operations.BioNano.Assemble.BNGAssembly import Assembly
+from Operations.BioNano.Assemble.BNGPairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.BNGSummarize import Summarize
 
 class ParameterSearch(Step):
 	def __init__(self, workspace, genome_size_mb):

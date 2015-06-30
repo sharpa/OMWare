@@ -3,8 +3,8 @@
 # The purpose of this script is to run a whole assembly
 #	with automatic prereq generation
 
-from Operations.Assemble.BioNano.BNGAssembly import Assembly
-from Operations.Assemble.BioNano.BNGVitalParameters import VitalParameters
+from Operations.BioNano.Assemble.BNGAssembly import Assembly
+from Operations.BioNano.Assemble.BNGVitalParameters import VitalParameters
 from Utils.Workspace import Workspace
 from Utils.CD import CD
 from Operations.SBATCHCodeFormatter import CodeFormatter

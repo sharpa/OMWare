@@ -2,10 +2,10 @@
 
 # The purpose of this script is to characterize a BNG file
 
-from Operations.Subset.Subsetter import RunCharacterizer
+from Operations.BioNano.Subset.Subsetter import RunCharacterizer
 from Utils.Workspace import Workspace
 from Utils.CD import CD
-from POMMIO import POMMIO
+from Operations.BioNano.POMMIO import POMMIO
 
 work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir" ### SET ME
 input_file="all_reduced_to_150.bnx" ### SET ME

@@ -7,30 +7,30 @@
 # all modules in  Operations.Assemble.BioNano
 import unittest
 import UnitTests.Helper
-import Operations.Assemble.BioNano.BNGAssembly
-from Operations.Assemble.BioNano.BNGSummarize import Summarize
-from Operations.Assemble.BioNano.BNGSort import Sort
-from Operations.Assemble.BioNano.BNGSplit import Split
-from Operations.Assemble.BioNano.BNGPairwiseAlignment import PairwiseAlignment
-from Operations.Assemble.BioNano.BNGMoleculeStats import MoleculeStats
+from Operations.BioNano.Assemble.BNGAssembly import Assembly
+from Operations.BioNano.Assemble.BNGSummarize import Summarize
+from Operations.BioNano.Assemble.BNGSort import Sort
+from Operations.BioNano.Assemble.BNGSplit import Split
+from Operations.BioNano.Assemble.BNGPairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.BNGMoleculeStats import MoleculeStats
 
 class tAssembly(unittest.TestCase):
 	workspace=UnitTests.Helper.Mock(input_file="input_file", work_dir="work_dir")
 	vital_parameters=UnitTests.Helper.Mock(pval="pval", fp="fp", fn="fn", min_molecule_len="minlen", min_molecule_sites="minsites")
-	native_autoGeneratePrereqs=Operations.Step.Step.autoGeneratePrereqs
+	native_autoGeneratePrereqs=Assembly.autoGeneratePrereqs
 
 	def dummy_autoGeneratePrereqs(self):
 		self.autoGeneratePrereqsCalled=True
 
 	def setUp(self):
-		Operations.Assemble.BioNano.BNGAssembly.Assembly.autoGeneratePrereqs=tAssembly.dummy_autoGeneratePrereqs.im_func
-		self.obj=Operations.Assemble.BioNano.BNGAssembly.Assembly(self.workspace, self.vital_parameters)
+		Assembly.autoGeneratePrereqs=tAssembly.dummy_autoGeneratePrereqs.im_func
+		self.obj=Assembly(self.workspace, self.vital_parameters)
 
 	def tearDown(self):
-		Operations.Assemble.BioNano.BNGAssembly.Assembly.autoGeneratePrereqs=self.native_autoGeneratePrereqs
+		Assembly.autoGeneratePrereqs=self.native_autoGeneratePrereqs
 
 	def test_default_init(self):
-		expectedDefault=Operations.Assemble.BioNano.BNGAssembly.Assembly(None, None)
+		expectedDefault=Assembly(None, None)
 		expectedDefault.workspace=self.workspace
 		expectedDefault.vital_parameters=self.vital_parameters
 
@@ -83,13 +83,13 @@ class tAssembly(unittest.TestCase):
 	def dummy_getStepDir(self):
 		return "dummy"
 	def test_get_output_file(self):
-		native_getStepDir=Operations.Assemble.BioNano.BNGAssembly.Assembly.getStepDir
-		Operations.Assemble.BioNano.BNGAssembly.Assembly.getStepDir=tAssembly.dummy_getStepDir.im_func
+		native_getStepDir=Assembly.getStepDir
+		Assembly.getStepDir=tAssembly.dummy_getStepDir.im_func
 		self.obj.output_prefix="dummy"
 
 		self.assertEqual("dummy/dummy.contigs",self.obj.getOutputFile())
 
-		Operations.Assemble.BioNano.BNGAssembly.Assembly.getStepDir=native_getStepDir
+		Assembly.getStepDir=native_getStepDir
 
 	def test_get_output_file_extension(self):
 		self.assertEqual("contigs",self.obj.getOutputFileExtension())

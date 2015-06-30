@@ -5,7 +5,7 @@
 # 
 # The purpose of this module remove molecules from (or keep them in)
 # an input .bnx file based on their attributes
-from POMMIO import POMMIO
+from Operations.BioNano.POMMIO import POMMIO
 
 class Subsetter(object):
 	def __init__(self, input_file, output_file):

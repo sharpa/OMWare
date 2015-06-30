@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGSummarize
+# Module: Operations.BioNano.Assemble.BNGSummarize
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 06/04/2015

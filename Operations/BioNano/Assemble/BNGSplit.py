@@ -1,4 +1,4 @@
-# Module: Assemble.BioNano.BNGSplit
+# Module: Operations.BioNano.Assemble.BNGSplit
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/27/2015
@@ -7,7 +7,7 @@
 # split a single bnx file into "good sized" chunks of molecules
 # for more efficient parallel assembly
 from Operations.Step import Step
-from Operations.Assemble.BioNano.BNGSort import Sort
+from Operations.BioNano.Assemble.BNGSort import Sort
 import math
 from collections import OrderedDict
 
