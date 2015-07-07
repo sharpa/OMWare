@@ -37,6 +37,7 @@ def get_operations_test_suites():
 def get_bioNanoAssembly_test_suites():
 	import UnitTests.tBioNanoAssembly
 	test_suites=[]
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tInput))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tAssembly))
 	return test_suites
 

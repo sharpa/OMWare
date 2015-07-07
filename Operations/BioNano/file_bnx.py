@@ -11,8 +11,15 @@ class BnxFile:
 		i_file=open(input_file, "r")
 		i_file.close()
 		self.input_file=input_file
+	def __eq__(self, other):
+		if other is None:
+			return False
+		return self.input_file==other.input_file
+	def __ne__(self, other):
+		return self.input_file!=other.input_file
 
-	def getExtension(self):
+	@staticmethod
+	def getExtension():
 		return "bnx"
 
 	def getHeaders(self):
