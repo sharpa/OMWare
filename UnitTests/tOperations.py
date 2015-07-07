@@ -9,27 +9,46 @@ import unittest
 import UnitTests.Helper
 import os
 import copy
-import Operations.Step
+from Operations.Step import Step
+from Operations.Step import Quality
 
 class tStep(unittest.TestCase):
 	workspace=UnitTests.Helper.Mock(input_file="input_file", work_dir="work_dir")
 	vital_parameters=UnitTests.Helper.Mock(pval="pval", fp="fp", fn="fn", min_molecule_len="minlen", min_molecule_sites="minsites")
-	native_autoGeneratePrereqs=Operations.Step.Step.autoGeneratePrereqs
+	native_autoGeneratePrereqs=Step.autoGeneratePrereqs
 
 	def dummy_autoGeneratePrereqs(self):
 		self.autoGeneratePrereqsCalled=True
 	def dummy_getStepDir(self):
 		return "tmp"
+	def dummy_isComplete_true(self):
+		return True
+	def dummy_isComplete_false(self):
+		return False
+	def dummy_getQualityFileName(self):
+		return "Quality.json"
+	def dummy_createQualityObject(self):
+		self.quality=Quality()
+	def dummy_createQualityObject_wSave(self):
+		self.quality=Quality(key="value")
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+
+		self.saveQualityObjectToFile()
+
+		Step.getQualityFileName=native_getQualityFileName
+	def dummy_loadQualityReportItems(self):
+		return {"1": 1, "2": 2, "1.0": 1, "4": 4, "3": 3}
 
 	def setUp(self):
-		Operations.Step.Step.autoGeneratePrereqs=tStep.dummy_autoGeneratePrereqs.im_func
-		self.obj=Operations.Step.Step(self.workspace, self.vital_parameters)
+		Step.autoGeneratePrereqs=tStep.dummy_autoGeneratePrereqs.im_func
+		self.obj=Step(self.workspace, self.vital_parameters)
 
 	def tearDown(self):
-		Operations.Step.Step.autoGeneratePrereqs=self.native_autoGeneratePrereqs
+		Step.autoGeneratePrereqs=self.native_autoGeneratePrereqs
 	
 	def test_constructor(self):
-		self.assertEqual([self.workspace, self.vital_parameters, True], [self.obj.workspace, self.obj.vital_parameters, self.obj.autoGeneratePrereqsCalled])
+		self.assertEqual([self.workspace, self.vital_parameters, None, True], [self.obj.workspace, self.obj.vital_parameters, self.obj.quality, self.obj.autoGeneratePrereqsCalled])
 
 	def test_hash(self):
 		class_name="Step"
@@ -74,7 +93,7 @@ class tStep(unittest.TestCase):
 			self.obj.getOutputFileExtension()
 
 	def test_auto_generate_prereqs(self):
-		Operations.Step.Step.autoGeneratePrereqs=self.native_autoGeneratePrereqs
+		Step.autoGeneratePrereqs=self.native_autoGeneratePrereqs
 		with self.assertRaises(Exception):
 			self.obj.autoGeneratePrereqs()
 
@@ -83,30 +102,235 @@ class tStep(unittest.TestCase):
 			self.obj.getPrereqs()
 
 	def test_is_complete_while_is(self):
-		native_getStepDir=Operations.Step.Step.getStepDir
-		Operations.Step.Step.getStepDir=tStep.dummy_getStepDir.im_func
+		native_getStepDir=Step.getStepDir
+		Step.getStepDir=tStep.dummy_getStepDir.im_func
+		actual=-1
 		
 		os.mkdir("tmp")
 		with open("tmp/Complete.status", "w"):
-			self.assertEqual(True, self.obj.isComplete())
+			actual=self.obj.isComplete()
 
 		os.remove("tmp/Complete.status")
 		os.rmdir("tmp")
+		Step.getStepDir=native_getStepDir
+
+		self.assertEqual(True, actual)
 
 	def test_is_complete_while_is_not(self):
-		native_getStepDir=Operations.Step.Step.getStepDir
-		Operations.Step.Step.getStepDir=tStep.dummy_getStepDir.im_func
-		
-		self.assertEqual(False, self.obj.isComplete())
+		native_getStepDir=Step.getStepDir
+		Step.getStepDir=tStep.dummy_getStepDir.im_func
 
-	def test_get_quality_report(self):
-		self.assertEqual(1,2)
-	def test_get_quality_file(self):
-		self.assertEqual(1,2)
-	def test_generate_quality_file(self):
-		self.assertEqual(1,2)
+		actual=self.obj.isComplete()
+		
+		Step.getStepDir=native_getStepDir
+
+		self.assertEqual(False, actual)
+
+
+	def test_loadQualityReport_notComplete(self):
+		native_isComplete=Step.isComplete
+		Step.isComplete=tStep.dummy_isComplete_false.im_func
+
+		with self.assertRaises(Exception):
+			self.obj.loadQualityReport(1)
+			Step.isComplete=native_isComplete
+
+		Step.isComplete=native_isComplete
+
+	def test_loadQualityReport_complete_qualityFileDoesNotExist(self):
+		native_isComplete=Step.isComplete
+		Step.isComplete=tStep.dummy_isComplete_true.im_func
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "3", "2", "1.0", "4"], Quality()]
+
+		actuals=[self.obj.loadQualityReport(4)]
+		actuals.append(self.obj.quality)
+
+		Step.isComplete=native_isComplete
+		Step.getQualityFileName=native_getQualityFileName
+		Step.createQualityObject=native_createQualityObject
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+		
+	def test_loadQualityReport_complete_qualityFileDoesExist(self):
+		native_isComplete=Step.isComplete
+		Step.isComplete=tStep.dummy_isComplete_true.im_func
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "3", "2", "1.0"], None]
+
+		with open("Quality.json", "w"):
+			actuals=[self.obj.loadQualityReport(3)]
+			actuals.append(self.obj.quality)
+		os.remove("Quality.json")
+
+		Step.isComplete=native_isComplete
+		Step.getQualityFileName=native_getQualityFileName
+		Step.createQualityObject=native_createQualityObject
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_loadQualityReport_complete_qualityFileDoesExist_cutoff2(self):
+		native_isComplete=Step.isComplete
+		Step.isComplete=tStep.dummy_isComplete_true.im_func
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "2", "1.0"], None]
+
+		with open("Quality.json", "w"):
+			actuals=[self.obj.loadQualityReport(2)]
+			actuals.append(self.obj.quality)
+		os.remove("Quality.json")
+
+		Step.isComplete=native_isComplete
+		Step.getQualityFileName=native_getQualityFileName
+		Step.createQualityObject=native_createQualityObject
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_loadQualityReport_complete_qualityFileDoesExist_cutoff1(self):
+		native_isComplete=Step.isComplete
+		Step.isComplete=tStep.dummy_isComplete_true.im_func
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "1.0"], None]
+
+		with open("Quality.json", "w"):
+			actuals=[self.obj.loadQualityReport(1)]
+			actuals.append(self.obj.quality)
+		os.remove("Quality.json")
+
+		Step.isComplete=native_isComplete
+		Step.getQualityFileName=native_getQualityFileName
+		Step.createQualityObject=native_createQualityObject
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_loadQualityReport_complete_qualityFileDoesExist_cutoff0(self):
+		native_isComplete=Step.isComplete
+		Step.isComplete=tStep.dummy_isComplete_true.im_func
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[[], None]
+
+		with open("Quality.json", "w"):
+			actuals=[self.obj.loadQualityReport(0)]
+			actuals.append(self.obj.quality)
+		os.remove("Quality.json")
+
+		Step.isComplete=native_isComplete
+		Step.getQualityFileName=native_getQualityFileName
+		Step.createQualityObject=native_createQualityObject
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_get_quality_file_name(self):
+		native_getStepDir=Step.getStepDir
+		Step.getStepDir=tStep.dummy_getStepDir.im_func
+		expected="tmp/Quality.json"
+
+		actual=self.obj.getQualityFileName()
+
+		Step.getStepDir=native_getStepDir
+
+		self.assertEqual(expected, actual)
+		
+	def test_create_quality_object(self):
+		with self.assertRaises(Exception):
+			self.obj.createQualityObject()
+
 	def test_load_quality_report_items(self):
-		self.assertEqual(1,2)
+		with self.assertRaises(Exception):
+			self.obj.loadQualityReportItems()
+
+	def test_saveQualityObjectToFile_objectDoesNotExist(self):
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+
+		self.obj.saveQualityObjectToFile()
+
+		Step.createQualityObject=native_createQualityObject
+		Step.getQualityFileName=native_getQualityFileName
+
+		expected="{}"
+		actual=""
+		with open(self.dummy_getQualityFileName()) as qual_file:
+			actual=qual_file.read()
+		os.remove(self.dummy_getQualityFileName())
+		
+		self.assertEqual(expected, actual)
+
+	def test_saveQualityObjectToFile_objectDoesExist(self):
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		self.obj.quality=Quality(key="value")
+
+		self.obj.saveQualityObjectToFile()
+
+		Step.getQualityFileName=native_getQualityFileName
+
+		expected="{\n \"key\": \"value\"\n}"
+		actual=""
+		with open(self.dummy_getQualityFileName()) as qual_file:
+			actual=qual_file.read()
+		os.remove(self.dummy_getQualityFileName())
+		
+		self.assertEqual(expected, actual)
+
+	def test_loadQualityObjectFromFile_fileDoesExist(self):
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		with open(self.dummy_getQualityFileName(), "w") as quality_file:
+			quality_file.write("{\n \"key\": \"value\"\n}")
+
+		self.obj.loadQualityObjectFromFile()
+
+		Step.getQualityFileName=native_getQualityFileName
+		os.remove(self.dummy_getQualityFileName())
+
+		self.assertEqual(Quality(key="value"), self.obj.quality)
+
+	def test_loadQualityObjectFromFile_fileDoesNotExist(self):
+		native_getQualityFileName=Step.getQualityFileName
+		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
+		native_createQualityObject=Step.createQualityObject
+		Step.createQualityObject=tStep.dummy_createQualityObject_wSave.im_func
+
+		self.obj.loadQualityObjectFromFile()
+
+		Step.getQualityFileName=native_getQualityFileName
+		Step.createQualityObject=native_createQualityObject
+		os.remove(self.dummy_getQualityFileName())
+
+		self.assertEqual(Quality(key="value"), self.obj.quality)
 
 	def test_get_mem(self):
 		with self.assertRaises(Exception):

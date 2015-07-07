@@ -5,11 +5,13 @@
 # 
 # The purpose of this module is abstractify code generator step classes
 from os import path
+import json
 
 class Step(object):
 	def __init__(self, workspace, vital_parameters):
 		self.workspace=workspace
 		self.vital_parameters=vital_parameters
+		self.quality=None
 
 		self.autoGeneratePrereqs()
 
@@ -41,6 +43,43 @@ class Step(object):
 	def isComplete(self):
 		return path.exists(self.getStepDir() + "/Complete.status")
 
+	def getQualityFileName(self):
+		return self.getStepDir() + "/Quality.json"
+
+	def loadQualityReport(self, log_level):
+		if not self.isComplete():
+			raise Exception("Step not run yet; no quality available")
+
+		if not path.exists(self.getQualityFileName()):
+			self.createQualityObject()
+
+		qualityReportItems=[]
+		allQualityReportItems=self.loadQualityReportItems()
+		for item in allQualityReportItems.keys():
+			if allQualityReportItems[item] <= log_level:
+				qualityReportItems.append(item)
+
+		return qualityReportItems
+
+	def loadQualityReportItems(self):
+		raise Exception("Abstract method called")
+
+	def createQualityObject(self):
+		raise Exception("Abstract method called")
+
+	def saveQualityObjectToFile(self):
+		if self.quality is None:
+			self.createQualityObject()
+		with open(self.getQualityFileName(), "w") as quality_file:
+			json.dump(self.quality.__dict__, quality_file, indent=1)
+
+	def loadQualityObjectFromFile(self):
+		if not path.exists(self.getQualityFileName()):
+			self.createQualityObject()
+		with open(self.getQualityFileName()) as quality_file:
+			self.quality=Quality()
+			self.quality.__dict__=json.load(quality_file)
+
 	def getMem(self):
 		raise Exception("Abstract method called")
 	def getTime(self):
@@ -50,3 +89,13 @@ class Step(object):
 
 	def getErrorNotificationEmail(self):
 		return self.workspace.errorNotificationEmail
+
+class Quality(object):
+	def __init__(self, **kwards):
+		self.__dict__.update(kwards)
+	def __eq__(self, other):
+		if other is None:
+			return False
+		return self.__dict__ == other.__dict__
+	def __str__(self):
+		return str(self.__dict__)

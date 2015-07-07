@@ -10,6 +10,8 @@ class Mock(object):
 	def __init__(self, **kwards):
 		self.__dict__.update(kwards)
 	def __eq__(self, other):
+		if other is None:
+			return False
 		return self.__dict__ == other.__dict__
 	def __str__(self):
 		return str(self.__dict__)

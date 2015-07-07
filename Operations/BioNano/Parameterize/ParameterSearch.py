@@ -188,6 +188,19 @@ class ParameterSearch(Step):
 		# Check isComplete on list members
 		return False
 
+	def loadQualityReport(self):
+		raise Exception("Quality for param walk isn't implemented yet...")
+	def getQualityFileName(self):
+		raise Exception("Quality for param walk isn't implemented yet...")
+	def loadQualityReportItems(self):
+		raise Exception("Quality for param walk isn't implemented yet...")
+	def createQualityObject(self):
+		raise Exception("Quality for param walk isn't implemented yet...")
+	def saveQualityObjectToFile(self):
+		raise Exception("Quality for param walk isn't implemented yet...")
+	def loadQualityObjectFromFile(self):
+		raise Exception("Quality for param walk isn't implemented yet...")
+
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
 	def getTime(self):
