@@ -10,8 +10,10 @@ import os
 from collections import OrderedDict
 import UnitTests.Helper
 from Operations.BioNano.file_bnx import BnxFile
+from Operations.BioNano.Assemble.RefineA import RefineA
 from Operations.BioNano.Assemble.Assembly import Assembly
 from Operations.BioNano.Assemble.Summarize import Summarize
+from Operations.BioNano.Assemble.GroupManifest import GroupManifest
 from Operations.BioNano.Assemble.Sort import Sort
 from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
@@ -400,3 +402,236 @@ class dummy_BnxFile(object):
 		return [ UnitTests.Helper.Mock(length=100.0, num_labels=13),
 			UnitTests.Helper.Mock(length=200.0, num_labels=26),
 			UnitTests.Helper.Mock(length=300.0, num_labels=39) ]
+
+class tRefineA(unittest.TestCase):
+	workspace=UnitTests.Helper.Mock(work_dir="work_dir", input_file="input_file")
+	vital_parameters=UnitTests.Helper.Mock(fp="fp", fn="fn", pval="pval", min_molecule_len="minlen", min_molecule_sites="minsites")
+	def setUp(self):
+		native_autoGeneratePrereqs=RefineA.autoGeneratePrereqs
+		RefineA.autoGeneratePrereqs=self.dummy_autoGeneratePrereqs.im_func
+
+		self.obj=RefineA(self.workspace, self.vital_parameters)
+		RefineA.autoGeneratePrereqs=native_autoGeneratePrereqs
+	def dummy_getResources(self):
+		return -1
+	def dummy_autoGeneratePrereqs(self):
+		self.autoGeneratePrereqsCalled=True
+	def dummy_getStepDir(self):
+		return "step_dir"
+	def dummy_getOutputFileExtension(self):
+		return "ext"
+	def test_constructor_default(self):
+		expected=UnitTests.Helper.Mock(
+			workspace=self.workspace,
+			vital_parameters=self.vital_parameters,
+			quality=None,
+			sd=0.2,
+			sf=0.2,
+			sr=0.03,
+			res=3.3,
+			usecolor=1,
+			use_multi_mode=True,
+			consensus_end_coverage=0.99,
+			bias_for_low_likelihood_ratio=1e2,
+			refinement_length_accuracy="",
+			largest_query_map_interval=4,
+			largest_reference_map_interval=6,
+			outlier_pval=1e-5,
+			end_outlier_prior_probability=0.00001,
+			contigs_format=1,
+			overwrite_output=True,
+			output_prefix="refineeA",
+			send_output_to_file=True,
+			send_errors_to_file=True,
+			autoGeneratePrereqsCalled=True)
+
+		self.assertEqual(expected, self.obj)
+
+	def test_writeCode(self):
+		self.assertEqual(1,2)
+	def test_getStepDir(self):
+		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
+		self.obj.inpt=UnitTests.Helper.Mock()
+		expected="refineA_" + self.dummy_getStepDir() + "_fp" + self.vital_parameters.fp + "_fn" + self.vital_parameters.fn + "_pval" + self.vital_parameters.pval + "_minlen" + self.vital_parameters.min_molecule_len + "_minsites" + self.vital_parameters.min_molecule_sites
+
+		actual=self.obj.getStepDir()
+
+		del self.obj.inpt
+		del UnitTests.Helper.Mock.getStepDir
+
+		self.assertEqual(expected, actual)
+	def test_getOutputFile(self):
+		native_getStepDir=RefineA.getStepDir
+		RefineA.getStepDir=self.dummy_getStepDir.im_func
+		native_getOutputFileExtension=RefineA.getOutputFileExtension
+		RefineA.getOutputFileExtension=self.dummy_getOutputFileExtension.im_func
+		self.obj.output_prefix="output_prefix"
+		expected=self.dummy_getStepDir() + "/" + self.obj.output_prefix + "." + self.dummy_getOutputFileExtension()
+
+		actual=self.obj.getOutputFile()
+
+		RefineA.getStepDir=native_getStepDir
+		RefineA.getOutputFileExtension=native_getOutputFileExtension
+
+		self.assertEqual(expected, actual)
+
+	def test_getOutputFileExtension(self):
+		self.assertEqual("contigs", self.obj.getOutputFileExtension())
+	def test_autoGeneratePrereqs(self):
+		native_getTime_split=Split.getTime
+		Split.getTime=self.dummy_getResources.im_func
+		native_getTime_pairwise=PairwiseAlignment.getTime
+		PairwiseAlignment.getTime=self.dummy_getResources.im_func
+
+		self.vital_parameters.blocks=1
+		self.obj.vital_parameters.blocks=1
+		sort=Sort(self.workspace, self.vital_parameters)
+		expected=RefineA(self.workspace, self.vital_parameters)
+		expected.inpt=Input(self.workspace),
+		expected.sort=sort,
+		expected.molecule_stats=sort.getMoleculeStats(),
+		expected.split=Split(self.workspace, self.vital_parameters),
+		expected.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters),
+		expected.assembly=Assembly(self.workspace, self.vital_parameters)
+
+		self.obj.autoGeneratePrereqs()		
+
+		Split.getTime=native_getTime_split
+		PairwiseAlignment.getTime=native_getTime_pairwise
+		del self.vital_parameters.blocks
+
+		self.assertEqual(expected.__dict__, self.obj.__dict__)
+	def test_getPrereqs(self):
+		assembly=UnitTests.Helper.Mock()
+		self.obj.assembly=assembly
+		expected=[GroupManifest(self.workspace, assembly)]
+
+		actual=self.obj.getPrereqs()
+
+		self.assertEqual(expected, actual)
+	def test_getMem(self):
+		UnitTests.Helper.Mock.getMediumMemory=self.dummy_getResources.im_func
+		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		expected=self.dummy_getResources()
+
+		actual=self.obj.getMem()
+
+		del UnitTests.Helper.Mock.getMediumMemory
+		del self.obj.workspace.resources
+
+		self.assertEqual(expected, actual)
+	def test_getTime(self):
+		UnitTests.Helper.Mock.getLargeTime=self.dummy_getResources.im_func
+		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		expected=self.dummy_getResources()
+
+		actual=self.obj.getTime()
+
+		del UnitTests.Helper.Mock.getLargeTime
+		del self.obj.workspace.resources
+
+		self.assertEqual(expected, actual)
+	def test_getThreads(self):
+		UnitTests.Helper.Mock.getMediumThreads=self.dummy_getResources.im_func
+		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		expected=self.dummy_getResources()
+
+		actual=self.obj.getThreads()
+
+		del UnitTests.Helper.Mock.getMediumThreads
+		del self.obj.workspace.resources
+
+		self.assertEqual(expected, actual)
+
+class tGroupManifest(unittest.TestCase):
+	workspace=UnitTests.Helper.Mock(work_dir="work_dir", input_file="input_file")
+	assembly=UnitTests.Helper.Mock(output_prefix="output_prefix", vital_parameters=UnitTests.Helper.Mock(fp="fp", fn="fn", pval="pval", min_molecule_len="minlen", min_molecule_sites="minsites"))
+	def setUp(self):
+		self.obj=GroupManifest(self.workspace, self.assembly)
+	def dummy_getResources(self):
+		return -1
+	def dummy_getStepDir(self):
+		return "step_dir"
+
+	def test_constructor_default(self):
+		expected=UnitTests.Helper.Mock(
+			workspace=self.workspace,
+			assembly=self.assembly,
+			quality=None)
+
+		self.assertEqual(expected, self.obj)
+
+	def test_writeCode(self):
+		native_getStepDir=GroupManifest.getStepDir
+		GroupManifest.getStepDir=self.dummy_getStepDir.im_func
+
+		expected="cd " + self.workspace.work_dir + "\n"
+		expected+="mkdir " + self.dummy_getStepDir() + "\n"
+		expected+="cd " + self.dummy_getStepDir() + "\n"
+		expected+="pwd\n"
+		expected+="python -c 'from Utils.Workspace import Workspace;"
+		expected+="from Operations.BioNano.Assemble.VitalParameters import VitalParameters;"
+		expected+="from Operations.BioNano.Assemble.Assembly import Assembly;"
+		expected+="from Operations.BioNano.Assemble.GroupManifest import GroupManifest;"
+		expected+="ws=Workspace(" + self.workspace.work_dir + ", " + self.workspace.input_file + ");"
+		expected+="vp=VitalParameters(" + self.assembly.vital_parameters.fp + ", " + self.assembly.vital_parameters.fn + ", " + self.assembly.vital_parameters.pval + ", " + self.assembly.vital_parameters.min_molecule_len + ", " + self.assembly.vital_parameters.min_molecule_sites + ");"
+		expected+="gm=GroupManifest(ws, Assembly(ws, vp));"
+		expected+="gm.makeGroupManifestFile()'"
+
+		actual=self.obj.writeCode()
+
+		GroupManifest.getStepDir=native_getStepDir
+		
+		self.assertEqual([expected], actual)
+
+	def test_getStepDir(self):
+		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
+		expected="manifest_for_" + self.dummy_getStepDir()
+
+		actual=self.obj.getStepDir()
+
+		del UnitTests.Helper.Mock.getStepDir
+		self.assertEqual(expected, actual)
+	def test_getOutputFile(self):
+		native_getStepDir=GroupManifest.getStepDir
+		GroupManifest.getStepDir=self.dummy_getStepDir.im_func
+		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
+		expected=self.dummy_getStepDir() + self.assembly.output_prefix + ".group_manifest"
+
+		actual=self.obj.getOutputFile()
+
+		GroupManifest.getStepDir=native_getStepDir
+		del UnitTests.Helper.Mock.getStepDir
+		self.assertEqual(expected, actual)
+
+	def test_getOutputFileExtension(self):
+		self.assertEqual("group_manifest", self.obj.getOutputFileExtension())
+	def test_autoGeneratePrereqs(self):
+		self.obj.autoGeneratePrereqs()
+	def test_getPrereqs(self):
+		self.assertEqual([self.assembly], self.obj.getPrereqs())
+
+	def test_getMem(self):
+		UnitTests.Helper.Mock.getSmallMemory=self.dummy_getResources.im_func
+		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		expected=self.dummy_getResources()
+
+		actual=self.obj.getMem()
+
+		del self.obj.workspace.resources
+		del UnitTests.Helper.Mock.getSmallMemory
+
+		self.assertEqual(expected, actual)
+	def test_getTime(self):
+		UnitTests.Helper.Mock.getSmallTime=self.dummy_getResources.im_func
+		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		expected=self.dummy_getResources()
+
+		actual=self.obj.getTime()
+
+		del self.obj.workspace.resources
+		del UnitTests.Helper.Mock.getSmallTime
+
+		self.assertEqual(expected, actual)
+	def test_getThreads(self):
+		self.assertEqual(1, self.obj.getThreads())

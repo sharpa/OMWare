@@ -39,6 +39,8 @@ def get_bioNanoAssembly_test_suites():
 	test_suites=[]
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tInput))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tAssembly))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tGroupManifest))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tRefineA))
 	return test_suites
 
 if __name__=="__main__":

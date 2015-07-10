@@ -1,0 +1,31 @@
+#!/usr/bin/python
+
+# The purpose of this script is to run a refinement of
+# an assembly, generating the assembly itself if needed
+
+from Operations.BioNano.Assemble.RefineA import RefineA
+from Operations.BioNano.Assemble.VitalParameters import VitalParameters
+from Utils.Workspace import Workspace
+from Utils.CD import CD
+from Operations.SBATCHCodeFormatter import CodeFormatter
+
+work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir" ### SET ME
+input_file="all_abridged.bnx" ### SET ME
+workspace=Workspace(work_dir, input_file)
+workspace.errorNotificationEmail='sharp.aaron.r@gmail.com' ### SET ME
+workspace.addBinary("bng_assembler", "/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/Assembler") ### SET ME
+workspace.addBinary("bng_ref_aligner", "/Users/sharpa/Dropbox/Stars/GossRaim_BNG/code/POMM_scratch_input/RefAligner") ### SET ME
+
+false_positives=1.5 ### SET ME
+false_negatives=.386 ### SET ME
+p_val_cutoff=1.11e-6 ### SET ME
+min_molecule_len=100 ### SET ME
+min_molecule_sites=10 ### SET ME
+
+vital_parameters=VitalParameters(false_positives, false_negatives, p_val_cutoff, min_molecule_len, min_molecule_sites)
+
+refineA=RefineA(workspace, vital_parameters)
+
+with CD(work_dir):
+	formatter=CodeFormatter()
+	formatter.runOneStep(refineA)

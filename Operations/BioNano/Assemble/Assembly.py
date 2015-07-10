@@ -81,7 +81,7 @@ class Assembly(Step):
 		param_values["-MinMaps"]= str(self.min_maps)
 		param_values["-MinContigLen"]= str(self.min_contig_len)
 		param_values["-EndTrim"]= str(self.end_trim)
-		param_values["-refine"]= str(0)
+		param_values["-refine"]="0"
 		param_values["-PVchim"]= " ".join([str(self.chimera_pval),str(self.chimera_num)])
 		param_values["-FastBulge"]= str(self.fast_bulge)
 		param_values["-FragilePreserve"]= str("1" if self.fragile_preserve else "0")
