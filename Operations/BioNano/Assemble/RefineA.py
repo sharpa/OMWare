@@ -14,6 +14,7 @@ from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
 from Operations.BioNano.Assemble.Assembly import Assembly
 from Operations.BioNano.Assemble.GroupManifest import GroupManifest
 from collections import OrderedDict
+from copy import copy
 
 class RefineA(Step):
 	def __init__(self, workspace, vital_parameters):
@@ -94,7 +95,7 @@ class RefineA(Step):
 		code+="  group_start=`echo $line | awk '{print $2}'`\n"
 		code+="  group_end=`echo $line | awk '{print $3}'`\n"
 		code+="    " + " ".join(param_list) + "\n"
-		code+="done < ../" + GroupManifest(self.workspace, self.assembly).getOutputFile()
+		code+="done < ../" + self.getPrereqs()[0].getOutputFile()
 
 		return [code]
 		
@@ -109,11 +110,11 @@ class RefineA(Step):
 
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
-		self.sort=Sort(self.workspace, self.vital_parameters)
+		self.sort=Sort(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
-		self.split=Split(self.workspace, self.vital_parameters)
-		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
-		self.assembly=Assembly(self.workspace, self.vital_parameters)
+		self.split=Split(self.workspace, copy(self.vital_parameters))
+		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
+		self.assembly=Assembly(self.workspace, copy(self.vital_parameters))
 	def getPrereqs(self):
 		return [GroupManifest(self.workspace, self.assembly)]
 

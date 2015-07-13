@@ -9,5 +9,13 @@
 class MoleculeStats:
 	def __init__(self, step_dir):
 		self.step_dir=step_dir
+	def __eq__(self, other):
+		if other is None:
+			return False
+		if self.__class__ != other.__class__:
+			return False
+		return self.step_dir==other.step_dir
+	def __ne__(self, other):
+		return not self == other
 	def getOutputFile(self):
 		return self.step_dir+"/molecule_stats.txt"

@@ -8,6 +8,7 @@
 import unittest
 import os
 from collections import OrderedDict
+from copy import copy
 import UnitTests.Helper
 from Operations.BioNano.file_bnx import BnxFile
 from Operations.BioNano.Assemble.RefineA import RefineA
@@ -27,6 +28,10 @@ class tAssembly(unittest.TestCase):
 
 	def dummy_autoGeneratePrereqs(self):
 		self.autoGeneratePrereqsCalled=True
+	def dummy_getResources(self):
+		return -1
+	def dummy_getOutputFile(self):
+		return "output_file"
 
 	def setUp(self):
 		Assembly.autoGeneratePrereqs=tAssembly.dummy_autoGeneratePrereqs.im_func
@@ -79,9 +84,37 @@ class tAssembly(unittest.TestCase):
 		self.assertEqual(expectedDefault, self.obj)
 		
 	def test_default_write_code(self):
-		expectedCode=""
+		self.workspace.binaries={"bng_assembler": "Assembler"}
+		native_getStepDir=Assembly.getStepDir
+		Assembly.getStepDir=self.dummy_getStepDir.im_func
+		native_getMem=Assembly.getMem
+		Assembly.getMem=self.dummy_getResources.im_func
+		native_getThreads=Assembly.getThreads
+		Assembly.getThreads=self.dummy_getResources.im_func
+		UnitTests.Helper.Mock.getListFile=self.dummy_getOutputFile.im_func
+		UnitTests.Helper.Mock.getOutputFile=self.dummy_getOutputFile.im_func
+		self.obj.split=UnitTests.Helper.Mock()
+		self.obj.pairwise_alignment=UnitTests.Helper.Mock()
+		self.obj.molecule_stats=UnitTests.Helper.Mock()
+		
+		expected=["cd " + self.workspace.work_dir + "\n" +
+			"mkdir " + self.dummy_getStepDir() + "\n" +
+			"cd " + self.dummy_getStepDir() + "\n" +
+			"pwd\n" +
+			"Assembler -if ../output_file -af ../output_file -XmapStatRead ../output_file -usecolor 1 -FP fp -FN fn -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -T pval -S 1 -MaxRelCoverage 100 200 30 -BulgeCoverage 20 -MaxCoverage 10 -MinCov 10 -MinAvCov 5 -MinMaps 5 -MinContigLen 0.0 -EndTrim 1 -refine 0 -PVchim 0.001 3 -FastBulge 1000 -FragilePreserve 0 -draftsize 1 -SideBranch 1 -contigs_format 1 -maxthreads -1 -maxmem 1 -minlen minlen -minsites minsites -minSNR 2 -o unrefined -AlignmentFilter 100 2.0 0.5 -force  -SideChain  -stdout  -stderr \n" +
+			"result=`tail -n 1 ../" + self.dummy_getStepDir() + "/" + self.obj.output_prefix + ".stdout`\n" +
+			"if [[ \"$result\" != \"END of output\" ]]; then exit 1; else touch Complete.status; fi\n"]
 
-		self.assertEqual(expectedCode(self.obj.writeCode()))
+		actual=self.obj.writeCode()
+
+		del self.workspace.binaries
+		Assembly.getStepDir=native_getStepDir
+		Assembly.getMem=native_getMem
+		Assembly.getThreads=native_getThreads
+		del UnitTests.Helper.Mock.getListFile
+		del UnitTests.Helper.Mock.getOutputFile
+
+		self.assertEqual(expected, actual)
 
 	def dummy_inputDotGetStepDir(self):
 		return "input_file"
@@ -107,7 +140,24 @@ class tAssembly(unittest.TestCase):
 		self.assertEqual("contigs",self.obj.getOutputFileExtension())
 
 	def test_auto_generate_prereqs(self):
-		self.assertEqual(1,2)
+		Assembly.autoGeneratePrereqs=self.native_autoGeneratePrereqs
+		native_getTime_split=Split.getTime
+		Split.getTime=self.dummy_getLargeMemory.im_func
+		native_getTime_pairwise=PairwiseAlignment.getTime
+		PairwiseAlignment.getTime=self.dummy_getLargeMemory.im_func
+		self.obj.vital_parameters.blocks=1
+		self.vital_parameters.blocks=1
+
+		expected_sort=Sort(self.workspace, copy(self.vital_parameters))
+		expected=[Input(self.workspace), expected_sort, expected_sort.getMoleculeStats(), Split(self.workspace, copy(self.vital_parameters)), PairwiseAlignment(self.workspace, copy(self.vital_parameters))]
+
+		self.obj.autoGeneratePrereqs()
+
+		Split.getTime=native_getTime_split
+		PairwiseAlignment.getTime=native_getTime_pairwise
+		del self.obj.vital_parameters.blocks
+
+		self.assertEqual(expected, [self.obj.inpt, self.obj.sort, self.obj.molecule_stats, self.obj.split, self.obj.pairwise_alignment])
 
 	def test_get_prereqs(self):
 		pairwise=UnitTests.Helper.Mock()
@@ -410,7 +460,7 @@ class tRefineA(unittest.TestCase):
 		native_autoGeneratePrereqs=RefineA.autoGeneratePrereqs
 		RefineA.autoGeneratePrereqs=self.dummy_autoGeneratePrereqs.im_func
 
-		self.obj=RefineA(self.workspace, self.vital_parameters)
+		self.obj=RefineA(self.workspace, copy(self.vital_parameters))
 		RefineA.autoGeneratePrereqs=native_autoGeneratePrereqs
 	def dummy_getResources(self):
 		return -1
@@ -420,6 +470,10 @@ class tRefineA(unittest.TestCase):
 		return "step_dir"
 	def dummy_getOutputFileExtension(self):
 		return "ext"
+	def dummy_getPrereqs(self):
+		return [UnitTests.Helper.Mock()]
+	def dummy_getOutputFile(self):
+		return "output_file.ext"
 	def test_constructor_default(self):
 		expected=UnitTests.Helper.Mock(
 			workspace=self.workspace,
@@ -448,7 +502,42 @@ class tRefineA(unittest.TestCase):
 		self.assertEqual(expected, self.obj)
 
 	def test_writeCode(self):
-		self.assertEqual(1,2)
+		self.workspace.binaries={"bng_assembler": "Assembler"}
+		native_getStepDir=RefineA.getStepDir
+		RefineA.getStepDir=self.dummy_getStepDir.im_func
+		native_getThreads=RefineA.getThreads
+		RefineA.getThreads=self.dummy_getResources.im_func
+		native_getPrereqs=RefineA.getPrereqs
+		RefineA.getPrereqs=self.dummy_getPrereqs.im_func
+		UnitTests.Helper.Mock.getOutputFile=self.dummy_getOutputFile.im_func
+		self.obj.sort=UnitTests.Helper.Mock()
+		self.obj.assembly=UnitTests.Helper.Mock()
+		self.obj.molecule_stats=UnitTests.Helper.Mock()
+
+		expected=["cd " + self.workspace.work_dir + "\n"
+ +
+			"mkdir " + self.dummy_getStepDir() + "\n" +
+			"cd " + self.dummy_getStepDir() + "\n" +
+			"pwd\n" +
+			"let contig_num=0\n" +
+			"while read line\n" +
+			"do\n" +
+			"  if [[ $line == \"#\"* ]]; then continue; fi\n" +
+			"  let contig_num+=1\n" +
+			"  group_start=`echo $line | awk '{print $2}'`\n" +
+			"  group_end=`echo $line | awk '{print $3}'`\n" +
+			"    Assembler -i ../output_file.ext -contigs ../output_file.ext $group_start $group_end -maxthreads -1 -T pval -usecolor 1 -extend 1 -refine 2 -MultiMode  -EndTrim 0.99 -LRBias 100.0 -Mprobeval  -deltaX 4 -deltaY 6 -outlier 1e-05 -endoutlier 1e-05 -contigs_format 1 -force  -FP fp -FN fn -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -output_prefix refineeA -stdout  -stderr  -XmapStatRead ../output_file.ext\n" +
+			"done < ../" + self.dummy_getPrereqs()[0].getOutputFile()]
+
+		actual=self.obj.writeCode()
+		
+		del self.workspace.binaries
+		RefineA.getStepDir=native_getStepDir
+		RefineA.getThreads=native_getThreads
+		RefineA.getPrereqs=native_getPrereqs
+		del UnitTests.Helper.Mock.getOutputFile
+		
+		self.assertEqual(expected, actual)
 	def test_getStepDir(self):
 		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
 		self.obj.inpt=UnitTests.Helper.Mock()
@@ -485,14 +574,15 @@ class tRefineA(unittest.TestCase):
 
 		self.vital_parameters.blocks=1
 		self.obj.vital_parameters.blocks=1
-		sort=Sort(self.workspace, self.vital_parameters)
-		expected=RefineA(self.workspace, self.vital_parameters)
-		expected.inpt=Input(self.workspace),
-		expected.sort=sort,
-		expected.molecule_stats=sort.getMoleculeStats(),
-		expected.split=Split(self.workspace, self.vital_parameters),
-		expected.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters),
-		expected.assembly=Assembly(self.workspace, self.vital_parameters)
+		sort=Sort(self.workspace, copy(self.vital_parameters))
+		expected=RefineA(self.workspace, copy(self.vital_parameters))
+		expected.inpt=Input(self.workspace)
+		expected.sort=sort
+		expected.molecule_stats=sort.getMoleculeStats()
+		expected.split=Split(self.workspace, copy(self.vital_parameters))
+		expected.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
+		expected.assembly=Assembly(self.workspace, copy(self.vital_parameters))
+		expected.autoGeneratePrereqsCalled=True
 
 		self.obj.autoGeneratePrereqs()		
 
@@ -500,7 +590,7 @@ class tRefineA(unittest.TestCase):
 		PairwiseAlignment.getTime=native_getTime_pairwise
 		del self.vital_parameters.blocks
 
-		self.assertEqual(expected.__dict__, self.obj.__dict__)
+		self.assertEqual(expected, self.obj)
 	def test_getPrereqs(self):
 		assembly=UnitTests.Helper.Mock()
 		self.obj.assembly=assembly
@@ -573,7 +663,7 @@ class tGroupManifest(unittest.TestCase):
 		expected+="from Operations.BioNano.Assemble.VitalParameters import VitalParameters;"
 		expected+="from Operations.BioNano.Assemble.Assembly import Assembly;"
 		expected+="from Operations.BioNano.Assemble.GroupManifest import GroupManifest;"
-		expected+="ws=Workspace(" + self.workspace.work_dir + ", " + self.workspace.input_file + ");"
+		expected+="ws=Workspace(\"" + self.workspace.work_dir + "\", \"" + self.workspace.input_file + "\");"
 		expected+="vp=VitalParameters(" + self.assembly.vital_parameters.fp + ", " + self.assembly.vital_parameters.fn + ", " + self.assembly.vital_parameters.pval + ", " + self.assembly.vital_parameters.min_molecule_len + ", " + self.assembly.vital_parameters.min_molecule_sites + ");"
 		expected+="gm=GroupManifest(ws, Assembly(ws, vp));"
 		expected+="gm.makeGroupManifestFile()'"

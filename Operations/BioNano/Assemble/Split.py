@@ -11,6 +11,7 @@ from Operations.BioNano.Assemble.Input import Input
 from Operations.BioNano.Assemble.Sort import Sort
 import math
 from collections import OrderedDict
+from copy import copy
 
 class Split(Step):
 	def __init__(self, workspace, vital_parameters):
@@ -98,7 +99,7 @@ class Split(Step):
 
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
-		self.sort=Sort(self.workspace, self.vital_parameters)
+		self.sort=Sort(self.workspace, copy(self.vital_parameters))
 
 	def getPrereqs(self):
 		return [self.sort]

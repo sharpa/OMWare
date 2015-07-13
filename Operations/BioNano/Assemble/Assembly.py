@@ -12,6 +12,7 @@ from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
 from Operations.BioNano.Assemble.Summarize import Summarize
 from collections import OrderedDict
+from copy import copy
 
 class Assembly(Step):
 	def __init__(self, workspace, vital_parameters):
@@ -129,10 +130,10 @@ class Assembly(Step):
 
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
-		self.sort=Sort(self.workspace, self.vital_parameters)
+		self.sort=Sort(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
-		self.split=Split(self.workspace, self.vital_parameters)
-		self.pairwise_alignment=PairwiseAlignment(self.workspace, self.vital_parameters)
+		self.split=Split(self.workspace, copy(self.vital_parameters))
+		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
 
 	def getPrereqs(self):
 		return [Summarize(self.workspace, self.pairwise_alignment)]

@@ -11,6 +11,7 @@ from Operations.BioNano.Assemble.Sort import Sort
 from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.Summarize import Summarize
 from collections import OrderedDict
+from copy import copy
 from os import path
 
 class PairwiseAlignment(Step):
@@ -160,8 +161,8 @@ class PairwiseAlignment(Step):
 
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
-		self.sort=Sort(self.workspace, self.vital_parameters)
-		self.split=Split(self.workspace, self.vital_parameters)
+		self.sort=Sort(self.workspace, copy(self.vital_parameters))
+		self.split=Split(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
 
 	def getPrereqs(self):
