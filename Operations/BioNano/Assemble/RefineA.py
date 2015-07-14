@@ -37,7 +37,7 @@ class RefineA(Step):
 		self.end_outlier_prior_probability=0.00001
 		self.contigs_format=1
 		self.overwrite_output=True
-		self.output_prefix="refineeA"
+		self.output_prefix="refineA"
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
@@ -60,7 +60,7 @@ class RefineA(Step):
 		if self.use_multi_mode:
 			param_values["-MultiMode"]=""
 		param_values["-EndTrim"]=str(self.consensus_end_coverage)
-		param_values["-LRBias"]=str(self.bias_for_low_likelihood_ratio)
+		param_values["-LRbias"]=str(self.bias_for_low_likelihood_ratio)
 		param_values["-Mprobeval"]=str(self.refinement_length_accuracy)
 		param_values["-deltaX"]=str(self.largest_query_map_interval)
 		param_values["-deltaY"]=str(self.largest_reference_map_interval)
@@ -75,7 +75,7 @@ class RefineA(Step):
 		param_values["-sf"]=str(self.sf)
 		param_values["-sr"]=str(self.sr)
 		param_values["-res"]=str(self.res)
-		param_values["-output_prefix"]=self.output_prefix
+		param_values["-o"]=self.output_prefix
 		if self.send_output_to_file:
 			param_values["-stdout"]=""
 		if self.send_errors_to_file:
@@ -92,8 +92,8 @@ class RefineA(Step):
 		code+="do\n"
 		code+="  if [[ $line == \"#\"* ]]; then continue; fi\n"
 		code+="  let contig_num+=1\n"
-		code+="  group_start=`echo $line | awk '{print $2}'`\n"
-		code+="  group_end=`echo $line | awk '{print $3}'`\n"
+		code+="  group_start=`echo $line | awk '{print $1}'`\n"
+		code+="  group_end=`echo $line | awk '{print $NF}'`\n"
 		code+="    " + " ".join(param_list) + "\n"
 		code+="done < ../" + self.getPrereqs()[0].getOutputFile()
 

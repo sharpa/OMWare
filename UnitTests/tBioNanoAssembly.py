@@ -494,7 +494,7 @@ class tRefineA(unittest.TestCase):
 			end_outlier_prior_probability=0.00001,
 			contigs_format=1,
 			overwrite_output=True,
-			output_prefix="refineeA",
+			output_prefix="refineA",
 			send_output_to_file=True,
 			send_errors_to_file=True,
 			autoGeneratePrereqsCalled=True)
@@ -524,9 +524,9 @@ class tRefineA(unittest.TestCase):
 			"do\n" +
 			"  if [[ $line == \"#\"* ]]; then continue; fi\n" +
 			"  let contig_num+=1\n" +
-			"  group_start=`echo $line | awk '{print $2}'`\n" +
-			"  group_end=`echo $line | awk '{print $3}'`\n" +
-			"    Assembler -i ../output_file.ext -contigs ../output_file.ext $group_start $group_end -maxthreads -1 -T pval -usecolor 1 -extend 1 -refine 2 -MultiMode  -EndTrim 0.99 -LRBias 100.0 -Mprobeval  -deltaX 4 -deltaY 6 -outlier 1e-05 -endoutlier 1e-05 -contigs_format 1 -force  -FP fp -FN fn -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -output_prefix refineeA -stdout  -stderr  -XmapStatRead ../output_file.ext\n" +
+			"  group_start=`echo $line | awk '{print $1}'`\n" +
+			"  group_end=`echo $line | awk '{print $NF}'`\n" +
+			"    Assembler -i ../output_file.ext -contigs ../output_file.ext $group_start $group_end -maxthreads -1 -T pval -usecolor 1 -extend 1 -refine 2 -MultiMode  -EndTrim 0.99 -LRbias 100.0 -Mprobeval  -deltaX 4 -deltaY 6 -outlier 1e-05 -endoutlier 1e-05 -contigs_format 1 -force  -FP fp -FN fn -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -o refineA -stdout  -stderr  -XmapStatRead ../output_file.ext\n" +
 			"done < ../" + self.dummy_getPrereqs()[0].getOutputFile()]
 
 		actual=self.obj.writeCode()
@@ -642,6 +642,15 @@ class tGroupManifest(unittest.TestCase):
 		return -1
 	def dummy_getStepDir(self):
 		return "step_dir"
+	def dummy_getOutputFile(self):
+		return "output_file.ext"
+	def dummy_makeWeightStatsFile(self):
+		self.makeWeightStatsFileCalled=True
+		with open("weight_stats.txt", "w"):
+			pass
+	def dummy__makeGroupManifestFile(self, dummy1, dummy2):
+		self._makeGroupManifestFileCalled=True
+
 
 	def test_constructor_default(self):
 		expected=UnitTests.Helper.Mock(
@@ -674,6 +683,92 @@ class tGroupManifest(unittest.TestCase):
 		
 		self.assertEqual([expected], actual)
 
+	def test_makeGroupManifestFile_weightStatsDoesNotExist(self):
+		self.obj.makeWeightStatsFileCalled=False
+		native_getOutputFile=GroupManifest.getOutputFile
+		GroupManifest.getOutputFile=self.dummy_getOutputFile.im_func
+		native_makeWeightStatsFile=GroupManifest.makeWeightStatsFile
+		GroupManifest.makeWeightStatsFile=self.dummy_makeWeightStatsFile.im_func
+		native__makeGroupManifestFile=GroupManifest._makeGroupManifestFile
+		GroupManifest._makeGroupManifestFile=self.dummy__makeGroupManifestFile.im_func
+
+		expected_makeWeightStatsFileCalled=True
+		expected__makeGroupManifestFileCalled=True
+		expected_weightStatsFileExists=True
+		expected_outputFileExists=True
+		expected_completeStatusExists=True
+		expected=[expected_makeWeightStatsFileCalled, expected__makeGroupManifestFileCalled, expected_weightStatsFileExists, expected_outputFileExists, expected_completeStatusExists]
+
+		self.obj.makeGroupManifestFile()
+
+		GroupManifest.getOutputFile=native_getOutputFile
+		GroupManifest.makeWeightStatsFile=native_makeWeightStatsFile
+		GroupManifest._makeGroupManifestFile=native__makeGroupManifestFile
+
+		actual_weightStatsFileExists=True
+		actual_outputFileExists=True
+		actual_completeStatusExists=True
+
+		try:
+			os.remove("weight_stats.txt")
+		except OSError:
+			actual_weightStatsFileExists=False
+		try:
+			os.remove("../" + self.dummy_getOutputFile())
+		except OSError:
+			acutal_outputFileExists=False
+		try: 
+			os.remove("Complete.status")
+		except OSError:
+			actual_completeStatusExists=False
+		actual=[self.obj.makeWeightStatsFileCalled, self.obj._makeGroupManifestFileCalled, actual_weightStatsFileExists, actual_outputFileExists, actual_completeStatusExists]
+
+		self.assertEqual(expected, actual)
+
+	def test_makeGroupManifestFile_weightStatsDoesExist(self):
+		self.obj.makeWeightStatsFileCalled=False
+		native_getOutputFile=GroupManifest.getOutputFile
+		GroupManifest.getOutputFile=self.dummy_getOutputFile.im_func
+		native_makeWeightStatsFile=GroupManifest.makeWeightStatsFile
+		GroupManifest.makeWeightStatsFile=self.dummy_makeWeightStatsFile.im_func
+		native__makeGroupManifestFile=GroupManifest._makeGroupManifestFile
+		GroupManifest._makeGroupManifestFile=self.dummy__makeGroupManifestFile.im_func
+
+		expected_makeWeightStatsFileCalled=False
+		expected__makeGroupManifestFileCalled=True
+		expected_outputFileExists=True
+		expected_completeStatusExists=True
+		expected=[expected_makeWeightStatsFileCalled, expected__makeGroupManifestFileCalled, expected_outputFileExists, expected_completeStatusExists]
+
+		with open("weight_stats.txt", "w"):
+			self.obj.makeGroupManifestFile()
+
+		GroupManifest.getOutputFile=native_getOutputFile
+		GroupManifest.makeWeightStatsFile=native_makeWeightStatsFile
+		GroupManifest._makeGroupManifestFile=native__makeGroupManifestFile
+
+		actual_outputFileExists=True
+		actual_completeStatusExists=True
+
+		os.remove("weight_stats.txt")
+		try:
+			os.remove("../" + self.dummy_getOutputFile())
+		except OSError:
+			acutal_outputFileExists=False
+		try: 
+			os.remove("Complete.status")
+		except OSError:
+			actual_completeStatusExists=False
+		actual=[self.obj.makeWeightStatsFileCalled, self.obj._makeGroupManifestFileCalled, actual_outputFileExists, actual_completeStatusExists]
+
+		self.assertEqual(expected, actual)
+
+	def test__makeGroupManifestFile(self):
+		self.assertEqual(1,2)
+
+	def test_makeWeightStatsFile(self):
+		self.assertEqual(1,2)
+
 	def test_getStepDir(self):
 		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
 		expected="manifest_for_" + self.dummy_getStepDir()
@@ -686,7 +781,7 @@ class tGroupManifest(unittest.TestCase):
 		native_getStepDir=GroupManifest.getStepDir
 		GroupManifest.getStepDir=self.dummy_getStepDir.im_func
 		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
-		expected=self.dummy_getStepDir() + self.assembly.output_prefix + ".group_manifest"
+		expected=self.dummy_getStepDir() + "/" + self.assembly.output_prefix + ".group_manifest"
 
 		actual=self.obj.getOutputFile()
 

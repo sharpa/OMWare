@@ -5,6 +5,8 @@
 
 from Operations.BioNano.Assemble.RefineA import RefineA
 from Operations.BioNano.Assemble.VitalParameters import VitalParameters
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Sort import Sort
 from Utils.Workspace import Workspace
 from Utils.CD import CD
 from Operations.SBATCHCodeFormatter import CodeFormatter
@@ -25,6 +27,11 @@ min_molecule_sites=10 ### SET ME
 vital_parameters=VitalParameters(false_positives, false_negatives, p_val_cutoff, min_molecule_len, min_molecule_sites)
 
 refineA=RefineA(workspace, vital_parameters)
+
+compatible_vital_parameters=VitalParameters(false_positives, false_negatives, p_val_cutoff/100, min_molecule_len, 6)
+refineA.assembly.pairwise_alignment=PairwiseAlignment(workspace, compatible_vital_parameters)
+refineA.sort=Sort(workspace, compatible_vital_parameters)
+refineA.molecule_stats=refineA.sort.getMoleculeStats()
 
 with CD(work_dir):
 	formatter=CodeFormatter()
