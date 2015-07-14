@@ -9,7 +9,7 @@ import unittest
 import os
 from collections import OrderedDict
 from copy import copy
-import UnitTests.Helper
+from UnitTests.Helper import Mock
 from Operations.BioNano.file_bnx import BnxFile
 from Operations.BioNano.Assemble.RefineA import RefineA
 from Operations.BioNano.Assemble.Assembly import Assembly
@@ -22,8 +22,8 @@ from Operations.BioNano.Assemble.MoleculeStats import MoleculeStats
 from Operations.BioNano.Assemble.Input import Input
 
 class tAssembly(unittest.TestCase):
-	workspace=UnitTests.Helper.Mock(input_file="input_file", work_dir="work_dir")
-	vital_parameters=UnitTests.Helper.Mock(pval="pval", fp="fp", fn="fn", min_molecule_len="minlen", min_molecule_sites="minsites")
+	workspace=Mock(input_file="input_file", work_dir="work_dir")
+	vital_parameters=Mock(pval=1e-5, fp=1.5, fn=.150, min_molecule_len=100, min_molecule_sites=6)
 	native_autoGeneratePrereqs=Assembly.autoGeneratePrereqs
 
 	def dummy_autoGeneratePrereqs(self):
@@ -91,17 +91,17 @@ class tAssembly(unittest.TestCase):
 		Assembly.getMem=self.dummy_getResources.im_func
 		native_getThreads=Assembly.getThreads
 		Assembly.getThreads=self.dummy_getResources.im_func
-		UnitTests.Helper.Mock.getListFile=self.dummy_getOutputFile.im_func
-		UnitTests.Helper.Mock.getOutputFile=self.dummy_getOutputFile.im_func
-		self.obj.split=UnitTests.Helper.Mock()
-		self.obj.pairwise_alignment=UnitTests.Helper.Mock()
-		self.obj.molecule_stats=UnitTests.Helper.Mock()
+		Mock.getListFile=self.dummy_getOutputFile.im_func
+		Mock.getOutputFile=self.dummy_getOutputFile.im_func
+		self.obj.split=Mock()
+		self.obj.pairwise_alignment=Mock()
+		self.obj.molecule_stats=Mock()
 		
 		expected=["cd " + self.workspace.work_dir + "\n" +
 			"mkdir " + self.dummy_getStepDir() + "\n" +
 			"cd " + self.dummy_getStepDir() + "\n" +
 			"pwd\n" +
-			"Assembler -if ../output_file -af ../output_file -XmapStatRead ../output_file -usecolor 1 -FP fp -FN fn -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -T pval -S 1 -MaxRelCoverage 100 200 30 -BulgeCoverage 20 -MaxCoverage 10 -MinCov 10 -MinAvCov 5 -MinMaps 5 -MinContigLen 0.0 -EndTrim 1 -refine 0 -PVchim 0.001 3 -FastBulge 1000 -FragilePreserve 0 -draftsize 1 -SideBranch 1 -contigs_format 1 -maxthreads -1 -maxmem 1 -minlen minlen -minsites minsites -minSNR 2 -o unrefined -AlignmentFilter 100 2.0 0.5 -force  -SideChain  -stdout  -stderr \n" +
+			"Assembler -if ../" + self.dummy_getOutputFile() + " -af ../" + self.dummy_getOutputFile() + " -XmapStatRead ../" + self.dummy_getOutputFile() + " -usecolor 1 -FP " + str(self.vital_parameters.fp) + " -FN " + str(self.vital_parameters.fn) + " -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -T " + str(self.vital_parameters.pval) + " -S 1 -MaxRelCoverage 100 200 30 -BulgeCoverage 20 -MaxCoverage 10 -MinCov 10 -MinAvCov 5 -MinMaps 5 -MinContigLen 0.0 -EndTrim 1 -refine 0 -PVchim 0.001 3 -FastBulge 1000 -FragilePreserve 0 -draftsize 1 -SideBranch 1 -contigs_format 1 -maxthreads " + str(self.dummy_getResources()) + " -maxmem 1 -minlen " + str(self.vital_parameters.min_molecule_len) + " -minsites " + str(self.vital_parameters.min_molecule_sites) + " -minSNR 2 -o unrefined -AlignmentFilter 100 2.0 0.5 -force  -SideChain  -stdout  -stderr \n" +
 			"result=`tail -n 1 ../" + self.dummy_getStepDir() + "/" + self.obj.output_prefix + ".stdout`\n" +
 			"if [[ \"$result\" != \"END of output\" ]]; then exit 1; else touch Complete.status; fi\n"]
 
@@ -111,8 +111,8 @@ class tAssembly(unittest.TestCase):
 		Assembly.getStepDir=native_getStepDir
 		Assembly.getMem=native_getMem
 		Assembly.getThreads=native_getThreads
-		del UnitTests.Helper.Mock.getListFile
-		del UnitTests.Helper.Mock.getOutputFile
+		del Mock.getListFile
+		del Mock.getOutputFile
 
 		self.assertEqual(expected, actual)
 
@@ -120,10 +120,10 @@ class tAssembly(unittest.TestCase):
 		return "input_file"
 
 	def test_default_get_step_dir(self):
-		UnitTests.Helper.Mock.getStepDir=tAssembly.dummy_inputDotGetStepDir.im_func
-		self.obj.inpt=UnitTests.Helper.Mock()
-		self.assertEqual("assembly_input_file_fpfp_fnfn_pvalpval_minlenminlen_minsitesminsites",self.obj.getStepDir())
-		del UnitTests.Helper.Mock.getStepDir
+		Mock.getStepDir=tAssembly.dummy_inputDotGetStepDir.im_func
+		self.obj.inpt=Mock()
+		self.assertEqual("assembly_input_file_fp" + str(self.vital_parameters.fp) + "_fn" + str(self.vital_parameters.fn) + "_pval" + str(self.vital_parameters.pval) + "_minlen" + str(self.vital_parameters.min_molecule_len) + "_minsites" + str(self.vital_parameters.min_molecule_sites),self.obj.getStepDir())
+		del Mock.getStepDir
 
 	def dummy_getStepDir(self):
 		return "dummy"
@@ -160,7 +160,7 @@ class tAssembly(unittest.TestCase):
 		self.assertEqual(expected, [self.obj.inpt, self.obj.sort, self.obj.molecule_stats, self.obj.split, self.obj.pairwise_alignment])
 
 	def test_get_prereqs(self):
-		pairwise=UnitTests.Helper.Mock()
+		pairwise=Mock()
 		self.obj.pairwise_alignment=pairwise
 
 		self.assertEqual([Summarize(self.workspace, pairwise)],self.obj.getPrereqs())
@@ -168,30 +168,30 @@ class tAssembly(unittest.TestCase):
 	def dummy_getLargeMemory(self):
 		return -1
 	def test_get_mem(self):
-		UnitTests.Helper.Mock.getLargeMemory=tAssembly.dummy_getLargeMemory.im_func
-		self.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getLargeMemory=tAssembly.dummy_getLargeMemory.im_func
+		self.workspace.resources=Mock()
 
 		self.assertEqual(self.dummy_getLargeMemory(), self.obj.getMem())
 
-		del UnitTests.Helper.Mock.getLargeMemory
+		del Mock.getLargeMemory
 		del self.workspace.resources
 
 	def dummy_getMediumTime(self):
 		return -1
 	def test_get_time(self):
-		UnitTests.Helper.Mock.getMediumTime=tAssembly.dummy_getMediumTime.im_func
-		self.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getMediumTime=tAssembly.dummy_getMediumTime.im_func
+		self.workspace.resources=Mock()
 
 		self.assertEqual(self.dummy_getMediumTime(), self.obj.getTime())
 
-		del UnitTests.Helper.Mock.getMediumTime
+		del Mock.getMediumTime
 		del self.workspace.resources
 
 	def test_get_threads(self):
 		self.assertEqual(1, self.obj.getThreads())
 
 class tInput(unittest.TestCase):
-	workspace=UnitTests.Helper.Mock(work_dir="work_dir", input_file="input_file")
+	workspace=Mock(work_dir="work_dir", input_file="input_file")
 	def setUp(self):
 		self.obj=Input(self.workspace)
 	def test_init_default(self):
@@ -319,7 +319,7 @@ class tInput(unittest.TestCase):
 		self.assertEqual(expected, actual)
 
 	def dummy_createQualityObject(self):
-		self.quality=UnitTests.Helper.Mock(createCalled=True, count=1, quantity=2, labels=3, density=4, average=5)
+		self.quality=Mock(createCalled=True, count=1, quantity=2, labels=3, density=4, average=5)
 
 	def test_loadQuality_count_noneQuantity(self):
 		native_createQualityObject=Input.createQualityObject
@@ -336,7 +336,7 @@ class tInput(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 	def test_loadQuality_count_someQuantity(self):
-		quality=UnitTests.Helper.Mock(count=1)
+		quality=Mock(count=1)
 		self.obj.quality=quality
 		expected=[quality, quality.count]
 
@@ -359,7 +359,7 @@ class tInput(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 	def test_loadQuality_quantity_someQuality(self):
-		quality=UnitTests.Helper.Mock(quantity=1)
+		quality=Mock(quantity=1)
 		self.obj.quality=quality
 		expected=[quality, quality.quantity]
 
@@ -382,7 +382,7 @@ class tInput(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 	def test_loadQuality_labels_someQuality(self):
-		quality=UnitTests.Helper.Mock(labels=1)
+		quality=Mock(labels=1)
 		self.obj.quality=quality
 		expected=[quality, quality.labels]
 
@@ -405,12 +405,12 @@ class tInput(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 	def test_loadQuality_density_qualityWithoutDensity(self):
-		self.obj.quality=UnitTests.Helper.Mock(labels=2, quantity=1.0)
+		self.obj.quality=Mock(labels=2, quantity=1.0)
 		expected = 2 / 1.0
 
 		self.assertEqual(expected, self.obj.loadQuality_density())
 	def test_loadQuality_density_qualityWithDensity(self):
-		self.obj.quality=UnitTests.Helper.Mock(labels=2, quantity=1.0, density=10)
+		self.obj.quality=Mock(labels=2, quantity=1.0, density=10)
 		expected=10
 
 		self.assertEqual(expected, self.obj.loadQuality_density())
@@ -430,12 +430,12 @@ class tInput(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 	def test_loadQuality_averageLength_qualityWithoutDensity(self):
-		self.obj.quality=UnitTests.Helper.Mock(count=2, quantity=4.0)
+		self.obj.quality=Mock(count=2, quantity=4.0)
 		expected = 4.0 / 2
 
 		self.assertEqual(expected, self.obj.loadQuality_averageLength())
 	def test_loadQuality_averageLength_qualityWithDensity(self):
-		self.obj.quality=UnitTests.Helper.Mock(count=2, quantity=4.0, average=10)
+		self.obj.quality=Mock(count=2, quantity=4.0, average=10)
 		expected=10
 
 		self.assertEqual(expected, self.obj.loadQuality_averageLength())
@@ -449,13 +449,13 @@ class tInput(unittest.TestCase):
 
 class dummy_BnxFile(object):
 	def parse(self, formt):
-		return [ UnitTests.Helper.Mock(length=100.0, num_labels=13),
-			UnitTests.Helper.Mock(length=200.0, num_labels=26),
-			UnitTests.Helper.Mock(length=300.0, num_labels=39) ]
+		return [ Mock(length=100.0, num_labels=13),
+			Mock(length=200.0, num_labels=26),
+			Mock(length=300.0, num_labels=39) ]
 
 class tRefineA(unittest.TestCase):
-	workspace=UnitTests.Helper.Mock(work_dir="work_dir", input_file="input_file")
-	vital_parameters=UnitTests.Helper.Mock(fp="fp", fn="fn", pval="pval", min_molecule_len="minlen", min_molecule_sites="minsites")
+	workspace=Mock(work_dir="work_dir", input_file="input_file")
+	vital_parameters=Mock(fp=1.5, fn=.150, pval=1e-5, min_molecule_len=100, min_molecule_sites=6)
 	def setUp(self):
 		native_autoGeneratePrereqs=RefineA.autoGeneratePrereqs
 		RefineA.autoGeneratePrereqs=self.dummy_autoGeneratePrereqs.im_func
@@ -471,11 +471,11 @@ class tRefineA(unittest.TestCase):
 	def dummy_getOutputFileExtension(self):
 		return "ext"
 	def dummy_getPrereqs(self):
-		return [UnitTests.Helper.Mock()]
+		return [Mock()]
 	def dummy_getOutputFile(self):
 		return "output_file.ext"
 	def test_constructor_default(self):
-		expected=UnitTests.Helper.Mock(
+		expected=Mock(
 			workspace=self.workspace,
 			vital_parameters=self.vital_parameters,
 			quality=None,
@@ -509,10 +509,10 @@ class tRefineA(unittest.TestCase):
 		RefineA.getThreads=self.dummy_getResources.im_func
 		native_getPrereqs=RefineA.getPrereqs
 		RefineA.getPrereqs=self.dummy_getPrereqs.im_func
-		UnitTests.Helper.Mock.getOutputFile=self.dummy_getOutputFile.im_func
-		self.obj.sort=UnitTests.Helper.Mock()
-		self.obj.assembly=UnitTests.Helper.Mock()
-		self.obj.molecule_stats=UnitTests.Helper.Mock()
+		Mock.getOutputFile=self.dummy_getOutputFile.im_func
+		self.obj.sort=Mock()
+		self.obj.assembly=Mock()
+		self.obj.molecule_stats=Mock()
 
 		expected=["cd " + self.workspace.work_dir + "\n"
  +
@@ -526,7 +526,7 @@ class tRefineA(unittest.TestCase):
 			"  let contig_num+=1\n" +
 			"  group_start=`echo $line | awk '{print $1}'`\n" +
 			"  group_end=`echo $line | awk '{print $NF}'`\n" +
-			"    Assembler -i ../output_file.ext -contigs ../output_file.ext $group_start $group_end -maxthreads -1 -T pval -usecolor 1 -extend 1 -refine 2 -MultiMode  -EndTrim 0.99 -LRbias 100.0 -Mprobeval  -deltaX 4 -deltaY 6 -outlier 1e-05 -endoutlier 1e-05 -contigs_format 1 -force  -FP fp -FN fn -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -o refineA -stdout  -stderr  -XmapStatRead ../output_file.ext\n" +
+			"    Assembler -i ../" + self.dummy_getOutputFile() + " -contigs ../" + self.dummy_getOutputFile() + " $group_start $group_end -maxthreads -1 -T " + str(self.vital_parameters.pval) + " -usecolor 1 -extend 1 -refine 2 -MultiMode  -EndTrim 0.99 -LRbias 100.0 -Mprobeval  -deltaX 4 -deltaY 6 -outlier 1e-05 -endoutlier 1e-05 -contigs_format 1 -force  -FP " + str(self.vital_parameters.fp) + " -FN " + str(self.vital_parameters.fn) + " -sd 0.2 -sf 0.2 -sr 0.03 -res 3.3 -o refineA -stdout  -stderr  -XmapStatRead ../" + self.dummy_getOutputFile() + "\n" +
 			"done < ../" + self.dummy_getPrereqs()[0].getOutputFile()]
 
 		actual=self.obj.writeCode()
@@ -535,18 +535,18 @@ class tRefineA(unittest.TestCase):
 		RefineA.getStepDir=native_getStepDir
 		RefineA.getThreads=native_getThreads
 		RefineA.getPrereqs=native_getPrereqs
-		del UnitTests.Helper.Mock.getOutputFile
+		del Mock.getOutputFile
 		
 		self.assertEqual(expected, actual)
 	def test_getStepDir(self):
-		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
-		self.obj.inpt=UnitTests.Helper.Mock()
-		expected="refineA_" + self.dummy_getStepDir() + "_fp" + self.vital_parameters.fp + "_fn" + self.vital_parameters.fn + "_pval" + self.vital_parameters.pval + "_minlen" + self.vital_parameters.min_molecule_len + "_minsites" + self.vital_parameters.min_molecule_sites
+		Mock.getStepDir=self.dummy_getStepDir.im_func
+		self.obj.inpt=Mock()
+		expected="refineA_" + self.dummy_getStepDir() + "_fp" + str(self.vital_parameters.fp) + "_fn" + str(self.vital_parameters.fn) + "_pval" + str(self.vital_parameters.pval) + "_minlen" + str(self.vital_parameters.min_molecule_len) + "_minsites" + str(self.vital_parameters.min_molecule_sites)
 
 		actual=self.obj.getStepDir()
 
 		del self.obj.inpt
-		del UnitTests.Helper.Mock.getStepDir
+		del Mock.getStepDir
 
 		self.assertEqual(expected, actual)
 	def test_getOutputFile(self):
@@ -592,7 +592,7 @@ class tRefineA(unittest.TestCase):
 
 		self.assertEqual(expected, self.obj)
 	def test_getPrereqs(self):
-		assembly=UnitTests.Helper.Mock()
+		assembly=Mock()
 		self.obj.assembly=assembly
 		expected=[GroupManifest(self.workspace, assembly)]
 
@@ -600,42 +600,42 @@ class tRefineA(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 	def test_getMem(self):
-		UnitTests.Helper.Mock.getMediumMemory=self.dummy_getResources.im_func
-		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getMediumMemory=self.dummy_getResources.im_func
+		self.obj.workspace.resources=Mock()
 		expected=self.dummy_getResources()
 
 		actual=self.obj.getMem()
 
-		del UnitTests.Helper.Mock.getMediumMemory
+		del Mock.getMediumMemory
 		del self.obj.workspace.resources
 
 		self.assertEqual(expected, actual)
 	def test_getTime(self):
-		UnitTests.Helper.Mock.getLargeTime=self.dummy_getResources.im_func
-		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getLargeTime=self.dummy_getResources.im_func
+		self.obj.workspace.resources=Mock()
 		expected=self.dummy_getResources()
 
 		actual=self.obj.getTime()
 
-		del UnitTests.Helper.Mock.getLargeTime
+		del Mock.getLargeTime
 		del self.obj.workspace.resources
 
 		self.assertEqual(expected, actual)
 	def test_getThreads(self):
-		UnitTests.Helper.Mock.getMediumThreads=self.dummy_getResources.im_func
-		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getMediumThreads=self.dummy_getResources.im_func
+		self.obj.workspace.resources=Mock()
 		expected=self.dummy_getResources()
 
 		actual=self.obj.getThreads()
 
-		del UnitTests.Helper.Mock.getMediumThreads
+		del Mock.getMediumThreads
 		del self.obj.workspace.resources
 
 		self.assertEqual(expected, actual)
 
 class tGroupManifest(unittest.TestCase):
-	workspace=UnitTests.Helper.Mock(work_dir="work_dir", input_file="input_file")
-	assembly=UnitTests.Helper.Mock(output_prefix="output_prefix", vital_parameters=UnitTests.Helper.Mock(fp="fp", fn="fn", pval="pval", min_molecule_len="minlen", min_molecule_sites="minsites"))
+	workspace=Mock(work_dir="work_dir", input_file="input_file")
+	assembly=Mock(output_prefix="output_prefix", vital_parameters=Mock(fp=1.5, fn=.150, pval=1e-5, min_molecule_len=100, min_molecule_sites=6))
 	def setUp(self):
 		self.obj=GroupManifest(self.workspace, self.assembly)
 	def dummy_getResources(self):
@@ -653,7 +653,7 @@ class tGroupManifest(unittest.TestCase):
 
 
 	def test_constructor_default(self):
-		expected=UnitTests.Helper.Mock(
+		expected=Mock(
 			workspace=self.workspace,
 			assembly=self.assembly,
 			quality=None)
@@ -673,7 +673,7 @@ class tGroupManifest(unittest.TestCase):
 		expected+="from Operations.BioNano.Assemble.Assembly import Assembly;"
 		expected+="from Operations.BioNano.Assemble.GroupManifest import GroupManifest;"
 		expected+="ws=Workspace(\"" + self.workspace.work_dir + "\", \"" + self.workspace.input_file + "\");"
-		expected+="vp=VitalParameters(" + self.assembly.vital_parameters.fp + ", " + self.assembly.vital_parameters.fn + ", " + self.assembly.vital_parameters.pval + ", " + self.assembly.vital_parameters.min_molecule_len + ", " + self.assembly.vital_parameters.min_molecule_sites + ");"
+		expected+="vp=VitalParameters(" + str(self.assembly.vital_parameters.fp) + ", " + str(self.assembly.vital_parameters.fn) + ", " + str(self.assembly.vital_parameters.pval) + ", " + str(self.assembly.vital_parameters.min_molecule_len) + ", " + str(self.assembly.vital_parameters.min_molecule_sites) + ");"
 		expected+="gm=GroupManifest(ws, Assembly(ws, vp));"
 		expected+="gm.makeGroupManifestFile()'"
 
@@ -770,23 +770,23 @@ class tGroupManifest(unittest.TestCase):
 		self.assertEqual(1,2)
 
 	def test_getStepDir(self):
-		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
+		Mock.getStepDir=self.dummy_getStepDir.im_func
 		expected="manifest_for_" + self.dummy_getStepDir()
 
 		actual=self.obj.getStepDir()
 
-		del UnitTests.Helper.Mock.getStepDir
+		del Mock.getStepDir
 		self.assertEqual(expected, actual)
 	def test_getOutputFile(self):
 		native_getStepDir=GroupManifest.getStepDir
 		GroupManifest.getStepDir=self.dummy_getStepDir.im_func
-		UnitTests.Helper.Mock.getStepDir=self.dummy_getStepDir.im_func
+		Mock.getStepDir=self.dummy_getStepDir.im_func
 		expected=self.dummy_getStepDir() + "/" + self.assembly.output_prefix + ".group_manifest"
 
 		actual=self.obj.getOutputFile()
 
 		GroupManifest.getStepDir=native_getStepDir
-		del UnitTests.Helper.Mock.getStepDir
+		del Mock.getStepDir
 		self.assertEqual(expected, actual)
 
 	def test_getOutputFileExtension(self):
@@ -797,25 +797,25 @@ class tGroupManifest(unittest.TestCase):
 		self.assertEqual([self.assembly], self.obj.getPrereqs())
 
 	def test_getMem(self):
-		UnitTests.Helper.Mock.getSmallMemory=self.dummy_getResources.im_func
-		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getSmallMemory=self.dummy_getResources.im_func
+		self.obj.workspace.resources=Mock()
 		expected=self.dummy_getResources()
 
 		actual=self.obj.getMem()
 
 		del self.obj.workspace.resources
-		del UnitTests.Helper.Mock.getSmallMemory
+		del Mock.getSmallMemory
 
 		self.assertEqual(expected, actual)
 	def test_getTime(self):
-		UnitTests.Helper.Mock.getSmallTime=self.dummy_getResources.im_func
-		self.obj.workspace.resources=UnitTests.Helper.Mock()
+		Mock.getSmallTime=self.dummy_getResources.im_func
+		self.obj.workspace.resources=Mock()
 		expected=self.dummy_getResources()
 
 		actual=self.obj.getTime()
 
 		del self.obj.workspace.resources
-		del UnitTests.Helper.Mock.getSmallTime
+		del Mock.getSmallTime
 
 		self.assertEqual(expected, actual)
 	def test_getThreads(self):

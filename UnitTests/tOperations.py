@@ -6,15 +6,15 @@
 # The purpose of this module is to provide unit tests for
 # classes that are directly in the Operations module (not submodules)
 import unittest
-import UnitTests.Helper
 import os
 import copy
+from UnitTests.Helper import Mock
 from Operations.Step import Step
 from Operations.Step import Quality
 
 class tStep(unittest.TestCase):
-	workspace=UnitTests.Helper.Mock(input_file="input_file", work_dir="work_dir")
-	vital_parameters=UnitTests.Helper.Mock(pval="pval", fp="fp", fn="fn", min_molecule_len="minlen", min_molecule_sites="minsites")
+	workspace=Mock(input_file="input_file", work_dir="work_dir")
+	vital_parameters=Mock(pval=1e-5, fp=1.5, fn=.150, min_molecule_len=100, min_molecule_sites=6)
 	native_autoGeneratePrereqs=Step.autoGeneratePrereqs
 
 	def dummy_autoGeneratePrereqs(self):
@@ -77,7 +77,7 @@ class tStep(unittest.TestCase):
 		self.assertEqual([False, True, False], [before_change, after_change_one, after_change_two])
 
 	def test_str(self):
-		expected="{'min_molecule_sites': 'minsites', 'fp': 'fp', 'min_molecule_len': 'minlen', 'fn': 'fn', 'pval': 'pval'}"
+		expected="{'min_molecule_sites': " + str(self.vital_parameters.min_molecule_sites) + ", 'fp': " + str(self.vital_parameters.fp) + ", 'min_molecule_len': " + str(self.vital_parameters.min_molecule_len) + ", 'fn': " + str(self.vital_parameters.fn) + ", 'pval': " + str(self.vital_parameters.pval) + "}"
 		self.assertEqual(expected,str(self.obj))
 
 	def test_write_code(self):
