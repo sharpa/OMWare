@@ -6,8 +6,8 @@ from Operations.BioNano.Subset.Subsetter import Subsetter
 from Utils.Workspace import Workspace
 from Utils.CD import CD
 
-work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir" ### SET ME
-input_file="all_reduced_to_150.bnx" ### SET ME
+work_dir="/path/to/work/dir/" ### SET ME
+input_file="input_file.bnx" ### SET ME
 workspace=Workspace(work_dir, input_file)
 
 with CD(work_dir):
