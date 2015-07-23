@@ -1,12 +1,13 @@
 #!/usr/bin/python
 
-# The purpose of this script is to run a refinement of
-# an assembly, generating the assembly itself if needed
+# The purpose of this script is to run a whole assembly
+#	with automatic prereq generation
 
-from Operations.BioNano.Assemble.RefineA import RefineA
-from Operations.BioNano.Assemble.VitalParameters import VitalParameters
+from Operations.BioNano.Assemble.Assembly import Assembly
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.VitalParameters import VitalParameters
 from Utils.Workspace import Workspace
 from Utils.CD import CD
 from Operations.SBATCHCodeFormatter import CodeFormatter
@@ -26,13 +27,9 @@ min_molecule_sites=10 ### SET ME
 
 vital_parameters=VitalParameters(false_positives, false_negatives, p_val_cutoff, min_molecule_len, min_molecule_sites)
 
-refineA=RefineA(workspace, vital_parameters)
-
-compatible_vital_parameters=VitalParameters(false_positives, false_negatives, p_val_cutoff/100, min_molecule_len, 6)
-refineA.assembly.pairwise_alignment=PairwiseAlignment(workspace, compatible_vital_parameters)
-refineA.sort=Sort(workspace, compatible_vital_parameters)
-refineA.molecule_stats=refineA.sort.getMoleculeStats()
+step=Assembly(workspace, vital_parameters) ### SET ME: see options below
+### Assembly, PairwiseAlignment, Split, or Sort
 
 with CD(work_dir):
 	formatter=CodeFormatter()
-	formatter.runOneStep(refineA)
+	formatter.runOneStep(step)
