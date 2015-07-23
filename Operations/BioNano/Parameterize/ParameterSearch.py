@@ -134,6 +134,7 @@ class ParameterSearch(Step):
 			if self.isLower(pairwise_alignment, lowest_pairwise_alignment):
 				lowest_pairwise_alignment=pairwise_alignment
 		lowest_pairwise_alignment.split=lowest_split
+		lowest_pairwise_alignment.split_summary=Summarize(lowest_pairwise_alignment.workspace, lowest_split)
 		lowest_pairwise_alignment.sort=lowest_sort
 		lowest_pairwise_alignment.molecule_stats=lowest_sort.getMoleculeStats()
 		assembly.pairwise_alignment=lowest_pairwise_alignment
