@@ -18,6 +18,17 @@ class Summarize(Step):
 	def __hash__(self):
 		return hash((self.workspace.input_file, self.workspace.work_dir, self.step.vital_parameters.pval, self.step.vital_parameters.fp, self.step.vital_parameters.fn, self.step.vital_parameters.min_molecule_len, self.step.vital_parameters.min_molecule_sites, self.__class__.__name__))
 
+	def __eq__(self, other):
+		if other is None:
+			return False
+		if self.__class__ != other.__class__:
+			return False
+		return self.step==other.step
+	def __ne__(self, other):
+		return not self == other
+	def __str__(self):
+		return "Summary of " + str(self.step)
+
 	def writeCode(self):
 
 		code = "wd=`pwd`\n"
@@ -44,8 +55,8 @@ class Summarize(Step):
 		return self.step.getStepDir()
 	def autoGeneratePrereqs(self):
 		pass
-	def getPrereqs(self):
-		return [self.step]
+	def getPrereq(self):
+		return self.step
 	def getOutputFile(self):
 		if isinstance(self.step, Split):
 			return self.getStepDir() + "/split." + self.getOutputFileExtension()

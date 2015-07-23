@@ -162,8 +162,8 @@ class PairwiseAlignment(Step):
 		self.split=Split(self.workspace, copy(self.vital_parameters))
 		self.split_summary=Summarize(self.workspace, self.split)
 
-	def getPrereqs(self):
-		return [self.split_summary]
+	def getPrereq(self):
+		return self.split_summary
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()

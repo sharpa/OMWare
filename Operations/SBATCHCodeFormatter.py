@@ -30,14 +30,11 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 	def runOneStep(self, step):
 		steps_retroorder=[]
 		
-		latest_prereqs=[step]
-		while latest_prereqs != []:
-			newest_prereqs=[]
-			for prereq in latest_prereqs:
-				if not prereq.isComplete():
-					steps_retroorder.append(prereq)
-					newest_prereqs.extend(prereq.getPrereqs())
-			latest_prereqs=newest_prereqs
+		prereq=step
+		while prereq is not None:
+			if not prereq.isComplete():
+				steps_retroorder.append(prereq)
+			prereq=prereq.getPrereq()
 		steps=steps_retroorder[::-1]
 		
 		steps_and_parts=[]
@@ -62,6 +59,8 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 			self.runStepInContext(step_part_files, step_name, dependency_clause)
 
 	def runSeveralSteps(self, levels):
+		print("#!/bin/bash\n")
+
 		step_names={}
 		for level_num, level in enumerate(levels):
 			for step_num, step in enumerate(level):
@@ -77,13 +76,7 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 					o_file.close()
 					step_part_files.append(o_file_name)
 
-				print("#!/bin/bash\n")
-
-				prereqs=step.getPrereqs()
-				if len(prereqs) == 0:
-					prereq=None
-				else:
-					prereq=prereqs[0]
+				prereq=step.getPrereq()
 
                                 dependency_clause=""
                                 if prereq is not None:

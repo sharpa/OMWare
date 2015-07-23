@@ -68,8 +68,8 @@ class Sort(Step):
 		self.inpt=Input(self.workspace)
 		self.molecule_stats=self.getMoleculeStats()
 
-	def getPrereqs(self):
-		return [self.inpt]
+	def getPrereq(self):
+		return self.inpt
 
 	def getMem(self):
 		return self.workspace.resources.getMediumMemory()

@@ -97,9 +97,9 @@ class tStep(unittest.TestCase):
 		with self.assertRaises(Exception):
 			self.obj.autoGeneratePrereqs()
 
-	def test_get_prereqs(self):
+	def test_get_prereq(self):
 		with self.assertRaises(Exception):
-			self.obj.getPrereqs()
+			self.obj.getPrereq()
 
 	def test_is_complete_while_is(self):
 		native_getStepDir=Step.getStepDir

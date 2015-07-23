@@ -40,7 +40,7 @@ class Step(object):
 	def autoGeneratePrereqs(self):
 		raise Exception("Abstract method called")
 
-	def getPrereqs(self):
+	def getPrereq(self):
 		raise Exception("Abstract method called")
 
 	def isComplete(self):

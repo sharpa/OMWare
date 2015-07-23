@@ -125,6 +125,7 @@ class ParameterSearch(Step):
 		lowest_split.sort=lowest_sort
 		lowest_split.molecule_stats=lowest_sort.getMoleculeStats()
 		assembly.split=lowest_split
+		assembly.split_summary=Summarize(assembly.workspace, assembly.split)
 
 		lowest_pairwise_alignment=None
 		for pairwise_alignment in self.pairwise_alignments:
@@ -136,6 +137,7 @@ class ParameterSearch(Step):
 		lowest_pairwise_alignment.sort=lowest_sort
 		lowest_pairwise_alignment.molecule_stats=lowest_sort.getMoleculeStats()
 		assembly.pairwise_alignment=lowest_pairwise_alignment
+		assembly.pairwise_summary=Summarize(assembly.workspace, assembly.pairwise_alignment)
 
 	def isCompatible(self, candidate, voter):
 		if isinstance(candidate, PairwiseAlignment):

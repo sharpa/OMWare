@@ -133,8 +133,8 @@ class Assembly(Step):
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
 		self.pairwise_summary=Summarize(self.workspace, self.pairwise_alignment)
 
-	def getPrereqs(self):
-		return [self.pairwise_summary]
+	def getPrereq(self):
+		return self.pairwise_summary
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()

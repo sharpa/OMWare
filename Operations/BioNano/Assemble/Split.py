@@ -97,8 +97,8 @@ class Split(Step):
 		self.sort=Sort(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
 
-	def getPrereqs(self):
-		return [self.sort]
+	def getPrereq(self):
+		return self.sort
 
 
 	def getMem(self):

@@ -17,6 +17,8 @@ class Input(Step):
 		self.quality=None
 	def __hash__(self):
 		return hash((self.workspace.input_file, self.workspace.work_dir, self.__class__.__name__))
+	def __str__(self):
+		return self.workspace.input_file
 
 	def writeCode(self):
 		return []
@@ -32,8 +34,8 @@ class Input(Step):
 
 	def autoGeneratePrereqs(self):
 		pass
-	def getPrereqs(self):
-		return []
+	def getPrereq(self):
+		return None
 
 	def isComplete(self):
 		return path.exists(self.getOutputFile())
