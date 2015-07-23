@@ -12,11 +12,18 @@ def run_suites(test_suites):
 
 def get_all_test_suites():
 	test_suites=[]
+	test_suites.extend(get_smoke_test())
 	test_suites.extend(get_utils_test_suites())
 	test_suites.extend(get_operations_test_suites())
 	test_suites.extend(get_bioNanoAssembly_test_suites())
 	return test_suites
 	
+def get_smoke_test():
+	import UnitTests.SmokeTest
+	test_suites=[]
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.SmokeTest.SmokeTest))
+	return test_suites
+
 def get_utils_test_suites():
 	import UnitTests.tUtils
 	test_suites=[]
