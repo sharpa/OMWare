@@ -31,6 +31,9 @@ class Step(object):
 	def getStepDir(self):
 		raise Exception("Abstract method called")
 
+	def getOutputFile(self):
+		raise Exception("Abstract method called")
+
 	def getOutputFileExtension(self):
 		raise Exception("Abstract method called")
 

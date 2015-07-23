@@ -6,11 +6,6 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
 from Operations.Step import Step
-from Operations.BioNano.Assemble.Input import Input
-from Operations.BioNano.Assemble.Sort import Sort
-from Operations.BioNano.Assemble.Split import Split
-from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
-from Operations.BioNano.Assemble.Summarize import Summarize
 from collections import OrderedDict
 from copy import copy
 
@@ -18,6 +13,7 @@ class Assembly(Step):
 	def __init__(self, workspace, vital_parameters):
 		self.workspace=workspace
 		self.vital_parameters=vital_parameters
+		self.quality=None
 
 		self.sd=0.2
 		self.sf=0.2
@@ -62,8 +58,8 @@ class Assembly(Step):
 		code += "pwd\n"
 
 		param_values=OrderedDict()
-		param_values["-if"]= "../" + str(self.split.getListFile())
-		param_values["-af"]= "../" + str(self.pairwise_alignment.getListFile())
+		param_values["-if"]= "../" + str(self.split_summary.getOutputFile())
+		param_values["-af"]= "../" + str(self.pairwise_summary.getOutputFile())
 		param_values["-XmapStatRead"]= "../" + str(self.molecule_stats.getOutputFile())
 		param_values["-usecolor"]= str(self.color)
 		param_values["-FP"]= str(self.vital_parameters.fp)
@@ -133,10 +129,12 @@ class Assembly(Step):
 		self.sort=Sort(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.split=Split(self.workspace, copy(self.vital_parameters))
+		self.split_summary=Summarize(self.workspace, self.split)
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
+		self.pairwise_summary=Summarize(self.workspace, self.pairwise_alignment)
 
 	def getPrereqs(self):
-		return [Summarize(self.workspace, self.pairwise_alignment)]
+		return [self.pairwise_summary]
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()
@@ -144,3 +142,9 @@ class Assembly(Step):
 		return self.workspace.resources.getMediumTime()
 	def getThreads(self):
 		return 1
+
+from Operations.BioNano.Assemble.Input import Input
+from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Summarize import Summarize

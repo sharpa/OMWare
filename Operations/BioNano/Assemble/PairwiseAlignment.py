@@ -6,10 +6,6 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner to create a set of pairwise alignments
 from Operations.Step import Step
-from Operations.BioNano.Assemble.Input import Input
-from Operations.BioNano.Assemble.Sort import Sort
-from Operations.BioNano.Assemble.Split import Split
-from Operations.BioNano.Assemble.Summarize import Summarize
 from collections import OrderedDict
 from copy import copy
 from os import path
@@ -162,11 +158,12 @@ class PairwiseAlignment(Step):
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
 		self.sort=Sort(self.workspace, copy(self.vital_parameters))
-		self.split=Split(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
+		self.split=Split(self.workspace, copy(self.vital_parameters))
+		self.split_summary=Summarize(self.workspace, self.split)
 
 	def getPrereqs(self):
-		return [Summarize(self.workspace, self.split)]
+		return [self.split_summary]
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()
@@ -175,8 +172,12 @@ class PairwiseAlignment(Step):
 	def getThreads(self):
 		return self.workspace.resources.getLargeThreads()
 
-	def getListFile(self):
-		return self.getStepDir() + "/align.list"
+	def getOutputFile(self):
+		raise Exception("Pairwise doesn't have an output file, per se")
 	def getOutputFileExtension(self):
 		return "align"
 
+from Operations.BioNano.Assemble.Input import Input
+from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.Summarize import Summarize

@@ -21,7 +21,7 @@ class Summarize(Step):
 	def writeCode(self):
 
 		code = "wd=`pwd`\n"
-		code += "rm -f " + self.step.getListFile() + "\n"
+		code += "rm -f " + self.getOutputFile() + "\n"
 		code += "let errors=0\n"
 		code += "let total=0\n"
 		code += "for stdout_file in " + self.getStepDir() + "/*.stdout\n"
@@ -31,7 +31,7 @@ class Summarize(Step):
 		code += "  if [[ $result != \"END of output\" ]]; then let errors+=1\n"
 		code += "  else\n"
 		code += "    file=`echo $stdout_file | sed 's/\.stdout/\." + self.step.getOutputFileExtension() + "/'`\n"
-		code += "    echo $wd/$file >> " + self.step.getListFile() + ";\n"
+		code += "    echo $wd/$file >> " + self.getOutputFile() + ";\n"
 		code += "  fi\n"
 		code += "done\n"
 		code += "if [ $total -ne " + str(self.step.total_job_count) + " ]; then let errors+=1; fi\n"
@@ -46,6 +46,14 @@ class Summarize(Step):
 		pass
 	def getPrereqs(self):
 		return [self.step]
+	def getOutputFile(self):
+		if isinstance(self.step, Split):
+			return self.getStepDir() + "/split." + self.getOutputFileExtension()
+		if isinstance(self.step, PairwiseAlignment):
+			return self.getStepDir() + "/align." + self.getOutputFileExtension()
+		if isinstance(self.step, Assembly):
+			return self.getStepDir() + "/contigs." + self.getOutputFileExtension()
+
 	def getOutputFileExtension(self):
 		return "list"
 
@@ -56,3 +64,6 @@ class Summarize(Step):
 	def getThreads(self):
 		return 1
 
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Assembly import Assembly

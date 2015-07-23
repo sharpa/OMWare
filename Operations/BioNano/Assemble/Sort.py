@@ -6,8 +6,6 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create sort an input dataset
 from Operations.Step import Step
-from Operations.BioNano.Assemble.Input import Input
-from Operations.BioNano.Assemble.MoleculeStats import MoleculeStats
 from collections import OrderedDict
 
 class Sort(Step):
@@ -85,3 +83,5 @@ class Sort(Step):
 	def getMoleculeStats(self):
 		return MoleculeStats(self.getStepDir())
 
+from Operations.BioNano.Assemble.Input import Input
+from Operations.BioNano.Assemble.MoleculeStats import MoleculeStats

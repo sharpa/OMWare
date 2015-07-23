@@ -7,8 +7,6 @@
 # split a single bnx file into "good sized" chunks of molecules
 # for more efficient parallel assembly
 from Operations.Step import Step
-from Operations.BioNano.Assemble.Input import Input
-from Operations.BioNano.Assemble.Sort import Sort
 import math
 from collections import OrderedDict
 from copy import copy
@@ -91,15 +89,13 @@ class Split(Step):
 
 		return code_parts
 
-	def getListFile(self):
-		return self.getStepDir() + "/split.list"
-
 	def getStepDir(self):
 		return "_".join(["split", self.inpt.getStepDir(), "blockCount"+str(self.total_job_count)])
 
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
 		self.sort=Sort(self.workspace, copy(self.vital_parameters))
+		self.molecule_stats=self.sort.getMoleculeStats()
 
 	def getPrereqs(self):
 		return [self.sort]
@@ -116,3 +112,6 @@ class Split(Step):
 		return self.getStepDir() + "/split_" + str(block_num) + "_of_" + str(self.total_job_count) + ".bnx"
 	def getOutputFileExtension(self):
 		return "bnx"
+
+from Operations.BioNano.Assemble.Input import Input
+from Operations.BioNano.Assemble.Sort import Sort
