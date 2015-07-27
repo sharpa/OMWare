@@ -6,10 +6,11 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run the BNG RefAligner and Assembler software to create an optical map de novo assembly
 from Operations.Step import Step
+from Operations.BioNano.Assemble.GenericAssembly import GenericAssembly
 from collections import OrderedDict
 from copy import copy
 
-class Assembly(Step):
+class Assembly(GenericAssembly):
 	def __init__(self, workspace, vital_parameters):
 		self.workspace=workspace
 		self.vital_parameters=vital_parameters
@@ -118,10 +119,6 @@ class Assembly(Step):
 
 	def getStepDir(self):
 		return "_".join(["assembly", self.inpt.getStepDir(), "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
-	def getOutputFile(self):
-		return self.getStepDir() + "/" + self.output_prefix + ".contigs"
-	def getOutputFileExtension(self):
-		return "contigs"
 
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
