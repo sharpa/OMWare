@@ -40,14 +40,18 @@ class Summarize(Step):
 		code += "  let total+=1\n"
 		code += "  result=`tail -n 1 $stdout_file`\n"
 		code += "  if [[ $result != \"END of output\" ]]; then let errors+=1\n"
-		code += "  else\n"
-		code += "    file=`echo $stdout_file | sed 's/\.stdout/\." + self.step.getOutputFileExtension() + "/'`\n"
-		code += "    echo $wd/$file >> " + self.getOutputFile() + ";\n"
+		if not isinstance(self.step, Assembly):
+			code += "  else\n"
+			code += "    file=`echo $stdout_file | sed 's/\.stdout/\." + self.step.getOutputFileExtension() + "/'`\n"
+			code += "    echo $wd/$file >> " + self.getOutputFile() + ";\n"
 		code += "  fi\n"
 		code += "done\n"
 		code += "if [ $total -ne " + str(self.step.total_job_count) + " ]; then let errors+=1; fi\n"
 
 		code += "if [ $errors -ne 0 ]; then exit 1; else touch " + self.getStepDir() + "/Complete.status; fi\n"
+
+		if isinstance(self.step, Assembly):
+			code+="ls " + self.getStepDir() + "/*.cmap | while read file; do echo $wd/$file >> " + self.getOutputFile() + "; done;\n"
 
 		return [code]
 

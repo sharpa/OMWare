@@ -49,6 +49,8 @@ class Assembly(Step):
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
+		self.total_job_count=1
+
 		self.autoGeneratePrereqs()
 
 	def writeCode(self):
@@ -111,9 +113,6 @@ class Assembly(Step):
 			param_list.append(key)
 			param_list.append(param_values[key])
 		code += " ".join(param_list) + "\n"
-
-		code += "result=`tail -n 1 ../" + self.getStepDir()  + "/" + self.output_prefix + ".stdout`\n"
-		code += "if [[ \"$result\" != \"END of output\" ]]; then exit 1; else touch Complete.status; fi\n"
 
 		return [code]
 
