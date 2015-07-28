@@ -15,6 +15,21 @@ class GroupManifest(Step):
 		self.assembly=assembly
 		self.quality=None
 
+		self.autoGeneratePrereqs()
+
+	def __eq__(self, other):
+		if other is None:
+			return False
+		if self.__class__ != other.__class__:
+			return False
+		return self.assembly==other.assembly
+
+	def __ne__(self, other):
+		return not self == other
+
+	def __str__(self):
+		return self.merge_assembly.getStepDir()
+
 	def writeCode(self):
 		code="cd " + self.workspace.work_dir + "\n"
 		code+="mkdir " + self.getStepDir() + "\n"
@@ -22,11 +37,14 @@ class GroupManifest(Step):
 		code+="pwd\n"
 		code+="python -c 'from Utils.Workspace import Workspace;"
 		code+="from Operations.BioNano.Assemble.VitalParameters import VitalParameters;"
-		code+="from Operations.BioNano.Assemble.Assembly import Assembly;"
+		code+="from Operations.BioNano.Assemble.GenericAssembly import GenericAssembly;"
 		code+="from Operations.BioNano.Assemble.GroupManifest import GroupManifest;"
 		code+="ws=Workspace(\"" + self.workspace.work_dir + "\", \"" + self.workspace.input_file + "\");"
 		code+="vp=VitalParameters(" + str(self.assembly.vital_parameters.fp) + ", " + str(self.assembly.vital_parameters.fn) + ", " + str(self.assembly.vital_parameters.pval) + ", " + str(self.assembly.vital_parameters.min_molecule_len) + ", " + str(self.assembly.vital_parameters.min_molecule_sites) + ");"
-		code+="gm=GroupManifest(ws, Assembly(ws, vp));"
+		assembly_type=""
+		if isinstance(self.assembly, Assembly):
+			assembly_type="assembly"
+		code+="gm=GroupManifest(ws, GenericAssembly.createAssembly(ws, vp, \"" + assembly_type + "\"));"
 		code+="gm.makeGroupManifestFile()'"
 		return [code]
 		
@@ -109,15 +127,16 @@ class GroupManifest(Step):
 			
 		
 	def getStepDir(self):
-		return "manifest_for_" + self.assembly.getStepDir()
+		return self.merge_assembly.getStepDir()
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.assembly.output_prefix+".group_manifest"
 	def getOutputFileExtension(self):
 		return "group_manifest"
 	def autoGeneratePrereqs(self):
-		pass
-	def getPrereqs(self):
-		return [self.assembly]
+		self.assembly_summary=Summarize(self.workspace, self.assembly)
+		self.merge_assembly=Merge(self.workspace, self.assembly)
+	def getPrereq(self):
+		return self.merge_assembly
 
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
@@ -125,3 +144,7 @@ class GroupManifest(Step):
 		return self.workspace.resources.getSmallTime()
 	def getThreads(self):
 		return 1
+
+from Operations.BioNano.Assemble.Summarize import Summarize
+from Operations.BioNano.Assemble.Merge import Merge
+from Operations.BioNano.Assemble.Assembly import Assembly

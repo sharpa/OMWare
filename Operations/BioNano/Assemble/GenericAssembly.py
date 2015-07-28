@@ -35,3 +35,10 @@ class GenericAssembly(Step):
 	
 	def getThreads(self):
 		raise Exception("Abstract method called")
+
+	@staticmethod
+	def createAssembly(workspace, vital_parameters, assembly_type):
+		if assembly_type=="assembly":
+			return Operations.BioNano.Assemble.Assembly.Assembly(workspace, vital_parameters)
+
+import Operations.BioNano.Assemble.Assembly
