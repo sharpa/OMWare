@@ -16,7 +16,7 @@ class GenericAssembly(Step):
 		raise Exception("Abstract method called")
 
 	def getOutputFile(self):
-		return self.getStepDir() + "/" + self.output_prefix + ".contigs"
+		return self.getStepDir() + "/" + self.output_prefix + "." + self.getOutputFileExtension()
 
 	def getOutputFileExtension(self):
 		return "contigs"
@@ -40,5 +40,8 @@ class GenericAssembly(Step):
 	def createAssembly(workspace, vital_parameters, assembly_type):
 		if assembly_type=="assembly":
 			return Operations.BioNano.Assemble.Assembly.Assembly(workspace, vital_parameters)
+		if assembly_type=="refineA":
+			return Operations.BioNano.Assemble.RefineA.RefineA(workspace, vital_parameters)
 
 import Operations.BioNano.Assemble.Assembly
+import Operations.BioNano.Assemble.RefineA

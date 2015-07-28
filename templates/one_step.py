@@ -3,6 +3,7 @@
 # The purpose of this script is to run a whole assembly
 #	with automatic prereq generation
 
+from Operations.BioNano.Assemble.RefineA import RefineA
 from Operations.BioNano.Assemble.Merge import Merge
 from Operations.BioNano.Assemble.Assembly import Assembly
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
@@ -29,7 +30,7 @@ min_molecule_sites=10 ### SET ME
 vital_parameters=VitalParameters(false_positives, false_negatives, p_val_cutoff, min_molecule_len, min_molecule_sites)
 
 step=Assembly(workspace, vital_parameters) ### SET ME: see options below
-### Merge, Assembly, PairwiseAlignment, Split, or Sort
+### RefineA, Merge, Assembly, PairwiseAlignment, Split, or Sort
 
 with CD(work_dir):
 	formatter=CodeFormatter()

@@ -7,16 +7,11 @@
 # run the first step of BNG refinement
 
 from Operations.Step import Step
-from Operations.BioNano.Assemble.Input import Input
-from Operations.BioNano.Assemble.Sort import Sort
-from Operations.BioNano.Assemble.Split import Split
-from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
-from Operations.BioNano.Assemble.Assembly import Assembly
-from Operations.BioNano.Assemble.GroupManifest import GroupManifest
+from Operations.BioNano.Assemble.GenericAssembly import GenericAssembly
 from collections import OrderedDict
 from copy import copy
 
-class RefineA(Step):
+class RefineA(GenericAssembly):
 	def __init__(self, workspace, vital_parameters):
 		self.workspace=workspace
 		self.vital_parameters=vital_parameters
@@ -95,28 +90,27 @@ class RefineA(Step):
 		code+="  group_start=`echo $line | awk '{print $1}'`\n"
 		code+="  group_end=`echo $line | awk '{print $NF}'`\n"
 		code+="    " + " ".join(param_list) + "\n"
-		code+="done < ../" + self.getPrereqs()[0].getOutputFile()
+		code+="done < ../" + self.group_manifest.getOutputFile()
 
 		return [code]
 		
 	def getStepDir(self):
 		return "_".join(["refineA", self.inpt.getStepDir(), "fp"+str(self.vital_parameters.fp), "fn"+str(self.vital_parameters.fn), "pval"+str(self.vital_parameters.pval), "minlen"+str(self.vital_parameters.min_molecule_len), "minsites"+str(self.vital_parameters.min_molecule_sites)])
 
-	def getOutputFile(self):
-		return self.getStepDir() + "/" + self.output_prefix + "." + self.getOutputFileExtension()
-
-	def getOutputFileExtension(self):
-		return "contigs"
-
 	def autoGeneratePrereqs(self):
 		self.inpt=Input(self.workspace)
 		self.sort=Sort(self.workspace, copy(self.vital_parameters))
 		self.molecule_stats=self.sort.getMoleculeStats()
 		self.split=Split(self.workspace, copy(self.vital_parameters))
+		self.split_summary=Summarize(self.workspace, self.split)
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
+		self.pairwise_summary=Summarize(self.workspace, self.pairwise_alignment)
 		self.assembly=Assembly(self.workspace, copy(self.vital_parameters))
-	def getPrereqs(self):
-		return [GroupManifest(self.workspace, self.assembly)]
+		self.assembly_summary=Summarize(self.workspace, self.assembly)
+		self.group_manifest=GroupManifest(self.workspace, self.assembly)
+
+	def getPrereq(self):
+		return self.group_manifest
 
 	def getMem(self):
 		return self.workspace.resources.getMediumMemory()
@@ -124,3 +118,11 @@ class RefineA(Step):
 		return self.workspace.resources.getLargeTime()
 	def getThreads(self):
 		return self.workspace.resources.getMediumThreads()
+
+from Operations.BioNano.Assemble.Input import Input
+from Operations.BioNano.Assemble.Sort import Sort
+from Operations.BioNano.Assemble.Split import Split
+from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
+from Operations.BioNano.Assemble.Assembly import Assembly
+from Operations.BioNano.Assemble.Summarize import Summarize
+from Operations.BioNano.Assemble.GroupManifest import GroupManifest
