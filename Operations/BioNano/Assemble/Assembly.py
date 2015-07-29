@@ -271,6 +271,7 @@ class RefineA(GenericAssembly):
 		self.pairwise_summary=Summarize(self.workspace, self.pairwise_alignment)
 		self.assembly=Assembly(self.workspace, copy(self.vital_parameters))
 		self.assembly_summary=Summarize(self.workspace, self.assembly)
+		self.merge_assembly=Merge(self.workspace, self.assembly)
 		self.group_manifest=GroupManifest(self.workspace, self.assembly)
 
 	def getPrereq(self):
@@ -288,3 +289,5 @@ from Operations.BioNano.Assemble.Sort import Sort
 from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
 from Operations.BioNano.Assemble.Summarize import Summarize
+from Operations.BioNano.Assemble.Merge import Merge
+from Operations.BioNano.Assemble.GroupManifest import GroupManifest

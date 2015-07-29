@@ -40,7 +40,7 @@ class Summarize(Step):
 		code += "  let total+=1\n"
 		code += "  result=`tail -n 1 $stdout_file`\n"
 		code += "  if [[ $result != \"END of output\" ]]; then let errors+=1\n"
-		if not isinstance(self.step, Assembly):
+		if not isinstance(self.step, GenericAssembly):
 			code += "  else\n"
 			code += "    file=`echo $stdout_file | sed 's/\.stdout/\." + self.step.getOutputFileExtension() + "/'`\n"
 			code += "    echo $wd/$file >> " + self.getOutputFile() + ";\n"
@@ -50,7 +50,7 @@ class Summarize(Step):
 
 		code += "if [ $errors -ne 0 ]; then exit 1; else touch " + self.getStepDir() + "/Complete.status; fi\n"
 
-		if isinstance(self.step, Assembly):
+		if isinstance(self.step, GenericAssembly):
 			code+="ls " + self.getStepDir() + "/*.cmap | while read file; do echo $wd/$file >> " + self.getOutputFile() + "; done;\n"
 
 		return [code]
@@ -66,7 +66,7 @@ class Summarize(Step):
 			return self.getStepDir() + "/split." + self.getOutputFileExtension()
 		if isinstance(self.step, PairwiseAlignment):
 			return self.getStepDir() + "/align." + self.getOutputFileExtension()
-		if isinstance(self.step, Assembly):
+		if isinstance(self.step, GenericAssembly):
 			return self.getStepDir() + "/contigs." + self.getOutputFileExtension()
 
 	def getOutputFileExtension(self):
@@ -81,4 +81,4 @@ class Summarize(Step):
 
 from Operations.BioNano.Assemble.Split import Split
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
-from Operations.BioNano.Assemble.Assembly import Assembly
+from Operations.BioNano.Assemble.Assembly import GenericAssembly
