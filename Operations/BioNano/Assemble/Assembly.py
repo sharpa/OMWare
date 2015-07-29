@@ -200,6 +200,8 @@ class RefineA(GenericAssembly):
 		self.send_output_to_file=True
 		self.send_errors_to_file=True
 
+		self.total_job_count=1
+
 		self.autoGeneratePrereqs()
 
 	def writeCode(self):

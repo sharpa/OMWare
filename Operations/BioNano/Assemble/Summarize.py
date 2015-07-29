@@ -46,7 +46,7 @@ class Summarize(Step):
 			code += "    echo $wd/$file >> " + self.getOutputFile() + ";\n"
 		code += "  fi\n"
 		code += "done\n"
-		code += "if [ $total -ne " + str(self.step.total_job_count) + " ]; then let errors+=1; fi\n"
+		code += "if [ $total -lt " + str(self.step.total_job_count) + " ]; then let errors+=1; fi\n"
 
 		code += "if [ $errors -ne 0 ]; then exit 1; else touch " + self.getStepDir() + "/Complete.status; fi\n"
 

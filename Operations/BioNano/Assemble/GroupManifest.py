@@ -37,13 +37,15 @@ class GroupManifest(Step):
 		code+="pwd\n"
 		code+="python -c 'from Utils.Workspace import Workspace;"
 		code+="from Operations.BioNano.Assemble.VitalParameters import VitalParameters;"
-		code+="from Operations.BioNano.Assemble.GenericAssembly import GenericAssembly;"
+		code+="from Operations.BioNano.Assemble.Assembly import GenericAssembly;"
 		code+="from Operations.BioNano.Assemble.GroupManifest import GroupManifest;"
 		code+="ws=Workspace(\"" + self.workspace.work_dir + "\", \"" + self.workspace.input_file + "\");"
 		code+="vp=VitalParameters(" + str(self.assembly.vital_parameters.fp) + ", " + str(self.assembly.vital_parameters.fn) + ", " + str(self.assembly.vital_parameters.pval) + ", " + str(self.assembly.vital_parameters.min_molecule_len) + ", " + str(self.assembly.vital_parameters.min_molecule_sites) + ");"
 		assembly_type=""
 		if isinstance(self.assembly, Assembly):
 			assembly_type="assembly"
+		elif isinstance(self.assembly, RefineA):
+			assembly_type="refineA"
 		code+="gm=GroupManifest(ws, GenericAssembly.createAssembly(ws, vp, \"" + assembly_type + "\"));"
 		code+="gm.makeGroupManifestFile()'"
 		return [code]
@@ -137,6 +139,8 @@ class GroupManifest(Step):
 		self.merge_assembly=Merge(self.workspace, self.assembly)
 	def getPrereq(self):
 		return self.merge_assembly
+	def isComplete(self):
+		return os.path.exists(self.getOutputFile())
 
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
@@ -148,3 +152,4 @@ class GroupManifest(Step):
 from Operations.BioNano.Assemble.Summarize import Summarize
 from Operations.BioNano.Assemble.Merge import Merge
 from Operations.BioNano.Assemble.Assembly import Assembly
+from Operations.BioNano.Assemble.Assembly import RefineA
