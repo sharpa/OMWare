@@ -48,6 +48,10 @@ def get_bioNanoAssembly_test_suites():
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tAssembly))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tGroupManifest))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tRefineA))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tRefineB0))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tMerge))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tSummarize))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tGenericAssembly))
 	return test_suites
 
 if __name__=="__main__":
