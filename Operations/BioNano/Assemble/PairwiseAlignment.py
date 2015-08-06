@@ -48,7 +48,8 @@ class PairwiseAlignment(Step):
 		total_blocks=split.total_job_count
 		self.total_job_count=total_blocks*(total_blocks+1)/2 
 
-		self.max_job_count=self.getTime() * (60.0/270.0) - 1
+		approx_mins_per_job=270.0
+		self.max_job_count=self.getTime() * (60.0/approx_mins_per_job) - 1
 		if self.max_job_count<1:
 			self.max_job_count=1
 

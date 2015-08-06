@@ -41,7 +41,8 @@ class Split(Step):
 		else:
 			self.total_job_count=vital_parameters.blocks
 
-		self.max_job_count=self.getTime()*(60/5)-3
+		approx_mins_per_job=5
+		self.max_job_count=self.getTime()*(60.0/approx_mins_per_job)-3
 		if self.max_job_count<1:
 			self.max_job_count=1
 
