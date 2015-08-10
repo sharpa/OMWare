@@ -8,6 +8,7 @@
 from Operations.Step import Step
 from collections import OrderedDict
 from copy import copy
+from glob import glob
 
 class GenericAssembly(Step):
 	def __init__(self, workspace, vital_parameters):
@@ -165,6 +166,33 @@ class Assembly(GenericAssembly):
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
 		self.pairwise_summary=Summarize(self.workspace, self.pairwise_alignment)
 
+	def createQualityObject(self):
+		if not self.isComplete():
+			raise Exception("The step is not complete yet")
+		stats={"count": 0, "length": 0.0}
+		for cmap_name in glob(self.getStepDir() + "/*.cmap"): # This glob relies on there not being a merged .cmap in the same directory (i.e. Summarize has not been run)
+			contigs={}
+			cmap_file=CmapFile(cmap_name)
+			for label in cmap_file.parse():
+				if label.contig_id in contigs:
+					continue
+				contigs[label.contig_id]=label.contig_len
+			for contig in contigs:
+				stats["count"]+=1
+				stats["length"]+=contigs[contig]
+
+		self.quality=Quality(count=stats["count"], length=stats["length"])
+		self.saveQualityObjectToFile()
+
+	def getQuality_count(self):
+		if self.quality is None:
+			self.loadQualityFromFile()
+		return self.quality.count
+	def getQuality_length(self):
+		if self.quality is None:
+			self.loadQualityFromFile()
+		return self.quality.length
+
 	def getPrereq(self):
 		return self.pairwise_summary
 
@@ -286,6 +314,8 @@ class RefineA(GenericAssembly):
 	def getThreads(self):
 		return self.workspace.resources.getMediumThreads()
 
+from Operations.Step import Quality
+from Operations.BioNano.files import CmapFile
 from Operations.BioNano.Assemble.Input import Input
 from Operations.BioNano.Assemble.Sort import Sort
 from Operations.BioNano.Assemble.Split import Split

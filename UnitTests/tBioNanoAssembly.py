@@ -172,6 +172,29 @@ class tAssembly(unittest.TestCase):
 		self.obj.pairwise_summary=pairwise_summary
 
 		self.assertEqual(pairwise_summary,self.obj.getPrereq())
+	def dummy_returnFalse(self):
+		return False
+
+	def test_createQualityObject_notComplete(self):
+		native_isComplete=Assembly.isComplete
+		Assembly.isComplete=self.dummy_returnFalse.im_func
+		expected="The step is not complete yet"
+
+		actual=""
+		try:
+			self.obj.createQualityObject()
+		except Exception as e:
+			actual=str(e)
+		
+		Assembly.isComplete=native_isComplete
+
+		self.assertEqual(expected, actual)
+	def test_createQualityObject_complete(self):
+		self.assertEqual(1,2)
+	def test_getQualityCount(self):
+		self.assertEqual(1,2)
+	def test_getQualityLength(self):
+		self.assertEqual(1,2)
 
 	def dummy_getLargeMemory(self):
 		return -1

@@ -113,7 +113,7 @@ class tCmapFile_iter(unittest.TestCase):
 			self.assertEqual(None, self.obj.next())
 	def test_next_badFileFormat(self):
 		with open(self.input_file, "w") as o_file:
-			o_file.write("1	2	3	4	5	6	7	8	9	10	11\n")
+			o_file.write("1	2	3	4	5	6	7	8	9	10\n")
 		with self.assertRaises(Exception):
 			self.obj.next()
 
@@ -124,7 +124,7 @@ class tCmapFile_iter(unittest.TestCase):
 			self.obj.next()
 
 	def test_next_twoLines(self):
-		expected=Mock(contig_id=1, contig_len=2.0, contig_site_count=3, label_id=4, channel="5", position=6.0, stdev=7.0, coverage=8.0, occurrences=9, snr_mean=10.0, snr_stdev=11.0, snr_count=12.0)
+		expected=Mock(contig_id=1, contig_len=2.0, contig_site_count=3, label_id=4, channel="5", position=6.0, stdev=7.0, coverage=8.0, occurrences=9.0, snr_mean=10.0, snr_stdev=11.0, snr_count=12.0)
 		with open(self.input_file, "w") as o_file:
 			o_file.write("1	2	3	4	5	6	7	8	9	10	11	12")
 
