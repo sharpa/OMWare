@@ -147,3 +147,84 @@ class Molecule:
 		self.qualities_two.append(quality_two_of_molecule_end)
 
 		self.num_labels=last_label_index+1
+
+class CmapFile(File):
+	@staticmethod
+	def getExtension():
+		return "cmap"
+	def parse(self):
+		return CmapFile_iter(self.input_file)
+	def write(self, label, o_file):
+		fields=[str(label.contig_id),
+			str(label.contig_len),
+			str(label.contig_site_count),
+			str(label.label_id),
+			label.channel,
+			str(label.position),
+			str(label.stdev),
+			str(label.coverage),
+			str(label.occurrences),
+			str(label.snr_mean),
+			str(label.snr_stdev),
+			str(label.snr_count)]
+		o_file.write("\t".join(fields) + "\n")
+
+class CmapFile_iter:
+	def __init__(self, input_file):
+		self.i_file=open(input_file)
+	def __iter__(self):
+		return self
+	def __eq__(self, other):
+		if other is None:
+			return False
+		return self.i_file.name==other.i_file.name
+	def __ne__(self, other):
+		return self != other
+	def next(self):
+		while True:
+			try:
+				line=self.i_file.readline()
+				if line=='':
+					self.i_file.close()
+					raise StopIteration
+				if line[0]=="#":
+					continue
+				label_data=line.split("\t")
+				if len(label_data)<12:
+					raise Exception("this file is incorrectly formatted")
+
+				label_id=int(label_data[3])
+				contig_id=int(label_data[0])
+				new_label=Label(contig_id, label_id)
+
+				new_label.contig_len=float(label_data[1])
+				new_label.contig_site_count=int(label_data[2])
+
+				new_label.channel=label_data[4]
+				new_label.position=float(label_data[5])
+				new_label.stdev=float(label_data[6])
+				new_label.coverage=float(label_data[7]) # I'm not sure why this is a float, not an int
+				new_label.occurrences=int(label_data[8])
+				new_label.snr_mean=float(label_data[9])
+				new_label.snr_stdev=float(label_data[10])
+				new_label.snr_count=float(label_data[11])
+				
+				return new_label
+
+			except StopIteration:
+				raise
+			except IndexError:
+				raise Exception("this file is incorrectly formatted")
+			except:
+				raise
+				
+
+
+class Label:
+	def __eq__(self, other):
+		if other is None:
+			return False
+		return self.__dict__ == other.__dict__
+	def __init__(self, contig_id, label_id):
+		self.contig_id=contig_id
+		self.label_id=label_id

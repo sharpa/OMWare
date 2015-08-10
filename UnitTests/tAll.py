@@ -59,6 +59,8 @@ def get_files_test_suites():
 	import UnitTests.tFiles
 	test_suites=[]
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tFile))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tCmapFile))
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tCmapFile_iter))
 	return test_suites
 
 if __name__=="__main__":
