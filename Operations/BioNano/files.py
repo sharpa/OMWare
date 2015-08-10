@@ -1,10 +1,10 @@
-# Module: file_bnx
+# Module: Operations.BioNano.files
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/26/2015
 # 
 # The purpose of this module is to manipulate optical maps
-# as they appear in the BNG .bnx file format
+# as they appear in a variety of BNG file formats
 
 class BnxFile:
 	def __init__(self, input_file):

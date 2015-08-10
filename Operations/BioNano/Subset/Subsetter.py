@@ -5,7 +5,7 @@
 # 
 # The purpose of this module remove molecules from (or keep them in)
 # an input .bnx file based on their attributes
-from Operations.BioNano.file_bnx import BnxFile
+from Operations.BioNano.files import BnxFile
 
 class Subsetter(object):
 	def __init__(self, input_file, output_file):

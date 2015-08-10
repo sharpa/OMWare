@@ -7,7 +7,7 @@
 # encapsulate the initial input .bnx file of a BNG assembly
 from Operations.Step import Step
 from Operations.Step import Quality
-from Operations.BioNano.file_bnx import BnxFile
+from Operations.BioNano.files import BnxFile
 from os import path
 from collections import OrderedDict
 

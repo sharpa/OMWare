@@ -7,7 +7,7 @@
 # and return a new dataset that has a random subset of the input
 # by random removal of whole or partial molecules
 import random
-from Operations.BioNano.file_bnx import BnxFile
+from Operations.BioNano.files import BnxFile
 
 class Rarefactor:
 	def __init__(self, input_file):
