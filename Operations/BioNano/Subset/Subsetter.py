@@ -22,7 +22,7 @@ class Subsetter(object):
 				o_file.write(header)
 			for molecule in bnx_file.parse("bnx"):
 				if criteria(molecule):
-					bnx_file.write(molecule, o_file, "bnx")
+					bnx_file.write(molecule, o_file)
 
 	def keep_greater(self, attribute, limit):
 		if attribute=="length":

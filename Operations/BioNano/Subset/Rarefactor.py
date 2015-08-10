@@ -30,7 +30,7 @@ class Rarefactor:
 			total_length=0.0
 			molecule_lengths={}
 			molecule_ids=[]
-			for molecule in bnx_file.parse("bnx"):
+			for molecule in bnx_file.parse():
 				total_length+=molecule.length
 				molecule_lengths[molecule.id] = molecule.length
 				molecule_ids.append(molecule.id)
@@ -58,12 +58,12 @@ class Rarefactor:
 					excess_distance=removed_length-target_removed_length
 					abridged[candidate]=excess_distance
 
-			for molecule in bnx_file.parse("bnx"):
+			for molecule in bnx_file.parse():
 				if molecule.id in removed:
 					continue
 				if molecule.id in abridged:
 					molecule.shrink(abridged[molecule.id])
-				bnx_file.write(molecule, o_file, "bnx")
+				bnx_file.write(molecule, o_file)
 
 
 

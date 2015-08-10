@@ -6,7 +6,7 @@
 # The purpose of this module is to manipulate optical maps
 # as they appear in a variety of BNG file formats
 
-class BnxFile:
+class File(object):
 	def __init__(self, input_file):
 		i_file=open(input_file, "r")
 		i_file.close()
@@ -20,7 +20,7 @@ class BnxFile:
 
 	@staticmethod
 	def getExtension():
-		return "bnx"
+		raise Exception("Abstract method called")
 
 	def getHeaders(self):
 		headers=[]
@@ -32,9 +32,21 @@ class BnxFile:
 					break
 		return headers
 
-	def parse(self, format):
+	def parse(self):
+		raise Exception("Abstract method called")
+	def write(self, entity, o_file):
+		raise Exception("Abstract method called")
+		
+
+class BnxFile(File):
+	@staticmethod
+	def getExtension():
+		return "bnx"
+
+	def parse(self):
 		return BnxFile_iter(self.input_file)
-	def write(self, molecule, o_file, format):
+
+	def write(self, molecule, o_file):
 
 		o_file.write("	".join(["0", str(molecule.id), str(molecule.length), str(molecule.average_intensity), str(molecule.snr), str(molecule.num_labels), str(molecule.original_id), str(molecule.scan_id), str(molecule.scan_direction), str(molecule.chip_id), str(molecule.flowcell), str(molecule.run_id), str(molecule.global_scan_id)]) + "\n")
 

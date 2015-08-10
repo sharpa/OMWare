@@ -10,7 +10,7 @@ import os
 from collections import OrderedDict
 from copy import copy
 from UnitTests.Helper import Mock
-from Operations.BioNano.file_bnx import BnxFile
+from Operations.BioNano.files import BnxFile
 from Operations.BioNano.Assemble.RefineB0 import RefineB0
 from Operations.BioNano.Assemble.Assembly import RefineA
 from Operations.BioNano.Assemble.Assembly import Assembly

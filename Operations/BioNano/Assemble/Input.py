@@ -47,7 +47,7 @@ class Input(Step):
 		count=0
 		quantity=0.0
 		labels=0
-		for molecule in self.getBnxFile().parse('bnx'):
+		for molecule in self.getBnxFile().parse():
 			count+=1
 			quantity+=molecule.length
 			labels+=molecule.num_labels

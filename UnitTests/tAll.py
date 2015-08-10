@@ -16,6 +16,7 @@ def get_all_test_suites():
 	test_suites.extend(get_utils_test_suites())
 	test_suites.extend(get_operations_test_suites())
 	test_suites.extend(get_bioNanoAssembly_test_suites())
+	test_suites.extend(get_files_test_suites())
 	return test_suites
 	
 def get_smoke_test():
@@ -52,6 +53,12 @@ def get_bioNanoAssembly_test_suites():
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tMerge))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tSummarize))
 	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tGenericAssembly))
+	return test_suites
+
+def get_files_test_suites():
+	import UnitTests.tFiles
+	test_suites=[]
+	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tFile))
 	return test_suites
 
 if __name__=="__main__":
