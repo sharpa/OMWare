@@ -186,11 +186,11 @@ class Assembly(GenericAssembly):
 
 	def getQuality_count(self):
 		if self.quality is None:
-			self.loadQualityFromFile()
+			self.loadQualityObjectFromFile()
 		return self.quality.count
 	def getQuality_length(self):
 		if self.quality is None:
-			self.loadQualityFromFile()
+			self.loadQualityObjectFromFile()
 		return self.quality.length
 
 	def getPrereq(self):

@@ -50,11 +50,8 @@ class Step(object):
 		return self.getStepDir() + "/Quality.json"
 
 	def loadQualityReport(self, log_level):
-		if not self.isComplete():
-			raise Exception("Step not run yet; no quality available")
-
-		if not path.exists(self.getQualityFileName()):
-			self.createQualityObject()
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
 
 		qualityReportItems=[]
 		allQualityReportItems=self.loadQualityReportItems()

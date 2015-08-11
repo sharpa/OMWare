@@ -6,7 +6,9 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run many assemblies at a variety of input parameters to determine 
 # which set is most appropriate to the data
+from collections import OrderedDict
 from Operations.Step import Step
+from Operations.Step import Quality
 from Operations.BioNano.Assemble.VitalParameters import VitalParameters
 from Operations.BioNano.Assemble.Assembly import Assembly
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
@@ -15,6 +17,7 @@ from Operations.BioNano.Assemble.Summarize import Summarize
 class ParameterSearch(Step):
 	def __init__(self, workspace, genome_size_mb):
 		self.workspace=workspace
+		self.quality=None
 
 		recommended_pval=1e-5/float(genome_size_mb)
 		self.pvals=[recommended_pval/10000, recommended_pval/100, recommended_pval, recommended_pval*100, recommended_pval*10000]
@@ -187,22 +190,34 @@ class ParameterSearch(Step):
 		return []
 
 	def isComplete(self):
-		# Check isComplete on list members
-		return False
+		for assembly in self.assemblies:
+			if not assembly.isComplete():
+				return False
+		return True 
 
-	def loadQualityReport(self):
-		raise Exception("Quality for param walk isn't implemented yet...")
-	def getQualityFileName(self):
-		raise Exception("Quality for param walk isn't implemented yet...")
 	def loadQualityReportItems(self):
-		raise Exception("Quality for param walk isn't implemented yet...")
+		report=OrderedDict()
+		report["Assembly Directory\tContig Count\tLength in Basepairs"]=1
+		if self.quality is None:
+			self.createQualityObject()
+		for assembly in self.quality.assemblies:
+			main_stats=[assembly]
+			main_stats.extend(self.quality.assemblies[assembly][5:7])
+			report["\t".join(main_stats)]=1
+			other_stats=[""]
+			other_stats.extend(self.quality.assemblies[assembly])
+			report["\t".join(other_stats)]=2
+		return report
+		
 	def createQualityObject(self):
-		raise Exception("Quality for param walk isn't implemented yet...")
-	def saveQualityObjectToFile(self):
-		raise Exception("Quality for param walk isn't implemented yet...")
-	def loadQualityObjectFromFile(self):
-		raise Exception("Quality for param walk isn't implemented yet...")
-
+		if not self.isComplete():
+			raise Exception("Cannont ascertain quality if this step is not complete")
+		self.quality=Quality(assemblies={})
+		for assembly in self.assemblies:
+			count=assembly.getQuality_count()
+			length=assembly.getQuality_length()
+			self.quality.assemblies[assembly.getStepDir()]=[str(assembly.vital_parameters.fp), str(assembly.vital_parameters.fn), str(assembly.vital_parameters.pval), str(assembly.vital_parameters.min_molecule_len), str(assembly.vital_parameters.min_molecule_sites), str(count), str(length)]
+		self.saveQualityObjectToFile()
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
 	def getTime(self):
