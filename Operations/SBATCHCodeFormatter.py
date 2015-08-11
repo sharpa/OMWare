@@ -64,6 +64,8 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 		step_names={}
 		for level_num, level in enumerate(levels):
 			for step_num, step in enumerate(level):
+				if step.isComplete():
+					continue
 				step_name="level" + str(level_num+1) + "_step" + str(step_num+1)
 				step_names[step]=step_name
 				step_parts=self.formatCode(step)

@@ -30,12 +30,13 @@ class ParameterSearch(Step):
 		self.minlens=[100, 150, 180]
 		self.minsites=[6, 8, 10]
 
-		self.assemblies=set()
-		self.pairwise_alignments=set()
-		self.splits=set()
-		self.sorts=set()
-
 		self.input_file_blocks=None
+
+		self.sorts=set()
+		self.splits=set()
+		self.pairwise_alignments=set()
+		self.assemblies=set()
+		self.autoGeneratePrereqs()
 		
 	def optimizeFalsehoods(self, avg_label_density, expected_label_density):
 		new_falsehoods=[]
@@ -52,11 +53,6 @@ class ParameterSearch(Step):
 		self.falsehoods=new_falsehoods
 
 	def writeCode(self):
-		for falsehood in self.falsehoods:
-                        for pval in self.pvals:
-                                for minlen in self.minlens:
-                                        for minsite in self.minsites:
-                                                self.createDumbAssembly(falsehood, pval, minlen, minsite)
                 run_assemblies=set()
                 for assembly in self.assemblies:
                         if not assembly.isComplete():
@@ -181,8 +177,11 @@ class ParameterSearch(Step):
 		return ""
 
 	def autoGeneratePrereqs(self):
-		# Generate a list
-		pass
+		for falsehood in self.falsehoods:
+                        for pval in self.pvals:
+                                for minlen in self.minlens:
+                                        for minsite in self.minsites:
+                                                self.createDumbAssembly(falsehood, pval, minlen, minsite)
 
 	def getPrereqs(self):
 		return []
