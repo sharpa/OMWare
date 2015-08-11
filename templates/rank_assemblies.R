@@ -1,10 +1,10 @@
-#!/fslhome/jtpage/bin/Rscript
+#!/path/to/Rscript ### SET ME
 
 simp_stat <- read.table('Quality.txt', header=T, row.names=1, sep="\t")
 
 lengths <- simp_stat[,"Length.in.Basepairs"]
 length_percentile <- ecdf(lengths)
-length_ranks <- length_percentile(simp_stat[,"Length.in.basepairs"])
+length_ranks <- length_percentile(simp_stat[,"Length.in.Basepairs"])
 
 counts <- simp_stat[,"Contig.Count"]
 count_percentile <- ecdf(counts)

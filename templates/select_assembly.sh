@@ -26,4 +26,9 @@ with CD(work_dir):
 			print(item)
 #' > Quality.txt ### UNCOMMENT ME LAST
 
-#Rscript rank_assemblies.R #####
+if [ ! -e rank_assemblies.R ]
+then
+	cp /path/to/templates/rank_assemblies.R . ### SET ME
+	vim rank_assemblies.R
+fi
+./rank_assemblies.R
