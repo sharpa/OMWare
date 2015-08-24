@@ -1,25 +1,23 @@
-# Module: Operations.BioNano.Assemble.ReferenceAlign
+# Module: Operations.BioNano.Compare.ReferenceAlign
 # Version: 0.1
 # Author: Aaron Sharp
 # Date: 05/28/2015
 # 
 # The purpose of this module is to WRITE CODE (bash) that will
 # run compare a BNG assembly to an in silico digested reference map
-from Utils.MacbookProResources import MacbookProResources
+from Operations.Step import Step
 from collections import OrderedDict
+from copy import copy
 
-class ReferenceAlignment:
-	def __init__(self, input_file, reference_file):
-		self.input_file=input_file
-		self.reference_file=reference_file
-		self.work_dir="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_data_dir"
-		self.ref_aligner_bin="/Users/aaron/Dropbox/Stars/General_BNG/code/POMM_scratch_input/RefAligner"
+class ReferenceAlignment(Step):
+	def __init__(self, workspace, query_file):
+		self.workspace=workspace
+		self.query_file=query_file
+		self.quality=None
 
-		self.resources=MacbookProResources()
+		file_data=self.query_file.split('/')
+		prefix_data=file_data[len(file_data)-1].split('.')
 
-		file_data=self.input_file.split('/')
-		file_data_len=len(file_data)
-		prefix_data=file_data[file_data_len-1].split('.')
 		self.output_prefix=prefix_data[0]
 		self.send_output_to_file=True
 		self.send_error_to_file=True
@@ -56,16 +54,27 @@ class ReferenceAlignment:
 		self.overwrite_output=True
 		self.print_indel_file=True
 
+		self.autoGeneratePrereqs()
+
+	def __hash__(self):
+		return hash((self.workspace.input_file, self.workspace.work_dir, self.query_file))
+
+	def __str__(self):
+		return("Comparison of " + self.query_file + " to " + self.workspace.input_file)
+
 	def writeCode(self):
-		print("cd " + self.work_dir)
-		print("pwd")
+		code="cd " + self.workspace.work_dir + "\n"
+		code+="mkdir " + self.getStepDir() + "\n"
+		code+="cd " + self.getStepDir() + "\n"
+		code+="pwd" + "\n"
+
 		param_values=OrderedDict()
-		param_values["-ref"]=  self.reference_file
-		param_values["-i"]=  self.input_file
+		param_values["-ref"]=  "../" + self.anchor.getOutputFile()
+		param_values["-i"]=  "../" + self.query.getOutputFile()
 		param_values["-o"]=  self.output_prefix
-		param_values["-maxthreads"]=  str(self.resources.getMaxThreads())
-		param_values["-insertThreads"]=  str(self.resources.getMaxThreads())
-		param_values["-maxmem"]=  str(self.resources.getMaxMem())
+		param_values["-maxthreads"]=  str(self.getThreads())
+		param_values["-insertThreads"]=  str(self.getThreads())
+		param_values["-maxmem"]=  str(self.getMem() / self.getThreads())
 		param_values["-output-veto-filter"]=  self.output_veto_regex
 		param_values["-res"]=  str(self.res)
 		param_values["-T"]=  str(self.pval)
@@ -96,11 +105,36 @@ class ReferenceAlignment:
 		if self.print_indel_file:
 			param_values["-indel"]=""
 
-		param_list=[self.ref_aligner_bin]
+		param_list=[self.workspace.binaries["bng_ref_aligner"]]
 		for key in param_values:
 			param_list.append(key)
 			param_list.append(param_values[key])
-		print(" ".join(param_list))
+		code+=" ".join(param_list)
+		return [code]
+
+	def getStepDir(self):
+		return "_".join(["comparison", self.workspace.input_file, self.query_file])
+
+	def getOutputFile(self):
+		return self.getStepDir() + "/" + self.output_prefix + "." + self.getOutputFileExtension()
 
 	def getOutputFileExtension(self):
-		return "cmap"
+		return "xmap"
+
+	def autoGeneratePrereqs(self):
+		self.anchor=Input(self.workspace)
+		workspace_copy=copy(self.workspace)
+		workspace_copy.input_file=self.query_file
+		self.query=Input(workspace_copy)
+
+	def getPrereq(self):
+		return []
+
+	def getMem(self):
+		return self.workspace.resources.getSmallMem()
+	def getTime(self):
+		return self.workspace.resources.getSmallTime()
+	def getThreads(self):
+		return self.workspace.resources.getSmallThreads()
+
+from Operations.BioNano.Compare.Input import Input
