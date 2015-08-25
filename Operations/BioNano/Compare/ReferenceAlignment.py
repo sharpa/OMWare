@@ -73,7 +73,10 @@ class ReferenceAlignment(Step):
 		param_values["-o"]=  self.output_prefix
 		param_values["-maxthreads"]=  str(self.getThreads())
 		param_values["-insertThreads"]=  str(self.getThreads())
-		param_values["-maxmem"]=  str(self.getMem() / self.getThreads())
+		maxmem=self.getMem() / self.getThreads()
+		if maxmem < 1:
+			maxmem=1
+		param_values["-maxmem"]=  str(maxmem)
 		param_values["-output-veto-filter"]=  self.output_veto_regex
 		param_values["-res"]=  str(self.res)
 		param_values["-T"]=  str(self.pval)
@@ -129,7 +132,7 @@ class ReferenceAlignment(Step):
 		return self.merge
 
 	def getMem(self):
-		return self.workspace.resources.getSmallMem()
+		return self.workspace.resources.getSmallMemory()
 	def getTime(self):
 		return self.workspace.resources.getSmallTime()
 	def getThreads(self):

@@ -233,13 +233,13 @@ class tReferenceAlignment(unittest.TestCase):
 		self.assertEqual(self.merge, self.obj.getPrereq())
 
 	def test_getMem(self):
-		Mock.getSmallMem=self.dummy_getNum.im_func
+		Mock.getSmallMemory=self.dummy_getNum.im_func
 		self.workspace.resources=Mock()
 
 		expected=self.dummy_getNum()
 		actual=self.obj.getMem()
 
-		del Mock.getSmallMem
+		del Mock.getSmallMemory
 		del self.workspace.resources
 
 		self.assertEqual(expected, actual)

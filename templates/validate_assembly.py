@@ -31,7 +31,7 @@ with CD(work_dir):
 	### RefineB1, RefineA, Assembly
 	merge=Merge(workspace, assembly)
 
-	step=ReferenceAligment(workspace, merge, genome_reference_file)
+	step=ReferenceAlignment(workspace, merge, genome_reference_file)
 
 	formatter=CodeFormatter()
 	formatter.runOneStep(step)
