@@ -10,6 +10,12 @@ import Utils.Resources
 class Resources(Utils.Resources.Resources):
 	def __init__(self):
 		pass
+	def __eq__(self,other):
+		if other is None:
+			return False
+		return self.__class__==other.__class__
+	def __ne__(self, other):
+		return not self==other
 
 	def getSmallMemory(self):
 		return 1

@@ -6,16 +6,15 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run compare a BNG assembly to an in silico digested reference map
 from Operations.Step import Step
-from collections import OrderedDict
-from copy import copy
 
 class ReferenceAlignment(Step):
-	def __init__(self, workspace, query_file):
+	def __init__(self, workspace, merge, ref_file):
 		self.workspace=workspace
-		self.query_file=query_file
+		self.merge=merge
+		self.ref_file=ref_file
 		self.quality=None
 
-		file_data=self.query_file.split('/')
+		file_data=self.ref_file.split('/')
 		prefix_data=file_data[len(file_data)-1].split('.')
 
 		self.output_prefix=prefix_data[0]
@@ -57,10 +56,10 @@ class ReferenceAlignment(Step):
 		self.autoGeneratePrereqs()
 
 	def __hash__(self):
-		return hash((self.workspace.input_file, self.workspace.work_dir, self.query_file))
+		return hash((self.workspace.input_file, self.workspace.work_dir, self.ref_file))
 
 	def __str__(self):
-		return("Comparison of " + self.query_file + " to " + self.workspace.input_file)
+		return("Comparison of " + self.workspace.input_file + " to " + self.ref_file)
 
 	def writeCode(self):
 		code="cd " + self.workspace.work_dir + "\n"
@@ -113,7 +112,7 @@ class ReferenceAlignment(Step):
 		return [code]
 
 	def getStepDir(self):
-		return "_".join(["comparison", self.workspace.input_file, self.query_file])
+		return "_".join(["comparison", self.workspace.input_file, self.ref_file])
 
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + "." + self.getOutputFileExtension()
@@ -122,13 +121,12 @@ class ReferenceAlignment(Step):
 		return "xmap"
 
 	def autoGeneratePrereqs(self):
-		self.anchor=Input(self.workspace)
-		workspace_copy=copy(self.workspace)
-		workspace_copy.input_file=self.query_file
-		self.query=Input(workspace_copy)
+		work_dir=self.workspace.work_dir
+		self.anchor=Input(Workspace(work_dir, self.ref_file))
+		self.query=Input(Workspace(work_dir, self.merge.getOutputFile()))
 
 	def getPrereq(self):
-		return []
+		return self.merge
 
 	def getMem(self):
 		return self.workspace.resources.getSmallMem()
@@ -137,4 +135,8 @@ class ReferenceAlignment(Step):
 	def getThreads(self):
 		return self.workspace.resources.getSmallThreads()
 
+from Utils.Workspace import Workspace
 from Operations.BioNano.Compare.Input import Input
+from Operations.BioNano.Assemble.Merge import Merge
+from collections import OrderedDict
+from copy import copy
