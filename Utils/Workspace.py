@@ -15,6 +15,14 @@ class Workspace:
 		self.resources=Resources()
 
 		self.errorNotificationEmail=None
+
+	def __eq__(self, other):
+		if other is None:
+			return False
+		return self.__dict__==other.__dict__
+
+	def __ne__(self, other):
+		return not self == other
 		
 	def addBinary(self, name, path):
 		self.binaries[name]=path

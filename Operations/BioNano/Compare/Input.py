@@ -20,7 +20,7 @@ class Input(Step):
 			return False
 		return self.workspace==other.workspace
 	def __ne__(self, other):
-		return self != other
+		return not self == other
 
 	def __str__(self):
 		return "Input: " + self.workspace.input_file

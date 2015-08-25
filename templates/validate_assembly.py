@@ -11,8 +11,9 @@ from Utils.CD import CD
 from Operations.SBATCHCodeFormatter import CodeFormatter
 
 work_dir="/path/to/work/dir/" ### SET ME
-reference_file="input_file.cmap" ### SET ME
-workspace=Workspace(work_dir, reference_file)
+input_file="assembly_input_file.bnx" ###SET ME
+workspace=Workspace(work_dir, input_file)
+genome_reference_file="input_file.cmap" ### SET ME
 workspace.errorNotificationEmail='address@domain.com' ### SET ME
 workspace.addBinary("bng_assembler", "/path/to/Assembler") ### SET ME
 workspace.addBinary("bng_ref_aligner", "/path/to/RefAligner") ### SET ME
@@ -30,7 +31,7 @@ with CD(work_dir):
 	### RefineB1, RefineA, Assembly
 	merge=Merge(workspace, assembly)
 
-	step=ReferenceAligment(workspace, merge.getOutputFile())
+	step=ReferenceAligment(workspace, merge, genome_reference_file)
 
 	formatter=CodeFormatter()
 	formatter.runOneStep(step)

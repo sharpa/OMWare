@@ -5,6 +5,7 @@
 # 
 # The purpose of this module is to provide unit tests for Utils
 import unittest
+from UnitTests.Helper import Mock
 import os
 from copy import copy
 import Utils.CD
@@ -92,6 +93,39 @@ class tFultonResources(unittest.TestCase):
 	def setUp(self):
 		self.obj=Utils.FultonResources.Resources()
 
+	def test_eq_None(self):
+		other=None
+		expected=[False, True]
+
+		actual=[
+			self.obj==other,
+			self.obj!=other
+		]
+
+		self.assertEqual(expected, actual)
+
+	def test_eq_diffClass(self):
+		other=Mock()
+		expected=[False, True]
+
+		actual=[
+			self.obj==other,
+			self.obj!=other
+		]
+
+		self.assertEqual(expected, actual)
+
+	def test_eq_sameClass(self):
+		other=Utils.FultonResources.Resources()
+		expected=[True, False]
+
+		actual=[
+			self.obj==other,
+			self.obj!=other
+		]
+
+		self.assertEqual(expected, actual)
+
 	def test_get_small_memory(self):
 		self.assertEqual(1, self.obj.getSmallMemory())
 	def test_get_medium_memory(self):
@@ -144,6 +178,43 @@ class tWorkspace(unittest.TestCase):
 		input_file="input_file"
 		obj=Utils.Workspace.Workspace(work_dir, input_file)
 		self.assertEqual([work_dir, input_file, {}, Utils.FultonResources.Resources().__class__, None], [obj.work_dir, obj.input_file, obj.binaries, obj.resources.__class__, obj.errorNotificationEmail])
+
+	def test_eq_None(self):
+		other=None
+		obj=Utils.Workspace.Workspace("work_dir", "input_file")
+		expected=[False, True]
+
+		actual=[
+			obj==other,
+			obj!=other
+		]
+
+		self.assertEqual(expected, actual)
+
+	def test_eq_notEq(self):
+		obj=Utils.Workspace.Workspace("work_dir", "input_file")
+		other=Utils.Workspace.Workspace("diff_dir", "diff_file")
+		expected=[False, True]
+
+		actual=[
+			obj==other,
+			obj!=other
+		]
+
+		self.assertEqual(expected, actual)
+
+	def test_eq_eq(self):
+		obj=Utils.Workspace.Workspace("work_dir", "input_file")
+		other=Utils.Workspace.Workspace("work_dir", "input_file")
+		expected=[True, False]
+
+		actual=[
+			obj==other,
+			obj!=other
+		]
+
+		self.assertEqual(expected, actual)
+		
 
 	def test_error_notification_email(self):
 		test_email="address@domain.com"

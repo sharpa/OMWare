@@ -10,6 +10,7 @@ import unittest
 from Operations.BioNano.Compare.Input import Input
 from Operations.BioNano.files import CmapFile
 from Operations.BioNano.Compare.ReferenceAlignment import ReferenceAlignment
+from Utils.Workspace import Workspace
 from UnitTests.Helper import Mock
 
 class tInput(unittest.TestCase):
@@ -29,17 +30,43 @@ class tInput(unittest.TestCase):
 
 	def test_eq_None(self):
 		other=None
-		self.assertFalse(self.obj==other)
+		expected=[False, True]
+		actual=[]
+
+		actual.append(self.obj==other)
+		actual.append(self.obj!=other)
+
+		self.assertEqual(expected, actual)
 
 	def test_eq_diffClass(self):
 		other=Mock(workspace=self.workspace)
-		self.assertFalse(self.obj==other)
+		expected=[False, True]
+		actual=[]
+
+		actual.append(self.obj==other)
+		actual.append(self.obj!=other)
+
+		self.assertEqual(expected, actual)
+
 	def test_eq_diffWorkspace(self):
 		other=Input(Mock(input_file="other_input_file", work_dir="other_work_dir"))
-		self.assertFalse(self.obj==other)
+		expected=[False, True]
+		actual=[]
+
+		actual.append(self.obj==other)
+		actual.append(self.obj!=other)
+
+		self.assertEqual(expected, actual)
+
 	def test_eq_equal(self):
 		other=Input(self.workspace)
-		self.assertTrue(self.obj==other)
+		expected=[True, False]
+		actual=[]
+
+		actual.append(self.obj==other)
+		actual.append(self.obj!=other)
+
+		self.assertEqual(expected, actual)
 
 	def test_writeCode(self):
 		self.assertEqual([], self.obj.writeCode())
@@ -75,12 +102,13 @@ class tInput(unittest.TestCase):
 
 class tReferenceAlignment(unittest.TestCase):
 	workspace=Mock(input_file="input_file", work_dir="work_dir")
-	query_file="query_file"
+	merge=Mock()
+	ref_file="ref_file"
 	def setUp(self):
 		native_autoGen=ReferenceAlignment.autoGeneratePrereqs
 		ReferenceAlignment.autoGeneratePrereqs=self.dummy_autoGen.im_func
 
-		self.obj=ReferenceAlignment(self.workspace, self.query_file)
+		self.obj=ReferenceAlignment(self.workspace, self.merge, self.ref_file)
 
 		ReferenceAlignment.autoGeneratePrereqs=native_autoGen
 
@@ -95,12 +123,13 @@ class tReferenceAlignment(unittest.TestCase):
 		native_autoGen=ReferenceAlignment.autoGeneratePrereqs
 		ReferenceAlignment.autoGeneratePrereqs=self.dummy_autoGen.im_func
 
-		expected=ReferenceAlignment("dummy_workspace", "dummy_query_file")
+		expected=ReferenceAlignment("dummy_workspace", "dummy_merge", "dummy_ref_file")
 		expected.workspace=self.workspace
-		expected.query_file=self.query_file
+		expected.merge=self.merge
+		expected.ref_file=self.ref_file
 		expected.quality=None
 		expected.autoGenCalled=True
-		expected.output_prefix=self.query_file
+		expected.output_prefix=self.ref_file
 		expected.send_output_to_file=True
 		expected.send_error_to_file=True
 		expected.output_veto_regex="_intervals.txt$"
@@ -139,10 +168,10 @@ class tReferenceAlignment(unittest.TestCase):
 		self.assertEqual(expected, self.obj)
 
 	def test_hash(self):
-		self.assertEqual(hash((self.workspace.input_file, self.workspace.work_dir, self.query_file)), self.obj.__hash__())
+		self.assertEqual(hash((self.workspace.input_file, self.workspace.work_dir, self.ref_file)), self.obj.__hash__())
 
 	def test_str(self):
-		self.assertEqual("Comparison of " + self.query_file + " to " + self.workspace.input_file, self.obj.__str__())
+		self.assertEqual("Comparison of " + self.workspace.input_file + " to " + self.ref_file, self.obj.__str__())
 
 	def test_writeCode(self):
 		native_getStepDir=ReferenceAlignment.getStepDir
@@ -156,7 +185,7 @@ class tReferenceAlignment(unittest.TestCase):
 		ReferenceAlignment.getMem=self.dummy_getNum.im_func
 		self.workspace.binaries={"bng_ref_aligner": "RefAligner"}
 
-		expected=["cd work_dir\nmkdir string\ncd string\npwd\nRefAligner -ref ../string -i ../string -o query_file -maxthreads -1 -insertThreads -1 -maxmem 1 -output-veto-filter _intervals.txt$ -res 2.9 -T 1e-10 -FP 0.6 -FN 0.06 -sf 0.2 -sd 0.1 -extend 1 -outlier 0.0001 -endoutlier 0.001 -deltaX 12 -deltaY 12 -xmapchim 14 -hashgen 5 3 2.2 1.2 0.05 3.0 1 1 1 -hash  -hashdelta 50 -mres 0.001 -rres 1.2 -nosplit 2 -biaswt 0 -stdout  -stderr  -force  -indel "]
+		expected=["cd work_dir\nmkdir string\ncd string\npwd\nRefAligner -ref ../string -i ../string -o ref_file -maxthreads -1 -insertThreads -1 -maxmem 1 -output-veto-filter _intervals.txt$ -res 2.9 -T 1e-10 -FP 0.6 -FN 0.06 -sf 0.2 -sd 0.1 -extend 1 -outlier 0.0001 -endoutlier 0.001 -deltaX 12 -deltaY 12 -xmapchim 14 -hashgen 5 3 2.2 1.2 0.05 3.0 1 1 1 -hash  -hashdelta 50 -mres 0.001 -rres 1.2 -nosplit 2 -biaswt 0 -stdout  -stderr  -force  -indel "]
 		actual=self.obj.writeCode()
 
 		ReferenceAlignment.getStepDir=native_getStepDir
@@ -168,7 +197,7 @@ class tReferenceAlignment(unittest.TestCase):
 		self.assertEqual(expected, actual)
 
 	def test_getStepDir(self):
-		self.assertEqual("comparison_" + self.workspace.input_file + "_" + self.query_file, self.obj.getStepDir())
+		self.assertEqual("comparison_" + self.workspace.input_file + "_" + self.ref_file, self.obj.getStepDir())
 
 	def test_getOutputFile(self):
 		native_getStepDir=ReferenceAlignment.getStepDir
@@ -189,14 +218,19 @@ class tReferenceAlignment(unittest.TestCase):
 		self.assertEqual("xmap", self.obj.getOutputFileExtension())
 
 	def test_autoGeneratePrereqs(self):
-		self.obj.anchor=Input(self.workspace)
-		workspace2=Mock(input_file=self.query_file, work_dir=self.workspace.work_dir)
-		self.obj.query=Input(workspace2)
+		Mock.getOutputFile=self.dummy_getString.im_func
+		self.obj.anchor=Input(Workspace(self.workspace.work_dir, self.ref_file))
+		self.obj.query=Input(Workspace(self.workspace.work_dir, self.dummy_getString()))
 
-		actual=ReferenceAlignment(self.workspace, self.query_file)
+		actual=ReferenceAlignment(self.workspace, self.merge, self.ref_file)
 		actual.autoGenCalled=True
 
+		del Mock.getOutputFile
+
 		self.assertEqual(self.obj, actual)
+
+	def test_getPrereq(self):
+		self.assertEqual(self.merge, self.obj.getPrereq())
 
 	def test_getMem(self):
 		Mock.getSmallMem=self.dummy_getNum.im_func
