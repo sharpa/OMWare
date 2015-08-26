@@ -37,6 +37,19 @@ class File(object):
 	def write(self, entity, o_file):
 		raise Exception("Abstract method called")
 		
+class File_iter(object):
+	def __init__(self, input_file):
+		self.i_file=open(input_file, "r")
+	def __iter__(self):
+		return self
+	def __eq__(self, other):
+		if other is None:
+			return False
+		if self.__class__ != other.__class__:
+			return False
+		return self.i_file.name==other.i_file.name
+	def __ne__(self, other):
+		return not self == other
 
 class BnxFile(File):
 	@staticmethod
@@ -62,11 +75,7 @@ class BnxFile(File):
 		quality_two_data.extend(molecule.qualities_two)
 		o_file.write("	".join(quality_two_data) + "\n")
 
-class BnxFile_iter:
-	def __init__(self, input_file):
-		self.i_file=open(input_file, "r")
-	def __iter__(self):
-		return self
+class BnxFile_iter(File_iter):
 	def next(self):
 		while True:
 			try:
@@ -169,17 +178,7 @@ class CmapFile(File):
 			str(label.snr_count)]
 		o_file.write("\t".join(fields) + "\n")
 
-class CmapFile_iter:
-	def __init__(self, input_file):
-		self.i_file=open(input_file)
-	def __iter__(self):
-		return self
-	def __eq__(self, other):
-		if other is None:
-			return False
-		return self.i_file.name==other.i_file.name
-	def __ne__(self, other):
-		return self != other
+class CmapFile_iter(File_iter):
 	def next(self):
 		while True:
 			try:
@@ -220,8 +219,6 @@ class CmapFile_iter:
 			except:
 				raise
 				
-
-
 class Label:
 	def __eq__(self, other):
 		if other is None:
@@ -230,3 +227,80 @@ class Label:
 	def __init__(self, contig_id, label_id):
 		self.contig_id=contig_id
 		self.label_id=label_id
+
+class XmapFile(File):
+	@staticmethod
+	def getExtension():
+		return "xmap"
+
+	def parse(self):
+		return XmapFile_iter(self.input_file)
+	def write(self, alignment, o_file):
+		fields=[str(alignment.alignment_id),
+			str(alignment.query_id),
+			str(alignment.anchor_id),
+			str(alignment.query_start),
+			str(alignment.query_end),
+			str(alignment.anchor_start),
+			str(alignment.anchor_end),
+			alignment.orientation,
+			str(alignment.confidence),
+			alignment.hit_enum,
+			str(alignment.query_len),
+			str(alignment.anchor_len),
+			alignment.label_channel,
+			alignment.alignment
+			]
+		o_file.write("\t".join(fields) + "\n")
+		
+class XmapFile_iter(File_iter):
+	def next(self):
+		while True:
+			try:
+				line=self.i_file.readline()
+				if line=='':
+					self.i_file.close()
+					raise StopIteration
+				if line[0]=="#":
+					continue
+				alignment_data=line.split("\t")
+				if len(alignment_data)<14:
+					raise Exception("this file is incorrectly formatted")
+
+				alignment_id=int(alignment_data[0])
+				query_id=int(alignment_data[1])
+				anchor_id=int(alignment_data[2])
+				new_alignment=Alignment(alignment_id, query_id, anchor_id)
+
+				new_alignment.query_start=float(alignment_data[3])
+				new_alignment.query_end=float(alignment_data[4])
+				new_alignment.query_len=float(alignment_data[10])
+				new_alignment.anchor_start=float(alignment_data[5])
+				new_alignment.anchor_end=float(alignment_data[6])
+				new_alignment.anchor_len=float(alignment_data[11])
+
+				new_alignment.orientation=alignment_data[7]
+				new_alignment.confidence=float(alignment_data[8])
+				new_alignment.hit_enum=alignment_data[9]
+				new_alignment.label_channel=alignment_data[12]
+				new_alignment.alignment=alignment_data[13]
+
+				return new_alignment
+
+			except StopIteration:
+				raise
+			except IndexError:
+				raise Exception("this file is incorrectly formatted")
+			except:
+				raise
+class Alignment:
+	def __eq__(self, other):
+		if other is None:
+			return False
+		return self.__dict__ == other.__dict__
+	def __init__(self, alignment_id, query_id, anchor_id):
+		self.alignment_id=alignment_id
+		self.query_id=query_id
+		self.anchor_id=anchor_id
+	def __repr__(self):
+		return str(self.__dict__)
