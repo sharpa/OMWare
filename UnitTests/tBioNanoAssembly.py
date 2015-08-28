@@ -321,7 +321,7 @@ class tInput(unittest.TestCase):
 		expected_count=0
 		expected_quantity=0.0
 		expected_labels=0
-		for item in dummy_BnxFile().parse("bnx"):
+		for item in dummy_BnxFile().parse():
 			expected_count+=1
 			expected_quantity+=item.length
 			expected_labels+=item.num_labels
@@ -504,7 +504,7 @@ class tInput(unittest.TestCase):
 		self.assertEqual(-1, self.obj.getThreads())
 
 class dummy_BnxFile(object):
-	def parse(self, formt):
+	def parse(self):
 		return [ Mock(length=100.0, num_labels=13),
 			Mock(length=200.0, num_labels=26),
 			Mock(length=300.0, num_labels=39) ]

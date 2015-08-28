@@ -127,133 +127,10 @@ class tStep(unittest.TestCase):
 		self.assertEqual(False, actual)
 
 
-	def test_loadQualityReport_notComplete(self):
-		native_isComplete=Step.isComplete
-		Step.isComplete=tStep.dummy_isComplete_false.im_func
-
-		with self.assertRaises(Exception):
-			self.obj.loadQualityReport(1)
-			Step.isComplete=native_isComplete
-
-		Step.isComplete=native_isComplete
-
-	def test_loadQualityReport_complete_qualityFileDoesNotExist(self):
-		native_isComplete=Step.isComplete
-		Step.isComplete=tStep.dummy_isComplete_true.im_func
-		native_getQualityFileName=Step.getQualityFileName
-		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
-		native_createQualityObject=Step.createQualityObject
-		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
-		native_loadQualityReportItems=Step.loadQualityReportItems
-		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
-		expecteds=[["1", "3", "2", "1.0", "4"], Quality()]
-
-		actuals=[self.obj.loadQualityReport(4)]
-		actuals.append(self.obj.quality)
-
-		Step.isComplete=native_isComplete
-		Step.getQualityFileName=native_getQualityFileName
-		Step.createQualityObject=native_createQualityObject
-		Step.loadQualityReportItems=native_loadQualityReportItems
-
-		self.assertEqual(expecteds, actuals)
-		
-	def test_loadQualityReport_complete_qualityFileDoesExist(self):
-		native_isComplete=Step.isComplete
-		Step.isComplete=tStep.dummy_isComplete_true.im_func
-		native_getQualityFileName=Step.getQualityFileName
-		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
-		native_createQualityObject=Step.createQualityObject
-		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
-		native_loadQualityReportItems=Step.loadQualityReportItems
-		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
-		expecteds=[["1", "3", "2", "1.0"], None]
-
-		with open("Quality.json", "w"):
-			actuals=[self.obj.loadQualityReport(3)]
-			actuals.append(self.obj.quality)
-		os.remove("Quality.json")
-
-		Step.isComplete=native_isComplete
-		Step.getQualityFileName=native_getQualityFileName
-		Step.createQualityObject=native_createQualityObject
-		Step.loadQualityReportItems=native_loadQualityReportItems
-
-		self.assertEqual(expecteds, actuals)
-
-	def test_loadQualityReport_complete_qualityFileDoesExist_cutoff2(self):
-		native_isComplete=Step.isComplete
-		Step.isComplete=tStep.dummy_isComplete_true.im_func
-		native_getQualityFileName=Step.getQualityFileName
-		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
-		native_createQualityObject=Step.createQualityObject
-		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
-		native_loadQualityReportItems=Step.loadQualityReportItems
-		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
-		expecteds=[["1", "2", "1.0"], None]
-
-		with open("Quality.json", "w"):
-			actuals=[self.obj.loadQualityReport(2)]
-			actuals.append(self.obj.quality)
-		os.remove("Quality.json")
-
-		Step.isComplete=native_isComplete
-		Step.getQualityFileName=native_getQualityFileName
-		Step.createQualityObject=native_createQualityObject
-		Step.loadQualityReportItems=native_loadQualityReportItems
-
-		self.assertEqual(expecteds, actuals)
-
-	def test_loadQualityReport_complete_qualityFileDoesExist_cutoff1(self):
-		native_isComplete=Step.isComplete
-		Step.isComplete=tStep.dummy_isComplete_true.im_func
-		native_getQualityFileName=Step.getQualityFileName
-		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
-		native_createQualityObject=Step.createQualityObject
-		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
-		native_loadQualityReportItems=Step.loadQualityReportItems
-		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
-		expecteds=[["1", "1.0"], None]
-
-		with open("Quality.json", "w"):
-			actuals=[self.obj.loadQualityReport(1)]
-			actuals.append(self.obj.quality)
-		os.remove("Quality.json")
-
-		Step.isComplete=native_isComplete
-		Step.getQualityFileName=native_getQualityFileName
-		Step.createQualityObject=native_createQualityObject
-		Step.loadQualityReportItems=native_loadQualityReportItems
-
-		self.assertEqual(expecteds, actuals)
-
-	def test_loadQualityReport_complete_qualityFileDoesExist_cutoff0(self):
-		native_isComplete=Step.isComplete
-		Step.isComplete=tStep.dummy_isComplete_true.im_func
-		native_getQualityFileName=Step.getQualityFileName
-		Step.getQualityFileName=tStep.dummy_getQualityFileName.im_func
-		native_createQualityObject=Step.createQualityObject
-		Step.createQualityObject=tStep.dummy_createQualityObject.im_func
-		native_loadQualityReportItems=Step.loadQualityReportItems
-		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
-		expecteds=[[], None]
-
-		with open("Quality.json", "w"):
-			actuals=[self.obj.loadQualityReport(0)]
-			actuals.append(self.obj.quality)
-		os.remove("Quality.json")
-
-		Step.isComplete=native_isComplete
-		Step.getQualityFileName=native_getQualityFileName
-		Step.createQualityObject=native_createQualityObject
-		Step.loadQualityReportItems=native_loadQualityReportItems
-
-		self.assertEqual(expecteds, actuals)
-
-	def test_get_quality_file_name(self):
+	def test_getQualityFileName(self):
 		native_getStepDir=Step.getStepDir
 		Step.getStepDir=tStep.dummy_getStepDir.im_func
-		expected="tmp/Quality.json"
+		expected=self.dummy_getStepDir() + "/Quality.json"
 
 		actual=self.obj.getQualityFileName()
 
@@ -261,6 +138,70 @@ class tStep(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 		
+	def dummy_loadQualityObjectFromFile(self):
+		self.quality=Mock(dummy=True)
+
+	def test_loadQualityReport_noQuality_cutoff1(self):
+		native_loadQualityObjectFromFile=Step.loadQualityObjectFromFile
+		Step.loadQualityObjectFromFile=tStep.dummy_loadQualityObjectFromFile.im_func
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "1.0"], Mock(dummy=True)]
+		actuals=[
+			self.obj.loadQualityReport(1),
+			self.obj.quality
+		]
+
+		Step.loadQualityObjectFromFile=native_loadQualityObjectFromFile
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+		
+	def test_loadQualityReport_quality_cutoff2(self):
+		self.obj.quality=Mock(dummy=False)
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "2", "1.0"], Mock(dummy=False)]
+
+		actuals=[
+			self.obj.loadQualityReport(2),
+			self.obj.quality
+		]
+
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_loadQualityReport_quality_cutoff1(self):
+		self.obj.quality=Mock(dummy=False)
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[["1", "1.0"], Mock(dummy=False)]
+
+		actuals=[
+			self.obj.loadQualityReport(1),
+			self.obj.quality
+		]
+
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_loadQualityReport_quality_cutoff0(self):
+		self.obj.quality=Mock(dummy=False)
+		native_loadQualityReportItems=Step.loadQualityReportItems
+		Step.loadQualityReportItems=tStep.dummy_loadQualityReportItems.im_func
+		expecteds=[[], Mock(dummy=False)]
+
+		actuals=[
+			self.obj.loadQualityReport(0),
+			self.obj.quality
+		]
+
+		Step.loadQualityReportItems=native_loadQualityReportItems
+
+		self.assertEqual(expecteds, actuals)
+
 	def test_create_quality_object(self):
 		with self.assertRaises(Exception):
 			self.obj.createQualityObject()
