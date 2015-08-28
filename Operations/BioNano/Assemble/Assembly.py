@@ -9,6 +9,7 @@ from Operations.Step import Step
 from collections import OrderedDict
 from copy import copy
 from glob import glob
+from os import path
 
 class GenericAssembly(Step):
 	def __init__(self, workspace, vital_parameters):
@@ -166,6 +167,12 @@ class Assembly(GenericAssembly):
 		self.pairwise_alignment=PairwiseAlignment(self.workspace, copy(self.vital_parameters))
 		self.pairwise_summary=Summarize(self.workspace, self.pairwise_alignment)
 
+	def getPrereq(self):
+		return self.pairwise_summary
+
+	def isComplete(self):
+		return path.exists(self.getOutputFile())
+
 	def createQualityObject(self):
 		if not self.isComplete():
 			raise Exception("The step is not complete yet")
@@ -192,9 +199,6 @@ class Assembly(GenericAssembly):
 		if self.quality is None:
 			self.loadQualityObjectFromFile()
 		return self.quality.length
-
-	def getPrereq(self):
-		return self.pairwise_summary
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()

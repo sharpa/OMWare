@@ -172,6 +172,28 @@ class tAssembly(unittest.TestCase):
 		self.obj.pairwise_summary=pairwise_summary
 
 		self.assertEqual(pairwise_summary,self.obj.getPrereq())
+
+	def test_isComplete_is(self):
+		native_getOutputFile=Assembly.getOutputFile
+		Assembly.getOutputFile=self.dummy_getOutputFile.im_func
+		with open(self.dummy_getOutputFile(), "w"):
+
+			actual = self.obj.isComplete()
+
+		os.remove(self.dummy_getOutputFile())
+		Assembly.getOutputFile=native_getOutputFile
+
+		self.assertTrue(actual)
+
+	def test_isComplete_isNot(self):
+		native_getOutputFile=Assembly.getOutputFile
+		Assembly.getOutputFile=self.dummy_getOutputFile.im_func
+
+		actual = self.obj.isComplete()
+		Assembly.getOutputFile=native_getOutputFile
+
+		self.assertFalse(actual)
+
 	def dummy_returnFalse(self):
 		return False
 
