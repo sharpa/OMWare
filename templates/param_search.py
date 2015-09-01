@@ -19,6 +19,7 @@ parameter_search=ParameterSearch(workspace, genome_size_mb)
 #average_label_density=7.0 ### SET ME MAYBE
 #expected_label_density=13.5 ### SET ME MAYBE
 #parameter_search.optimizeFalsehoods(average_label_density, expected_label_density) ### UNCOMMENT ME MAYBE
+#parameter_search.autoGeneratePrereqs() ### UNCOMMENT ME MAYBE
 
 with CD(work_dir):
 	formatter=CodeFormatter()
