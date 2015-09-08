@@ -180,6 +180,7 @@ class ParameterSearch(Step):
 		return ""
 
 	def autoGeneratePrereqs(self):
+		self.assemblies=set()
 		for falsehood in self.falsehoods:
                         for pval in self.pvals:
                                 for minlen in self.minlens:
