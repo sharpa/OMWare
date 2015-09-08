@@ -6,6 +6,7 @@
 # The purpose of this module is to WRITE CODE (bash) that will
 # run compare a BNG assembly to an in silico digested reference map
 from Operations.Step import Step
+from sys import maxint
 
 class ReferenceAlignment(Step):
 	def __init__(self, workspace, merge, ref_file):
@@ -131,6 +132,77 @@ class ReferenceAlignment(Step):
 	def getPrereq(self):
 		return self.merge
 
+	def loadQualityReportItems(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+
+		report_items=OrderedDict()
+		report_items["Num alignments: " + str(self.quality.num_alignments)]=1
+		report_items["Total length: " + str(self.quality.total_length)]=2
+		report_items["Query length: " + str(self.quality.query_length)]=3
+		report_items["Proportion of query with match: "  + str(self.quality.proportion_query)]=1
+		report_items["Anchor length: " + str(self.quality.anchor_length)]=3
+		report_items["Proportion of anchor with match: " + str(self.quality.proportion_anchor)]=1
+
+		report_items["Total confidence: " + str(self.quality.total_confidence)]=2
+		report_items["Max confidence: " + str(self.quality.max_confidence)]=2
+		report_itmes["Min confidence: " + str(self.quality.min_confidence)]=2
+		report_items["Average confidence: " + str(self.quality.average_confidence)]=3
+		report_items["Weighted average confidence: " + str(self.quality.weighted_average_confidence)]=1
+		return report_items
+
+	def createQualityObject(self):
+		query_length=0.0
+		anchor_length=0.0
+		num_alignments=0
+		confidences=[]
+		total_confidence=0.0
+		total_length=0.0
+		max_confidence=0.0
+		min_confidence=maxint
+		
+		for alignment in XmapFile(self.getOutputFile()).parse():
+			num_alignments+=1
+
+			conf=alignment.confidence 
+			total_confidence+=conf
+
+			if conf > max_confidence:
+				max_confidence=conf
+			if conf < min_confidence:
+				min_confidence=conf
+
+			length=max(alignment.query_len, alignment.anchor_len)
+			total_length+=length
+
+			confidences.append(conf, length)
+
+		weighted_average_confidence=0.0
+		for conf, length in confidences:
+			adjustment=length / total_length
+			adjusted_confidence=conf * adjustment
+			weighted_average_confidence+=adjusted_confidence
+
+		proportion_query=query_length / self.query.loadQuality_length()
+		proportion_anchor=anchor_length / self.ancho.loadQuality_length()
+		average_confidence=total_confidence / num_alignments
+
+		self.quality=Quality(
+			num_alignment=num_alignments,
+			total_length=total_length,
+			query_length=query_length,
+			proportion_query=proportion_query,
+			anchor_length=anchor_length,
+			proportion_anchor=proportion_anchor,
+
+			total_confidence=total_confidence,
+			min_confidence=min_confidence,
+			max_confidence=max_confidence,
+			average_confidence=average_confidence,
+			weighted_average_confidence=weighted_average_confidence
+		)
+		self.saveQualityObjectToFile()
+
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
 	def getTime(self):
@@ -139,7 +211,10 @@ class ReferenceAlignment(Step):
 		return self.workspace.resources.getSmallThreads()
 
 from Utils.Workspace import Workspace
+from Operations.Step import Quality
 from Operations.BioNano.Compare.Input import Input
 from Operations.BioNano.Assemble.Merge import Merge
+from Operations.BioNano.files import XmapFile
 from collections import OrderedDict
 from copy import copy
+from collections import OrderedDict

@@ -38,6 +38,31 @@ class Input(Step):
 	def getPrereq(self):
 		return None
 
+	def getCmapFile(self):
+		return CmapFile(self.workspace.input_file)
+
+	def loadQualityReportItems(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return {"Length: " + str(self.quality.length): 1}
+
+	def createQualityObject(self):
+		if not self.isComplete():
+			raise Exception("Quality cannot be determined before step is complete")
+		length=0
+		ids=set()
+		for label in self.getCmapFile():
+			if label.contig_id not in ids:
+				length+=label.contig_len
+				ids.add(label.contig_id)
+		self.quality=Quality(length=length)
+		self.saveQualityObjectToFile()
+
+	def loadQuality_length(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.length
+
 	def getMem(self):
 		return -1
 	def getTime(self):
@@ -46,3 +71,4 @@ class Input(Step):
 		return -1
 
 from Operations.BioNano.files import CmapFile
+from Operations.Step import Quality
