@@ -16,7 +16,8 @@ class CodeFormatter (Operations.CodeFormatter.CodeFormatter):
 			batch_step_part="#!/bin/bash\n"
 			batch_step_part+="#SBATCH --mem " + str(1024*step.getMem()) + "M\n"
 			batch_step_part+="#SBATCH --time " + str(step.getTime()) + ":00:00\n"
-			batch_step_part+="#SBATCH --ntasks " + str(step.getThreads()) + "\n"
+			batch_step_part+="#SBATCH --ntasks 1\n"
+			batch_step_part+="#SBATCH --cpus-per-task " + str(step.getThreads()) + "\n"
 
 			errorNotificationEmail=step.getErrorNotificationEmail()
 			if errorNotificationEmail is not None:
