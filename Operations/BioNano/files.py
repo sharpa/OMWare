@@ -189,8 +189,8 @@ class CmapFile_iter(File_iter):
 				if line[0]=="#":
 					continue
 				label_data=line.split("\t")
-				# The cmap file format may have 11 fields, or 12, depending on if it is unmerged, or merged respectively
-				if len(label_data)<11:
+				# The cmap file format may have 9, 11 or 12 fields, depending on if it is in silico digested, unmerged, or merged respectively
+				if len(label_data)<9:
 					raise Exception("this file is incorrectly formatted")
 
 				label_id=int(label_data[3])
@@ -205,8 +205,9 @@ class CmapFile_iter(File_iter):
 				new_label.stdev=float(label_data[6])
 				new_label.coverage=float(label_data[7]) # I'm not sure why this is a float, not an int
 				new_label.occurrences=float(label_data[8])
-				new_label.snr_mean=float(label_data[9])
-				new_label.snr_stdev=float(label_data[10])
+				if len(label_data) > 9:
+					new_label.snr_mean=float(label_data[9])
+					new_label.snr_stdev=float(label_data[10])
 				if len(label_data) > 11:
 					new_label.snr_count=float(label_data[11])
 				

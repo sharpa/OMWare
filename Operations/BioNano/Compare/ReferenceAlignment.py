@@ -127,10 +127,12 @@ class ReferenceAlignment(Step):
 	def autoGeneratePrereqs(self):
 		work_dir=self.workspace.work_dir
 		self.anchor=Input(Workspace(work_dir, self.ref_file))
+		self.anchor.prereq=self.merge
 		self.query=Input(Workspace(work_dir, self.merge.getOutputFile()))
+		self.query.prereq=self.anchor
 
 	def getPrereq(self):
-		return self.merge
+		return self.query
 
 	def loadQualityReportItems(self):
 		if self.quality is None:
@@ -146,7 +148,7 @@ class ReferenceAlignment(Step):
 
 		report_items["Total confidence: " + str(self.quality.total_confidence)]=2
 		report_items["Max confidence: " + str(self.quality.max_confidence)]=2
-		report_itmes["Min confidence: " + str(self.quality.min_confidence)]=2
+		report_items["Min confidence: " + str(self.quality.min_confidence)]=2
 		report_items["Average confidence: " + str(self.quality.average_confidence)]=3
 		report_items["Weighted average confidence: " + str(self.quality.weighted_average_confidence)]=1
 		return report_items
@@ -172,10 +174,12 @@ class ReferenceAlignment(Step):
 			if conf < min_confidence:
 				min_confidence=conf
 
-			length=max(alignment.query_len, alignment.anchor_len)
+			query_length+=abs(alignment.query_end-alignment.query_start)
+			anchor_length+=abs(alignment.anchor_end-alignment.anchor_start)
+			length=max(query_length, anchor_length)
 			total_length+=length
 
-			confidences.append(conf, length)
+			confidences.append((conf, length))
 
 		weighted_average_confidence=0.0
 		for conf, length in confidences:
@@ -184,11 +188,11 @@ class ReferenceAlignment(Step):
 			weighted_average_confidence+=adjusted_confidence
 
 		proportion_query=query_length / self.query.loadQuality_length()
-		proportion_anchor=anchor_length / self.ancho.loadQuality_length()
+		proportion_anchor=anchor_length / self.anchor.loadQuality_length()
 		average_confidence=total_confidence / num_alignments
 
 		self.quality=Quality(
-			num_alignment=num_alignments,
+			num_alignments=num_alignments,
 			total_length=total_length,
 			query_length=query_length,
 			proportion_query=proportion_query,
