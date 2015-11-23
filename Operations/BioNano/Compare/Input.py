@@ -40,6 +40,7 @@ class Input(Step):
 		return [code]
 
 	def getStepDir(self):
+#		return self.step_dir
 		return "comparison_input_" + self.file_name
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.file_name
@@ -56,24 +57,54 @@ class Input(Step):
 	def loadQualityReportItems(self):
 		if self.quality is None:
 			self.loadQualityObjectFromFile()
-		return {"Length: " + str(self.quality.length): 1}
+		return {"Length: " + str(self.quality.length): 1,
+			"Count: " + str(self.quality.count): 1,
+			"N50: " + str(self.quality.n50): 2}
 
 	def createQualityObject(self):
 		if not self.isComplete():
 			raise Exception("Quality cannot be determined before step is complete")
-		length=0
+		lengths=[]
+		total_length=0
 		ids=set()
+		max_coverage=-1
+		min_max_coverage=-1
 		for label in self.getCmapFile().parse():
 			if label.contig_id not in ids:
-				length+=label.contig_len
+				if max_coverage < min_max_coverage or min_max_coverage < 0:
+					min_max_coverage=max_coverage
+				max_coverage=0.0
+				lengths.append(label.contig_len)
+				total_length+=label.contig_len
 				ids.add(label.contig_id)
-		self.quality=Quality(length=length)
+			if label.coverage > max_coverage:
+				max_coverage=label.coverage
+			
+
+		sorted_lengths=sorted(lengths, reverse=True)
+		minlen=sorted_lengths[len(sorted_lengths)-1]
+		maxlen=sorted_lengths[0]
+		n50=0
+		length_included_in_n50=0
+		target_length_included=float(total_length)/2.0
+		for length in sorted_lengths:
+			length_included_in_n50+=length
+			if length_included_in_n50 >= target_length_included:
+				n50=length
+				break
+
+		self.quality=Quality(length=total_length, count=len(ids), average_length=total_length/count, n50=n50, min=minlen, max=maxlen, min_max_coverage=min_max_coverage)
 		self.saveQualityObjectToFile()
 
 	def loadQuality_length(self):
 		if self.quality is None:
 			self.loadQualityObjectFromFile()
 		return self.quality.length
+
+	def loadQuality_count(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.count
 
 	def getMem(self):
 		return 1

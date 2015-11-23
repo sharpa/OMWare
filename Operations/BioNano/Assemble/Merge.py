@@ -10,6 +10,8 @@ from collections import OrderedDict
 
 class Merge(Step):
 	def __init__(self, workspace, assembly):
+		if isinstance(assembly,VitalParameters):
+			assembly=Assembly(workspace, assembly)
 		self.workspace=workspace
 		self.assembly=assembly
 		self.quality=assembly.quality
@@ -82,3 +84,5 @@ class Merge(Step):
 		return 1
 
 from Operations.BioNano.Assemble.Summarize import Summarize
+from Operations.BioNano.Assemble.Assembly import Assembly
+from Operations.BioNano.Assemble.VitalParameters import VitalParameters

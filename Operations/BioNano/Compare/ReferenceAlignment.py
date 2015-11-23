@@ -116,6 +116,7 @@ class ReferenceAlignment(Step):
 		return [code]
 
 	def getStepDir(self):
+#		return self.step_dir
 		return "_".join(["comparison", self.workspace.input_file, self.ref_file])
 
 	def getOutputFile(self):
@@ -140,9 +141,14 @@ class ReferenceAlignment(Step):
 
 		report_items=OrderedDict()
 		report_items["Num alignments: " + str(self.quality.num_alignments)]=1
+		num_query_contigs=self.query.loadQuality_count()
+		report_items["Num query contigs total: " + str(num_query_contigs)]=3
+		report_items["Num query contigs that don't align: " + str(num_query_contigs-self.quality.aligned_query_contig_num)]=2 
+		self.quality.unaligned_query_contig_num=num_query_contigs-self.quality.aligned_query_contig_num
 		report_items["Total length: " + str(self.quality.total_length)]=2
 		report_items["Query length: " + str(self.quality.query_length)]=3
 		report_items["Proportion of query with match: "  + str(self.quality.proportion_query)]=1
+		report_items["Average proportion of query contig within match: " + str(self.quality.average_proportion_of_query_matching)]=2
 		report_items["Anchor length: " + str(self.quality.anchor_length)]=3
 		report_items["Proportion of anchor with match: " + str(self.quality.proportion_anchor)]=1
 
@@ -155,8 +161,10 @@ class ReferenceAlignment(Step):
 
 	def createQualityObject(self):
 		query_length=0.0
+		proportion_of_query_matching=0.0
 		anchor_length=0.0
 		num_alignments=0
+		aligned_query_contigs=set()
 		confidences=[]
 		total_confidence=0.0
 		total_length=0.0
@@ -165,6 +173,7 @@ class ReferenceAlignment(Step):
 		
 		for alignment in XmapFile(self.getOutputFile()).parse():
 			num_alignments+=1
+			aligned_query_contigs.add(alignment.query_id)
 
 			conf=alignment.confidence 
 			total_confidence+=conf
@@ -175,6 +184,7 @@ class ReferenceAlignment(Step):
 				min_confidence=conf
 
 			query_length+=abs(alignment.query_end-alignment.query_start)
+			proportion_of_query_matching+=query_length/alignment.query_len
 			anchor_length+=abs(alignment.anchor_end-alignment.anchor_start)
 			length=max(query_length, anchor_length)
 			total_length+=length
@@ -193,9 +203,11 @@ class ReferenceAlignment(Step):
 
 		self.quality=Quality(
 			num_alignments=num_alignments,
+			aligned_query_contig_num=len(aligned_query_contigs),
 			total_length=total_length,
 			query_length=query_length,
 			proportion_query=proportion_query,
+			average_proportion_of_query_matching=(proportion_of_query_matching/num_alignments),
 			anchor_length=anchor_length,
 			proportion_anchor=proportion_anchor,
 
