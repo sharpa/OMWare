@@ -211,10 +211,12 @@ class ParameterSearch(Step):
 		return report
 		
 	def createQualityObject(self):
-		if not self.isComplete():
-			raise Exception("Cannont ascertain quality if this step is not complete")
+##		if not self.isComplete():
+##			raise Exception("Cannont ascertain quality if this step is not complete")
 		self.quality=Quality(assemblies={})
 		for assembly in self.assemblies:
+			if not assembly.isComplete():
+				continue
 			count=assembly.getQuality_count()
 			length=assembly.getQuality_length()
 			self.quality.assemblies[assembly.getStepDir()]=[str(assembly.vital_parameters.fp), str(assembly.vital_parameters.fn), str(assembly.vital_parameters.pval), str(assembly.vital_parameters.min_molecule_len), str(assembly.vital_parameters.min_molecule_sites), str(count), str(length)]
