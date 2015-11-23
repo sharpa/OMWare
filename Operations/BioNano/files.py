@@ -36,6 +36,11 @@ class File(object):
 		raise Exception("Abstract method called")
 	def write(self, entity, o_file):
 		raise Exception("Abstract method called")
+	def writeDefaultHeaders(self, o_file):
+		raise Exception("Abstract method called")
+
+	def getFileName(self):
+		return self.input_file
 		
 class File_iter(object):
 	def __init__(self, input_file):
@@ -172,11 +177,20 @@ class CmapFile(File):
 			str(label.position),
 			str(label.stdev),
 			str(label.coverage),
-			str(label.occurrences),
-			str(label.snr_mean),
-			str(label.snr_stdev),
-			str(label.snr_count)]
+			str(label.occurrences)]
+		if hasattr(label, 'snr_mean'):
+			fields.extend([str(label.snr_mean),
+				str(label.snr_stdev),
+				str(label.snr_count)])
 		o_file.write("\t".join(fields) + "\n")
+	def writeDefaultHeaders(self, o_file):
+		o_file.write("""# CMAP File Version:    0.1
+# Label Channels:       1
+# Nickase Recognition Site 1:   cctcagc
+# Enzyme1:      Nt.BbvCI
+#h CMapId       ContigLength    NumSites        SiteID  LabelChannel    Positio
+#f int  float   int     int     int     float   float   int     int\n""")
+
 
 class CmapFile_iter(File_iter):
 	def next(self):
