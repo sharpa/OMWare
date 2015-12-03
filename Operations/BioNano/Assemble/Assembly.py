@@ -176,19 +176,45 @@ class Assembly(GenericAssembly):
 	def createQualityObject(self):
 		if not self.isComplete():
 			raise Exception("The step is not complete yet")
-		stats={"count": 0, "length": 0.0}
+		count=0
+		total_length=0.0
+		lengths=[]
+		label_occurrences=0
+		label_count=0
 		for cmap_name in glob(self.getStepDir() + "/*.cmap"): # This glob relies on there not being a merged .cmap in the same directory (i.e. Summarize has not been run)
-			contigs={}
+			contigs=set()
 			cmap_file=CmapFile(cmap_name)
 			for label in cmap_file.parse():
-				if label.contig_id in contigs:
-					continue
-				contigs[label.contig_id]=label.contig_len
-			for contig in contigs:
-				stats["count"]+=1
-				stats["length"]+=contigs[contig]
+				if not label.contig_id in contigs:
+					count+=1
+					total_length+=label.contig_len
+					contigs.add(label.contig_id)
+					lengths.append(label.contig_len)
+				label_occurrences+=label.occurrences
+				label_count+=1
+		
+		sorted_lengths=sorted(lengths, reverse=True)
+		minlen=sorted_lengths[len(sorted_lengths)-1]
+		maxlen=sorted_lengths[0]
+		n50=0
+		length_included_in_n50=0
+		target_length_included=total_length/2.0
+		for length in sorted(lengths, reverse=True):
+			length_included_in_n50+=length
+			if length_included_in_n50 >= target_length_included:
+				n50 = length
+				break
 
-		self.quality=Quality(count=stats["count"], length=stats["length"])
+		with open(self.getOutputFile()) as contig_file:
+			for line in contig_file:
+				if line[0] != "C":
+					continue
+				contig_data=line.split(",")
+				nummaps=contig_data[len(contig_data)-1]
+				nummaps_data=nummaps.split("=")
+				nummaps=nummaps_data[len(nummaps_data)-1]
+
+		self.quality=Quality(length=total_length, count=count, average_length=total_length/count, n50=n50, min=minlen, max=maxlen, average_occurrences=float(label_occurrences)/label_count, total_mols_aligned=nummaps, avg_mols_aligned=float(nummaps)/count)
 		self.saveQualityObjectToFile()
 
 	def getQuality_count(self):
@@ -199,6 +225,34 @@ class Assembly(GenericAssembly):
 		if self.quality is None:
 			self.loadQualityObjectFromFile()
 		return self.quality.length
+	def getQuality_averageLength(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.average_length
+	def getQuality_n50(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.n50
+	def getQuality_max(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.max
+	def getQuality_min(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.min
+	def getQuality_averageOccurrences(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.average_occurrences
+	def getQuality_totalMolsAligned(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.total_mols_aligned
+	def getQuality_avgMolsAligned(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.avg_mols_aligned
 
 	def getMem(self):
 		return self.workspace.resources.getLargeMemory()

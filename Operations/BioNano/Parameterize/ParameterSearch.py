@@ -219,7 +219,14 @@ class ParameterSearch(Step):
 				continue
 			count=assembly.getQuality_count()
 			length=assembly.getQuality_length()
-			self.quality.assemblies[assembly.getStepDir()]=[str(assembly.vital_parameters.fp), str(assembly.vital_parameters.fn), str(assembly.vital_parameters.pval), str(assembly.vital_parameters.min_molecule_len), str(assembly.vital_parameters.min_molecule_sites), str(count), str(length)]
+			average_length=assembly.getQuality_averageLength()
+			n50=assembly.getQuality_n50()
+			max_length=assembly.getQuality_max()
+			min_length=assembly.getQuality_min()
+			avg_occur=assembly.getQuality_averageOccurrences()
+			total_mols_aligned=assembly.getQuality_totalMolsAligned()
+			avg_mols_aligned=assembly.getQuality_avgMolsAligned()
+			self.quality.assemblies[assembly.getStepDir()]=[str(assembly.vital_parameters.fp), str(assembly.vital_parameters.fn), str(assembly.vital_parameters.pval), str(assembly.vital_parameters.min_molecule_len), str(assembly.vital_parameters.min_molecule_sites), str(count), str(length), str(average_length), str(n50), str(max_length), str(min_length), str(avg_occur), str(total_mols_aligned), str(avg_mols_aligned)]
 		self.saveQualityObjectToFile()
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
