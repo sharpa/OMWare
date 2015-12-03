@@ -55,6 +55,8 @@ class File_iter(object):
 		return self.i_file.name==other.i_file.name
 	def __ne__(self, other):
 		return not self == other
+	def next(self):
+		raise Exception("Abstract method called")
 
 class BnxFile(File):
 	@staticmethod
