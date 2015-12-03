@@ -20,7 +20,7 @@ class Subsetter(object):
 			bnx_file=BnxFile(self.input_file)
 			for header in bnx_file.getHeaders():
 				o_file.write(header)
-			for molecule in bnx_file.parse("bnx"):
+			for molecule in bnx_file.parse():
 				if criteria(molecule):
 					bnx_file.write(molecule, o_file)
 
@@ -53,7 +53,7 @@ class RunCharacterizer(object):
 
 	def characterize(self):
 		bnx_file=BnxFile(self.input_file)
-		for molecule in bnx_file.parse('bnx'):
+		for molecule in bnx_file.parse():
 			run_id=molecule.run_id
 			if run_id not in self.dataset_stats:
 				self.dataset_stats[run_id]={"length": 0.0, "labels": 0.0}
