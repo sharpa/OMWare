@@ -40,7 +40,8 @@ class Input(Step):
 		return [code]
 
 	def getStepDir(self):
-#		return self.step_dir
+		if hasattr(self, "step_dir"):
+			return self.step_dir
 		return "comparison_input_" + self.file_name
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.file_name

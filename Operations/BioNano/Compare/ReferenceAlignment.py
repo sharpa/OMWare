@@ -117,7 +117,7 @@ class ReferenceAlignment(Step):
 
 	def getStepDir(self):
 #		return self.step_dir
-		return "_".join(["comparison", self.workspace.input_file, self.ref_file])
+		return "_".join(["comparison", self.workspace.input_file, str(self.merge.assembly.vital_parameters.fp), str(self.merge.assembly.vital_parameters.fn), str(self.merge.assembly.vital_parameters.pval), str(self.merge.assembly.vital_parameters.min_molecule_len), str(self.merge.assembly.vital_parameters.min_molecule_sites), self.ref_file])
 
 	def getOutputFile(self):
 		return self.getStepDir() + "/" + self.output_prefix + "." + self.getOutputFileExtension()
@@ -131,6 +131,7 @@ class ReferenceAlignment(Step):
 		self.anchor.prereq=self.merge
 		self.query=Input(Workspace(work_dir, self.merge.getOutputFile()))
 		self.query.prereq=self.anchor
+		self.query.step_dir="input_for_"+self.getStepDir()
 
 	def getPrereq(self):
 		return self.query
