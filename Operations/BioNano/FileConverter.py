@@ -15,6 +15,12 @@ class FileConverter:
 		if self.input_file.getExtension()=="fa":
 			if self.output_file.getExtension()=="cmap":
 				self.convert_from_fasta_to_cmap()
+		elif self.input_file.getExtension()=="xmap":
+			if self.output_file.getExtension()=="bed":
+				self.convert_from_xmap_to_bed()
+		elif self.input_file.getExtension()=="cmap":
+			if self.output_file.getExtension()=="len":
+				self.convert_from_cmap_to_len()
 
 	def convert_from_fasta_to_cmap(self):
 		if self.digestor is None:
@@ -34,6 +40,46 @@ class FileConverter:
 					labels=self.digestor.digest(record, contig_id)
 					for label in labels:
 						self.output_file.write(label, o_file)
+
+	def convert_from_xmap_to_bed(self):
+		with open(self.output_file.input_file, 'w') as o_file:
+			self.output_file.writeDefaultHeaders(o_file)
+			for i, alignment in enumerate(self.input_file.parse()):
+				chrom="chr"+str(alignment.anchor_id)
+				if alignment.orientation=="+":
+					start=alignment.anchor_start-alignment.query_start
+					stop=alignment.anchor_end+(alignment.query_len-alignment.query_end)
+				elif alignment.orientation=="-":
+					start=alignment.anchor_start-(alignment.query_len-alignment.query_end)
+					stop=alignment.anchor_end+alignment.query_start
+				if start < 0:
+					start=0
+				if stop > alignment.anchor_len:
+					stop=alignment.anchor_len
+				name="contig"+str(alignment.query_id)
+				feature=Feature(chrom, int(start), int(stop), name)
+				feature.score=int(alignment.confidence*10)
+				feature.strand=alignment.orientation
+				feature.thick_start=int(alignment.anchor_start)
+				feature.thick_end=int(alignment.anchor_end)
+				feature.item_rgb=[0,0,0]
+				feature.block_count=0
+				feature.block_sizes=[0]
+				feature.block_starts=[0]
+				
+				self.output_file.write(feature,o_file)
+
+	def convert_from_cmap_to_len(self):
+		with open(self.output_file.input_file, 'w') as o_file:
+			ids=set()
+			for i, label in enumerate(self.input_file.parse()):
+				if label.contig_id in ids:
+					continue
+				ids.add(label.contig_id)
+				name="chr"+str(label.contig_id)
+				length=int(label.contig_len)
+				chromosome=Chromosome(name, length)
+				self.output_file.write(chromosome,o_file)
 		
 from Bio.Seq import Seq
 from Bio.Alphabet import generic_dna
@@ -86,6 +132,7 @@ class Digestor(object):
 			
 
 from files import File
+from files import File_iter
 from Bio import SeqIO
 class FastaFile(File):
 	@staticmethod
@@ -96,3 +143,121 @@ class FastaFile(File):
 		return SeqIO.parse(open(self.input_file), 'fasta')
 	def write(self, entity, o_file):
 		SeqIO.write(entity, o_file, 'fasta')
+
+class BedFile(File):
+	@staticmethod
+	def getExtension():
+		return "bed"
+
+	def getHeaders(self):
+		headers=[]
+		with open(self.input_file, 'r') as i_file:
+			for line in i_file:
+				fields=line.split("\t")
+				if len(fields) < 12:
+					headers.append(line)
+				else:
+					break
+		return headers
+
+	def parse(self):
+		return BedFile_iter(self.input_file)
+	def write(self, feature, o_file):
+		fields=[feature.chrom,
+			str(feature.start),
+			str(feature.stop),
+			feature.name,
+			str(feature.score),
+			feature.strand,
+			str(feature.thick_start),
+			str(feature.thick_end),
+			",".join([str(x) for x in feature.item_rgb]),
+			str(feature.block_count),
+			",".join([str(x) for x in feature.block_sizes]),
+			",".join([str(x) for x in feature.block_starts])]
+		o_file.write("\t".join(fields)+"\n")
+
+	def writeDefaultHeaders(self, o_file):
+		o_file.write("track name=custom_track description=\"Default description\" useScore=1\n")
+		o_file.write("itemRgb=\"On\"\n")
+
+class BedFile_iter(File_iter):
+	def next(self):
+		while True:
+			try:
+				line=self.i_file.readline()
+				if line=='':
+					self.i_file.close()
+					raise StopIteration
+				feature_data=line.split("\t")
+				if len(feature_data) < 12:
+					continue
+				chrom=feature_data[0]
+				start=int(feature_data[1])
+				stop=int(feature_data[2])
+				name=feature_data[3]
+				feature=Feature(chrom, start, stop, name)
+				feature.score=int(feature_data[4])
+				feature.strand=feature_data[5]
+				feature.thick_start=int(feature_data[6])
+				feature.thick_end=int(feature_data[7])
+				feature.item_rgb=[int(x) for x in feature_data[8].split(',')]
+				feature.block_count=int(feature_data[9])
+				feature.block_sizes=[int(x) for x in feature_data[10].split(',')]
+				feature.block_starts=[int(x) for x in feature_data[11].split(',')]
+				return feature
+			except StopIteration:
+				raise
+			except IndexError:
+				raise Exception("this file is incorrectly formatted")
+			except:
+				raise
+				
+class Feature(object):
+	def __init__(self, chrom, start, stop, name):
+		self.chrom=chrom
+		self.start=start
+		self.stop=stop
+		self.name=name
+
+class LenFile(File):
+	@staticmethod
+	def getExtension():
+		return "len"
+
+	def parse(self):
+		return LenFile_iter(self.input_file)
+	def write(self, chromosome, o_file):
+		fields=[chromosome.name,
+			str(chromosome.length)]
+		o_file.write("\t".join(fields)+"\n")
+
+	def writeDefaultHeaders(self, o_file):
+		pass
+
+class LenFile_iter(File_iter):
+	def next(self):
+		while True:
+			try:
+				line=self.i_file.readline()
+				if line=='':
+					self.i_file.close()
+					raise StopIteration
+				if line[0]=="#":
+					continue
+				chromosome_data=line.split("\t")
+				name=chromosome_data[0]
+				length=int(chromosome_data[1])
+				chromosome=Chromosome(name, length)
+				return chromosome
+			except StopIteration:
+				raise
+			except IndexError:
+				raise Exception("this file is incorrectly formatted")
+			except:
+				raise
+				
+class Chromosome(object):
+	def __init__(self, name, length):
+		self.name=name
+		self.length=length
