@@ -14,11 +14,15 @@ from Utils.Workspace import Workspace
 from UnitTests.Helper import Mock
 
 class tInput(unittest.TestCase):
-	workspace=Mock(input_file="input_file", work_dir="work_dir")
+	workspace=Mock(input_file="step_dir/input_file", work_dir="work_dir")
+	file_name="input_file" ## Must be the same as workspace, .*/(input_file)
 	def setUp(self):
 		self.obj=Input(self.workspace)
+	def dummy_getString(self):
+		return "string"
+
 	def test_init(self):
-		expected=Mock(workspace=self.workspace, quality=None)
+		expected=Mock(workspace=self.workspace, quality=None, prereq=None, file_name=self.file_name)
 		self.assertEqual(expected, self.obj)
 
 	def test_hash(self):
@@ -69,13 +73,42 @@ class tInput(unittest.TestCase):
 		self.assertEqual(expected, actual)
 
 	def test_writeCode(self):
-		self.assertEqual([], self.obj.writeCode())
+		native_getStepDir=Input.getStepDir
+		Input.getStepDir=self.dummy_getString.im_func
+		self.obj.file_name=self.file_name
+		expected="cd "+self.workspace.work_dir+"\n"
+		expected+="mkdir "+self.dummy_getString()+"\n"
+		expected+="cd "+self.dummy_getString()+"\n"
+		expected+="pwd\n"
+		expected+="ln -s ../"+self.workspace.input_file+" "+self.file_name+"\n"
+		expected+="if [ $? -eq 0 ]; then touch Complete.status; fi;\n"
 
-	def test_getStepDir(self):
-		self.assertEqual(self.workspace.input_file, self.obj.getStepDir())
+		actual=self.obj.writeCode()
+
+		Input.getStepDir=native_getStepDir
+
+		self.assertEqual([expected], actual)
+
+	def test_getStepDir_noStepDir(self):
+		self.obj.file_name=self.file_name
+		self.assertEqual("comparison_input_"+self.file_name, self.obj.getStepDir())
+
+	def test_getStepDir_stepDir(self):
+		step_dir="step_dir"
+		self.obj.step_dir=step_dir
+		self.assertEqual(step_dir, self.obj.getStepDir())
 
 	def test_getOutputFile(self):
-		self.assertEqual(self.workspace.input_file, self.obj.getOutputFile())
+		native_getStepDir=Input.getStepDir
+		Input.getStepDir=self.dummy_getString.im_func
+		self.obj.file_name=self.file_name
+		expected=self.dummy_getString()+"/"+self.file_name
+
+		actual=self.obj.getOutputFile()
+
+		Input.getStepDir=native_getStepDir
+
+		self.assertEqual(expected, actual)
 
 	def test_getOutputFileExtension(self):
 		expected=CmapFile.getExtension()
@@ -93,12 +126,12 @@ class tInput(unittest.TestCase):
 		self.assertEqual(None, self.obj.getPrereq())
 
 	def test_getMem(self):
-		self.assertEqual(-1, self.obj.getMem())
+		self.assertEqual(1, self.obj.getMem())
 
 	def test_getTime(self):
-		self.assertEqual(-1, self.obj.getTime())
+		self.assertEqual(1, self.obj.getTime())
 	def test_getThreads(self):
-		self.assertEqual(-1, self.obj.getThreads())
+		self.assertEqual(1, self.obj.getThreads())
 
 class tReferenceAlignment(unittest.TestCase):
 	workspace=Mock(input_file="input_file", work_dir="work_dir")
