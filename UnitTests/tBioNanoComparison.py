@@ -230,7 +230,14 @@ class tReferenceAlignment(unittest.TestCase):
 		self.assertEqual(expected, actual)
 
 	def test_getStepDir(self):
-		self.assertEqual("comparison_" + self.workspace.input_file + "_" + self.ref_file, self.obj.getStepDir())
+		fp=1.5
+		fn=0.15
+		pval=1e-8
+		min_molecule_len=100
+		min_molecule_sites=6
+		self.obj.merge.assembly=Mock(vital_parameters=Mock(fp=fp, fn=fn, pval=pval, min_molecule_len=min_molecule_len, min_molecule_sites=min_molecule_sites))
+
+		self.assertEqual("comparison_"+self.workspace.input_file+"_"+str(fp)+"_"+str(fn)+"_"+str(pval)+"_"+str(min_molecule_len)+"_"+str(min_molecule_sites)+"_"+self.ref_file,self.obj.getStepDir())
 
 	def test_getOutputFile(self):
 		native_getStepDir=ReferenceAlignment.getStepDir
@@ -251,6 +258,8 @@ class tReferenceAlignment(unittest.TestCase):
 		self.assertEqual("xmap", self.obj.getOutputFileExtension())
 
 	def test_autoGeneratePrereqs(self):
+		native_getStepDir=ReferenceAlignment.getStepDir
+		ReferenceAlignment.getStepDir=self.dummy_getString.im_func
 		Mock.getOutputFile=self.dummy_getString.im_func
 		self.obj.anchor=Input(Workspace(self.workspace.work_dir, self.ref_file))
 		self.obj.query=Input(Workspace(self.workspace.work_dir, self.dummy_getString()))
@@ -258,12 +267,16 @@ class tReferenceAlignment(unittest.TestCase):
 		actual=ReferenceAlignment(self.workspace, self.merge, self.ref_file)
 		actual.autoGenCalled=True
 
+		ReferenceAlignment.getStepDir=native_getStepDir
 		del Mock.getOutputFile
 
 		self.assertEqual(self.obj, actual)
 
 	def test_getPrereq(self):
-		self.assertEqual(self.merge, self.obj.getPrereq())
+		expected=Mock()
+		self.obj.query=expected
+
+		self.assertEqual(expected, self.obj.getPrereq())
 
 	def test_getMem(self):
 		Mock.getSmallMemory=self.dummy_getNum.im_func
