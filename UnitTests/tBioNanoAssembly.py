@@ -213,10 +213,62 @@ class tAssembly(unittest.TestCase):
 		self.assertEqual(expected, actual)
 	def test_createQualityObject_complete(self):
 		self.assertEqual(1,2)
-	def test_getQualityCount(self):
-		self.assertEqual(1,2)
-	def test_getQualityLength(self):
-		self.assertEqual(1,2)
+
+	def dummy_loadQualityObjectFromFile(self):
+		self.loadQualityObjectFromFileCalled=True
+		mock_value=-1
+		self.quality=Mock(length=mock_value, count=mock_value)
+	def test_getQualityCount_noQuality(self):
+		self.obj.quality=None
+		native_loadQualityObjectFromFile=Assembly.loadQualityObjectFromFile
+		Assembly.loadQualityObjectFromFile=self.dummy_loadQualityObjectFromFile.im_func
+		expecteds=[True, -1] #Must be the same value as dummy_loadQualityObjectFromFile
+
+		actual_value=self.obj.getQuality_count()
+
+		actuals=[self.obj.loadQualityObjectFromFileCalled, actual_value]
+		Assembly.loadQualityObjectFromFile=native_loadQualityObjectFromFile
+
+		self.assertEqual(expecteds, actuals)
+
+	def dummy_throwException(self):
+		raise Exception("This function shouldn't have been called")
+	def test_getQualityCount_quality(self):
+		native_loadQualityObjectFromFile=Assembly.loadQualityObjectFromFile
+		Assembly.loadQualityObjectFromFile=self.dummy_throwException.im_func
+		expected=-1
+		self.obj.quality=Mock(count=expected)
+
+		actual=self.obj.getQuality_count()
+
+		Assembly.loadQualityObjectFromFile=native_loadQualityObjectFromFile
+
+		self.assertEqual(expected, actual)
+
+	def test_getQualityLength_noQuality(self):
+		self.obj.quality=None
+		native_loadQualityObjectFromFile=Assembly.loadQualityObjectFromFile
+		Assembly.loadQualityObjectFromFile=self.dummy_loadQualityObjectFromFile.im_func
+		expecteds=[True, -1] # Must be the same as dummy_loadQualityObjectFromFile
+
+		actual_value=self.obj.getQuality_length()
+		
+		actuals=[self.obj.loadQualityObjectFromFileCalled, actual_value]
+		Assembly.loadQualityObjectFromFile=native_loadQualityObjectFromFile
+
+		self.assertEqual(expecteds, actuals)
+
+	def test_getQualityLength_quality(self):
+		expected=self.dummy_getResources()
+		self.obj.quality=Mock(length=expected)
+		native_loadQualityObjectFromFile=Assembly.loadQualityObjectFromFile
+		Assembly.loadQualityObjectFromFile=self.dummy_throwException.im_func
+
+		actual=self.obj.getQuality_length()
+
+		Assembly.loadQualityObjectFromFile=native_loadQualityObjectFromFile
+
+		self.assertEqual(expected, actual)
 
 	def dummy_getLargeMemory(self):
 		return -1
