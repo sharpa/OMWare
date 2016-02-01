@@ -25,6 +25,10 @@ class Step(object):
 	def __str__(self):
 		return str(self.vital_parameters.__dict__)
 
+	@staticmethod
+	def generateFromStepDir(step_dir):
+		raise Exception("Abstract method called")
+
 	def writeCode(self):
 		raise Exception("Abstract method called")
 

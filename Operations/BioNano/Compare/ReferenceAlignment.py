@@ -7,6 +7,8 @@
 # run compare a BNG assembly to an in silico digested reference map
 from Operations.Step import Step
 from sys import maxint
+import re
+import os
 
 class ReferenceAlignment(Step):
 	def __init__(self, workspace, merge, ref_file):
@@ -61,6 +63,27 @@ class ReferenceAlignment(Step):
 
 	def __str__(self):
 		return("Comparison of " + self.workspace.input_file + " to " + self.ref_file)
+
+	@staticmethod
+	def generateFromStepDir(step_dir):
+		match_result=re.match("comparison_([^_]+)_([\d\.]+)_([\d\.]+)_([\d\.e-]+)_([\d]+)_([\d]+)_([^/]+)", step_dir)
+
+		work_dir=os.getcwd()
+		input_file=match_result.group(1)
+		workspace=Workspace(work_dir, input_file)
+
+		fp=match_result.group(2)
+		fn=match_result.group(3)
+		pval=match_result.group(4)
+		minlen=match_result.group(5)
+		minsites=match_result.group(6)
+		vital_parameters=VitalParameters(fp, fn, pval, minlen, minsites)
+
+		merge=Merge(workspace, vital_parameters)
+
+		ref_file=match_result.group(7)
+
+		return ReferenceAlignment(workspace, merge, ref_file)
 
 	def writeCode(self):
 		code="cd " + self.workspace.work_dir + "\n"
@@ -231,6 +254,7 @@ from Utils.Workspace import Workspace
 from Operations.Step import Quality
 from Operations.BioNano.Compare.Input import Input
 from Operations.BioNano.Assemble.Merge import Merge
+from Operations.BioNano.Assemble.VitalParameters import VitalParameters
 from Operations.BioNano.files import XmapFile
 from collections import OrderedDict
 from copy import copy
