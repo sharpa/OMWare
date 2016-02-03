@@ -211,6 +211,8 @@ class tAssembly(unittest.TestCase):
 		Assembly.isComplete=native_isComplete
 
 		self.assertEqual(expected, actual)
+
+	@unittest.skip('Incomplete test')
 	def test_createQualityObject_complete(self):
 		self.assertEqual(1,2)
 
@@ -883,9 +885,11 @@ class tGroupManifest(unittest.TestCase):
 
 		self.assertEqual(expected, actual)
 
+	@unittest.skip('Incomplete test')
 	def test__makeGroupManifestFile(self):
 		self.assertEqual(1,2)
 
+	@unittest.skip('Incomplete test')
 	def test_makeWeightStatsFile(self):
 		self.assertEqual(1,2)
 

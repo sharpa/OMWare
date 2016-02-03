@@ -278,6 +278,16 @@ class tReferenceAlignment(unittest.TestCase):
 
 		self.assertEqual(expected, self.obj.getPrereq())
 
+	@unittest.skip('Incomplete test')
+	def test_getQuality_(self):
+		self.assertEqual(1,2)
+	@unittest.skip('Incomplete test')
+	def test_loadQualityReportItems(self):
+		self.assertEqual(1,2)
+	@unittest.skip('Incomplete test')
+	def test_createQualityObject(self):
+		self.assertEqual(1,2)
+
 	def test_getMem(self):
 		Mock.getSmallMemory=self.dummy_getNum.im_func
 		self.workspace.resources=Mock()
