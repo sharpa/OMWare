@@ -94,7 +94,8 @@ class Input(Step):
 				n50=length
 				break
 
-		self.quality=Quality(length=total_length, count=len(ids), average_length=total_length/count, n50=n50, min=minlen, max=maxlen, min_max_coverage=min_max_coverage)
+		count=len(ids)
+		self.quality=Quality(length=total_length, count=count, average_length=total_length/count, n50=n50, min=minlen, max=maxlen, min_max_coverage=min_max_coverage)
 		self.saveQualityObjectToFile()
 
 	def loadQuality_length(self):
