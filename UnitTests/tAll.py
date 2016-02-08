@@ -6,72 +6,42 @@
 # The purpose of this module is to run all of POMM's unit tests
 import unittest
 
-def run_suites(test_suites):
-	for suite in test_suites:
-		unittest.TextTestRunner(verbosity=2).run(suite)
+def run_suites(suite):
+	unittest.TextTestRunner(verbosity=1).run(suite)
 
 def get_all_test_suites():
-	test_suites=[]
-	test_suites.extend(get_smoke_test())
-	test_suites.extend(get_utils_test_suites())
-	test_suites.extend(get_operations_test_suites())
-	test_suites.extend(get_bioNanoAssembly_test_suites())
-	test_suites.extend(get_bioNanoComparison_test_suites())
-	test_suites.extend(get_files_test_suites())
-	return test_suites
+	suite=unittest.TestSuite()
+	suite.addTests(get_smoke_test())
+	suite.addTests(get_utils_test_suites())
+	suite.addTests(get_operations_test_suites())
+	suite.addTests(get_bioNanoAssembly_test_suites())
+	suite.addTests(get_bioNanoComparison_test_suites())
+	suite.addTests(get_files_test_suites())
+	return suite
 	
 def get_smoke_test():
 	import UnitTests.SmokeTest
-	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.SmokeTest.SmokeTest))
-	return test_suites
+	return unittest.TestLoader().loadTestsFromModule(UnitTests.SmokeTest)
 
 def get_utils_test_suites():
 	import UnitTests.tUtils
-	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tCD))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tResources))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tMacbookProResources))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tFultonResources))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tFultonResourcesLight))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tUtils.tWorkspace))
-	return test_suites
+	return unittest.TestLoader().loadTestsFromModule(UnitTests.tUtils)
 
 def get_operations_test_suites():
 	import UnitTests.tOperations
-	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tOperations.tStep))
-	return test_suites
+	return unittest.TestLoader().loadTestsFromModule(UnitTests.tOperations)
 
 def get_bioNanoAssembly_test_suites():
 	import UnitTests.tBioNanoAssembly
-	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tInput))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tAssembly))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tGroupManifest))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tRefineA))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tRefineB0))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tMerge))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tSummarize))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoAssembly.tGenericAssembly))
-	return test_suites
+	return unittest.TestLoader().loadTestsFromModule(UnitTests.tBioNanoAssembly)
 
 def get_bioNanoComparison_test_suites():
 	import UnitTests.tBioNanoComparison
-	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoComparison.tInput))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tBioNanoComparison.tReferenceAlignment))
-	return test_suites
+	return unittest.TestLoader().loadTestsFromModule(UnitTests.tBioNanoComparison)
 
 def get_files_test_suites():
 	import UnitTests.tFiles
-	test_suites=[]
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tFile))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tCmapFile))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tCmapFile_iter))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tXmapFile))
-	test_suites.append(unittest.TestLoader().loadTestsFromTestCase(UnitTests.tFiles.tXmapFile_iter))
-	return test_suites
+	return unittest.TestLoader().loadTestsFromModule(UnitTests.tFiles)
 
 if __name__=="__main__":
 	test_suites=get_all_test_suites()
