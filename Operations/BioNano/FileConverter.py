@@ -12,12 +12,15 @@ class FileConverter:
 		if self.output_file is None:
 			raise Exception("Can't convert without target file format info")
 
+		# This is poorly designed
 		if self.input_file.getExtension()=="fa":
 			if self.output_file.getExtension()=="cmap":
 				self.convert_from_fasta_to_cmap()
 		elif self.input_file.getExtension()=="xmap":
 			if self.output_file.getExtension()=="bed":
 				self.convert_from_xmap_to_bed()
+			elif self.output_file.getExtension()=="sam":
+				self.convert_from_xmap_to_sam()
 		elif self.input_file.getExtension()=="cmap":
 			if self.output_file.getExtension()=="len":
 				self.convert_from_cmap_to_len()
@@ -261,3 +264,23 @@ class Chromosome(object):
 	def __init__(self, name, length):
 		self.name=name
 		self.length=length
+
+class SamFile(File):
+	def __iter__(self):
+		raise Exception("This feature not implemented for sam files")
+
+	@staticmethod
+	def getExtension():
+		return "sam"
+
+	def parse(self):
+		raise Exception("This feature not implemented for sam files")
+	
+	def next(self):
+		raise Exception("This feature not implemented for sam files")
+
+	def write(self, alignment, o_file):
+		pass
+
+	def writeDefaultHeaders(self, o_file):
+		raise Exception("This feature not implemented for sam files")
