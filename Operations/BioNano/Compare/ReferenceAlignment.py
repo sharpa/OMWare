@@ -65,7 +65,7 @@ class ReferenceAlignment(Step):
 		return("Comparison of " + self.workspace.input_file + " to " + self.ref_file)
 
 	@staticmethod
-	def generateFromStepDir(step_dir):
+	def generateFromStepDir(step_dir, blocks=None):
 		match_result=re.match("comparison_([^_]+)_([\d\.]+)_([\d\.]+)_([\d\.e-]+)_([\d]+)_([\d]+)_([^/]+)", step_dir)
 
 		work_dir=os.getcwd()
@@ -78,6 +78,7 @@ class ReferenceAlignment(Step):
 		minlen=match_result.group(5)
 		minsites=match_result.group(6)
 		vital_parameters=VitalParameters(fp, fn, pval, minlen, minsites)
+		vital_parameters.blocks=blocks
 
 		merge=Merge(workspace, vital_parameters)
 
@@ -170,10 +171,10 @@ class ReferenceAlignment(Step):
 		report_items["Num query contigs that don't align: " + str(num_query_contigs-self.quality.aligned_query_contig_num)]=2 
 		self.quality.unaligned_query_contig_num=num_query_contigs-self.quality.aligned_query_contig_num
 		report_items["Total length: " + str(self.quality.total_length)]=2
-		report_items["Query length: " + str(self.quality.query_length)]=3
+		report_items["Query length: " + str(self.quality.total_query_length)]=3
 		report_items["Proportion of query with match: "  + str(self.quality.proportion_query)]=1
 		report_items["Average proportion of query contig within match: " + str(self.quality.average_proportion_of_query_matching)]=2
-		report_items["Anchor length: " + str(self.quality.anchor_length)]=3
+		report_items["Anchor length: " + str(self.quality.total_anchor_length)]=3
 		report_items["Proportion of anchor with match: " + str(self.quality.proportion_anchor)]=1
 
 		report_items["Total confidence: " + str(self.quality.total_confidence)]=2
@@ -184,13 +185,13 @@ class ReferenceAlignment(Step):
 		return report_items
 
 	def createQualityObject(self):
-		query_length=0.0
 		proportion_of_query_matching=0.0
-		anchor_length=0.0
+		total_query_length=0.0
+		total_anchor_length=0.0
 		num_alignments=0
 		aligned_query_contigs=set()
-		confidences=[]
 		total_confidence=0.0
+		confidence_times_length=0.0
 		total_length=0.0
 		max_confidence=0.0
 		min_confidence=maxint
@@ -207,32 +208,29 @@ class ReferenceAlignment(Step):
 			if conf < min_confidence:
 				min_confidence=conf
 
-			query_length+=abs(alignment.query_end-alignment.query_start)
+			query_length=abs(alignment.query_end-alignment.query_start)
+			total_query_length+=query_length
 			proportion_of_query_matching+=query_length/alignment.query_len
-			anchor_length+=abs(alignment.anchor_end-alignment.anchor_start)
-			length=max(query_length, anchor_length)
+			anchor_length=abs(alignment.anchor_end-alignment.anchor_start)
+			total_anchor_length+=anchor_length
+#			length=max(query_length, anchor_length)
+			length=query_length
 			total_length+=length
+			confidence_times_length+=conf*length
 
-			confidences.append((conf, length))
-
-		weighted_average_confidence=0.0
-		for conf, length in confidences:
-			adjustment=length / total_length
-			adjusted_confidence=conf * adjustment
-			weighted_average_confidence+=adjusted_confidence
-
+		weighted_average_confidence=confidence_times_length/total_length
 		proportion_query=query_length / self.query.loadQuality_length()
-		proportion_anchor=anchor_length / self.anchor.loadQuality_length()
+		proportion_anchor=total_anchor_length / self.anchor.loadQuality_length()
 		average_confidence=total_confidence / num_alignments
 
 		self.quality=Quality(
 			num_alignments=num_alignments,
 			aligned_query_contig_num=len(aligned_query_contigs),
 			total_length=total_length,
-			query_length=query_length,
+			total_query_length=total_query_length,
 			proportion_query=proportion_query,
 			average_proportion_of_query_matching=(proportion_of_query_matching/num_alignments),
-			anchor_length=anchor_length,
+			total_anchor_length=total_anchor_length,
 			proportion_anchor=proportion_anchor,
 
 			total_confidence=total_confidence,
@@ -242,6 +240,16 @@ class ReferenceAlignment(Step):
 			weighted_average_confidence=weighted_average_confidence
 		)
 		self.saveQualityObjectToFile()
+
+	def getQuality_weightedAverageConfidence(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.weighted_average_confidence
+
+	def getQuality_totalLength(self):
+		if self.quality is None:
+			self.loadQualityObjectFromFile()
+		return self.quality.total_length
 
 	def getMem(self):
 		return self.workspace.resources.getSmallMemory()
