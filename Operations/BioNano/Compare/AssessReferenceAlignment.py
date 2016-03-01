@@ -13,7 +13,6 @@ class AssessReferenceAlignment(object):
 		file_name_parts_length=len(file_name_parts)
 		self.workspace="/".join(file_name_parts[0:(file_name_parts_length-1)])
 		with CD(self.workspace):
-			print(os.getcwd())
 			file_name=file_name_parts[file_name_parts_length-1]
 			self.xmap=XmapFile(file_name)
 			self.anchor_cmap=CmapFile(file_name.replace(".xmap", "_r.cmap"))
@@ -100,8 +99,6 @@ class AssessReferenceAlignment(object):
 
 				previous_label_pair=label_pair
 
-		print(self.false_positive_labels)
-
 		false_positive_offsets={}
 		last_true_positive=None
 		for label in self.query_cmap.parse():
@@ -121,8 +118,6 @@ class AssessReferenceAlignment(object):
 				false_positive_offsets[anchor][anchor_label]=[]
 			
 			false_positive_offsets[anchor][anchor_label].append(label.position-last_true_positive.position)
-
-		print(false_positive_offsets)
 
 		self.false_positive_locations={}
 		for label in self.anchor_cmap.parse():
