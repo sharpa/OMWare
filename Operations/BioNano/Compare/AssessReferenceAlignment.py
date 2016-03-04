@@ -138,8 +138,23 @@ class AssessReferenceAlignment(object):
 	def processSeqeuenceContexts(self, fasta_file):
 		pass
 
-	def findNearestNeighborDistribution(self,loci1, loci2):
-		pass
+	def findNearestNeighbors(self,loci,neighbor_locis):
+		neighbors={}
+		for chr in loci:
+			if not chr in neighbors:
+				neighbors[chr]=[]
+			for locus in loci[chr]:
+				nearest_dist=None
+				for neighbor_loci in neighbor_locis:
+					if not chr in neighbor_loci:
+						continue
+					for neighbor_locus in neighbor_loci[chr]:
+						dist=abs(locus-neighbor_locus)
+						if nearest_dist is None or dist<nearest_dist:
+							nearest_dist=dist
+				if nearest_dist is not None:
+					neighbors[chr].append(nearest_dist)
+		return neighbors
 
 import re
 from Utils.CD import CD
