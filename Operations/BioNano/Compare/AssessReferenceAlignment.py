@@ -5,13 +5,15 @@
 # 
 # The purpose of this module is to assay the disagreements 
 # between a BNG map and a reference genome
-import os
 
 class AssessReferenceAlignment(object):
 	def __init__ (self, xmap_file_name):
 		file_name_parts=xmap_file_name.split('/')
 		file_name_parts_length=len(file_name_parts)
-		self.workspace="/".join(file_name_parts[0:(file_name_parts_length-1)])
+		if file_name_parts_length>1:
+			self.workspace="/".join(file_name_parts[0:(file_name_parts_length-1)])
+		else:
+			self.workspace="."
 		with CD(self.workspace):
 			file_name=file_name_parts[file_name_parts_length-1]
 			self.xmap=XmapFile(file_name)
@@ -133,10 +135,46 @@ class AssessReferenceAlignment(object):
 
 		return self.false_positive_locations
 
+	def extractPartialMatches(self, output_name='partial_matches.xmap'):
+		self.partial_match_locations={}
+		with open(output_name, 'w') as o_file:
+			for align in self.xmap.parse():
+				proportion=abs(align.query_start-align.query_end)/float(align.query_len)
+				if proportion < 0.9:
+					anchor=align.anchor
+					if not anchor in self.partial_match_locations:
+						self.partial_match_locations[anchor]=[]
+					self.partial_match_locations[anchor].append(align.anchor_start, align.anchor_end)
+					xfile.write(align, o_file)
+		return self.partial_match_locations
+
 	def extractSequenceContexts(self, loci):
 		pass
-	def processSeqeuenceContexts(self, fasta_file):
-		pass
+	def processSeqeuenceContexts(self, fasta_file, motif):
+		snvs=set()
+		for i in xrange(0,len(motif)):
+			for base in ['A', 'T', 'C', 'G']:
+				if base==motif[i]:
+					continue
+				snv=motif[0:i]+base+motif[i+1:len(motif)]
+				snvs.add(snv)
+
+		print("HasGap	HasSNV")
+		for record in SeqIO.parse(fasta_file, 'fasta'):
+			output="0"
+			if "NNNNNNN" in record.seq or "nnnnnnn" in record.seq:
+				output="1"
+
+			contains_snv=False
+			for snv in snvs:
+				if snv in record.seq:
+					contains_snv=True
+			if contains_snv:
+				output+="\t1"
+			else:
+				output+="\t0"
+			print(output)
+
 
 	def findNearestNeighbors(self,loci,neighbor_locis):
 		neighbors={}
@@ -156,8 +194,19 @@ class AssessReferenceAlignment(object):
 					neighbors[chr].append(nearest_dist)
 		return neighbors
 
+	def findLabelsWithNearNeighbors(self,loci,neighbor_locis,threshold=301):
+		
+		nearest_neighbors=af.findNearestNeighbors(loci, neighbor_locis)
+		offending_count=0
+		for chrom in nearest_neighbors:
+			for distance in nearest_neighgbors[chrom]:
+				if distance < 301:
+					offending_count+=1
+		return offending_count
+
 import re
 from Utils.CD import CD
 from Operations.BioNano.files import CmapFile
 from Operations.BioNano.files import XmapFile
 from Operations.BioNano.FileConverter import FastaFile
+from Bio import SeqIO
