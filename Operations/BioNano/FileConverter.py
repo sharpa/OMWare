@@ -12,12 +12,15 @@ class FileConverter:
 		if self.output_file is None:
 			raise Exception("Can't convert without target file format info")
 
+		# This is poorly designed
 		if self.input_file.getExtension()=="fa":
 			if self.output_file.getExtension()=="cmap":
 				self.convert_from_fasta_to_cmap()
 		elif self.input_file.getExtension()=="xmap":
 			if self.output_file.getExtension()=="bed":
 				self.convert_from_xmap_to_bed()
+			elif self.output_file.getExtension()=="sam":
+				self.convert_from_xmap_to_sam()
 		elif self.input_file.getExtension()=="cmap":
 			if self.output_file.getExtension()=="len":
 				self.convert_from_cmap_to_len()
@@ -68,6 +71,44 @@ class FileConverter:
 				feature.block_starts=[0]
 				
 				self.output_file.write(feature,o_file)
+
+	def convert_from_xmap_to_sam(self):
+		anchors={}
+		confidence_maxima={}
+		for align in self.input_file.parse():
+			anchors[align.anchor_id]=align.anchor_len
+
+			if not align.query_id in confidence_maxima:
+				confidence_maxima[align.query_id]=align.confidence
+			elif align.confidence > confidence_maxima[align.query_id]:
+				confidence_maxima[align.query_id]=align.confidence
+
+		with open(self.output_file.input_file, 'w') as o_file:
+			o_file.write("@HD\tVN:1.0\tSO:unsorted\n")
+			for anchor in sorted(anchors.keys()):
+				o_file.write("@SQ\tSN:"+str(anchor)+"\tLN:"+str(int(anchors[anchor]))+"\n")
+
+			for align in self.input_file.parse():
+				flag=0
+				if align.orientation=="-":
+					flag+=16
+				if align.confidence!=confidence_maxima[align.query_id]:
+					flag+=256
+				start_pos=align.anchor_start
+				if start_pos==0:
+					start_pos=1
+				output=[
+					str(align.query_id),
+					str(flag),
+					str(align.anchor_id),
+					str(int(start_pos)),
+					str(int(align.confidence)),
+					align.hit_enum.replace('M','='),
+					"*","0",
+					str(int(align.query_len)),
+					"*","*"
+				]
+				o_file.write("\t".join(output)+"\n")
 
 	def convert_from_cmap_to_len(self):
 		with open(self.output_file.input_file, 'w') as o_file:
@@ -261,3 +302,23 @@ class Chromosome(object):
 	def __init__(self, name, length):
 		self.name=name
 		self.length=length
+
+class SamFile(File):
+	def __iter__(self):
+		raise Exception("This feature not implemented for sam files")
+
+	@staticmethod
+	def getExtension():
+		return "sam"
+
+	def parse(self):
+		raise Exception("This feature not implemented for sam files")
+	
+	def next(self):
+		raise Exception("This feature not implemented for sam files")
+
+	def write(self, alignment, o_file):
+		pass
+
+	def writeDefaultHeaders(self, o_file):
+		raise Exception("This feature not implemented for sam files")
