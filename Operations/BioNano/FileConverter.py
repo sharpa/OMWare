@@ -72,6 +72,44 @@ class FileConverter:
 				
 				self.output_file.write(feature,o_file)
 
+	def convert_from_xmap_to_sam(self):
+		anchors={}
+		confidence_maxima={}
+		for align in self.input_file.parse():
+			anchors[align.anchor_id]=align.anchor_len
+
+			if not align.query_id in confidence_maxima:
+				confidence_maxima[align.query_id]=align.confidence
+			elif align.confidence > confidence_maxima[align.query_id]:
+				confidence_maxima[align.query_id]=align.confidence
+
+		with open(self.output_file.input_file, 'w') as o_file:
+			o_file.write("@HD\tVN:1.0\tSO:unsorted\n")
+			for anchor in sorted(anchors.keys()):
+				o_file.write("@SQ\tSN:"+str(anchor)+"\tLN:"+str(int(anchors[anchor]))+"\n")
+
+			for align in self.input_file.parse():
+				flag=0
+				if align.orientation=="-":
+					flag+=16
+				if align.confidence!=confidence_maxima[align.query_id]:
+					flag+=256
+				start_pos=align.anchor_start
+				if start_pos==0:
+					start_pos=1
+				output=[
+					str(align.query_id),
+					str(flag),
+					str(align.anchor_id),
+					str(int(start_pos)),
+					str(int(align.confidence)),
+					align.hit_enum.replace('M','='),
+					"*","0",
+					str(int(align.query_len)),
+					"*","*"
+				]
+				o_file.write("\t".join(output)+"\n")
+
 	def convert_from_cmap_to_len(self):
 		with open(self.output_file.input_file, 'w') as o_file:
 			ids=set()
