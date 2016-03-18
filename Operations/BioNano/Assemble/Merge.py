@@ -33,6 +33,9 @@ class Merge(Step):
 	def __ne__(self, other):
 		return not self==other
 
+	def __hash__(self):
+		return hash((self.workspace.input_file, self.workspace.work_dir, self.assembly.vital_parameters.pval, self.assembly.vital_parameters.fp, self.assembly.vital_parameters.fn, self.assembly.vital_parameters.min_molecule_len, self.assembly.vital_parameters.min_molecule_sites, self.__class__.__name__))
+
 	def __str__(self):
 		return "merge of " + str(self.assembly)
 		

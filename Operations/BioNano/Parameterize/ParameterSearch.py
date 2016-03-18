@@ -10,6 +10,8 @@ from collections import OrderedDict
 from Operations.Step import Step
 from Operations.Step import Quality
 from Operations.BioNano.Assemble.VitalParameters import VitalParameters
+from Operations.BioNano.Compare.ReferenceAlignment import ReferenceAlignment
+from Operations.BioNano.Assemble.Merge import Merge
 from Operations.BioNano.Assemble.Assembly import Assembly
 from Operations.BioNano.Assemble.PairwiseAlignment import PairwiseAlignment
 from Operations.BioNano.Assemble.Summarize import Summarize
@@ -41,6 +43,9 @@ class ParameterSearch(Step):
 		self.assemblies=set()
 		self.autoGeneratePrereqs()
 		
+	def addReference(self, ref_file_name):
+		self.ref_file_name=ref_file_name
+		
 	def optimizeFalsehoods(self, avg_label_density, expected_label_density):
 		new_falsehoods=[]
 
@@ -57,9 +62,26 @@ class ParameterSearch(Step):
 
 	def writeCode(self):
                 run_assemblies=set()
+		assembly_summaries=set()
+		run_merges=set()
+		run_ref_alignment_inputs=set()
+		run_ref_alignments=set()
+		run_ref=None
                 for assembly in self.assemblies:
                         if not assembly.isComplete():
                                 run_assemblies.add(assembly)
+				assembly_summaries.add(Summarize(self.workspace, assembly))
+			merge=Merge(self.workspace, assembly)
+			if not merge.isComplete():
+				run_merges.add(merge)
+			if hasattr(self, "ref_file_name"):
+				ref_alignment=ReferenceAlignment(self.workspace, merge, self.ref_file_name)
+				if not ref_alignment.isComplete():
+					run_ref_alignments.add(ref_alignment)
+				ref_alignment_input=ref_alignment.query
+				if not ref_alignment_input.isComplete():
+					run_ref_alignment_inputs.add(ref_alignment_input)
+				run_ref=ref_alignment.anchor
 
                 necessary_sorts=set()
                 necessary_splits=set()
@@ -89,7 +111,7 @@ class ParameterSearch(Step):
                                 run_pas.add(pairwise)
                                 pairwise_summaries.add(Summarize(self.workspace, pairwise))
 
-                return [run_sorts, run_splits, split_summaries, run_pas, pairwise_summaries, run_assemblies]
+                return [run_sorts,run_splits,split_summaries,run_pas,pairwise_summaries,run_assemblies,assembly_summaries,run_merges,[run_ref],run_ref_alignment_inputs,run_ref_alignments]
 
 	# A dumb assembly uses it's own default prereqs, instead of someone else's
 	def createDumbAssembly(self, falsehood, pval, minlen, minsite):
