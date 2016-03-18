@@ -1,15 +1,15 @@
-#!/fslhome/jtpage/bin/python
+#!/usr/bin/python
 
-from sys import argv
-if len(argv)<2:
-	print("USAGE: python convert_xmap_to_bed.py <input.xmap>")
-	exit(1)
+import argparse
+parser=argparse.ArgumentParser(description='Convert a .xmap alignment file into a .bed file, where queries are described as regions of the anchor. You may need to create a .len file as well in order to visualize this alignmetn on a genome browswer (see convert_cmap_to_len.py)')
+parser.add_argument('xmap_file', help='A .xmap alignment file, generated such that your "reference" is the anchor')
+args=parser.parse_args()
 
 from Operations.BioNano.files import XmapFile
 from Operations.BioNano.FileConverter import FileConverter
 from Operations.BioNano.FileConverter import BedFile
 
-xmap_path=argv[1]
+xmap_path=args.xmap_file
 bed_path=xmap_path.replace(".xmap",".bed")
 with open(bed_path,'w'):
 	pass

@@ -1,10 +1,9 @@
-#!/fslhome/jtpage/bin/python
+#!/usr/bin/python
 
-from sys import argv
-
-if len(argv) < 2:
-	print("USAGE: cmap_stats.py <cmap_file>|<xmap_file>")
-	exit(1)
+import argparse
+argument_parser=argparse.ArgumentParser(description="")
+argument_parser.add_argument('file',help='A .cmap or .xmap file whose statistics will be reported') 
+arguments=argument_parser.parse_args()
 
 from Operations.BioNano.files import CmapFile
 from Operations.BioNano.files import XmapFile
@@ -63,8 +62,10 @@ def xmap_stats(file):
 	print("Total length of assembly covered: " + str(total_length))
 	
 
-file=argv[1]
-if "cmap" in file:
+file=arguments.file
+file_name_length=len(file)
+print(file[file_name_length-5:file_name_length])
+if file[file_name_length-5:file_name_length]==".cmap":
 	cmap_stats(file)
 else:
 	xmap_stats(file)

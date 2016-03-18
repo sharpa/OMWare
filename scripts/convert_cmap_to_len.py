@@ -1,15 +1,15 @@
-#!/fslhome/jtpage/bin/python
+#!/usr/bin/python
 
-from sys import argv
-if len(argv) < 2:
-	print("USAGE: python convert_cmap_len.py <input.cmap>")
-	exit(1)
+import argparse
+parser=argparse.ArgumentParser(description='Convert a .cmap reference genome file into a .len file (for example, for viewing on a genome browser)')
+parser.add_argument('cmap_file', help='A .cmap file whose contigs will be turned into lengths')
+args=parser.parse_args()
 
 from Operations.BioNano.files import CmapFile
 from Operations.BioNano.FileConverter import FileConverter
 from Operations.BioNano.FileConverter import LenFile
 
-cmap_path=argv[1]
+cmap_path=args.cmap_file
 len_path=cmap_path.replace(".cmap",".len")
 with open(len_path,'w'):
 	pass
