@@ -12,7 +12,7 @@ fi
 export SGE_ROOT=/Their/software/does/not/even/use/this/value
 export DRMAA_LIBRARY_PATH=/fslgroup/fslg_bionano/lib/lib/libdrmaa.so ### SET ME
 PYTHON=/fslhome/jtpage/bin/python ###SET ME
-SCRIPTS_DIR=/fslgroup/fslg_bionano/compute/refined_assemblies/scripts/ ### SET ME
+SCRIPTS_DIR=/fslgroup/fslg_bionano/compute/refined_assemblies/scripts_v3692/ ### SET ME
 TOOLS_DIR=/fslgroup/fslg_bionano/compute/refined_assemblies/tools/ ### SET ME
 
 INPUT_FILE="$1"
@@ -20,6 +20,8 @@ OUTPUT_DIR=./`echo "$INPUT_FILE" | sed 's/.*\///' | sed 's/\.bnx//'` ### SET ME 
 OPTARGS_FILE="$OUTPUT_DIR/optArguments.xml" ### SET ME MAYBE
 CLUSTERARGS_FILE=$SCRIPTS_DIR/clusterArguments.xml ### SET ME MAYBE
 LOG_FILE="$OUTPUT_DIR/$OUTPUT_DIR.log" ### SET ME MAYBE
+
+REF_FILE="/path/to/reference.cmap" ### SET ME
 
 # 2. Test that all necessary files are found
 ERROR_MESSAGE=""
@@ -47,6 +49,11 @@ if [ ! -d "$OUTPUT_DIR" ]; then
 if [ ! -e "$OPTARGS_FILE" ]; then
   ERROR_MESSAGE="$ERROR_MESSAGE""optArgs file $OPTARGS_FILE does not exist
 "; fi
+if [[ "$REF_FILE" != "" ]]; then
+  if [ ! -e "$REF_FILE" ]; then
+    ERROR_MESSAGE="$ERROR_MESSAGE""reference file $REF_FILE does not exist
+"; fi
+fi
 if [[ "$ERROR_MESSAGE" != "" ]]; then
   echo "$ERROR_MESSAGE"
   exit 1
@@ -57,4 +64,9 @@ echo ------------- NEW RUN ------------- >> $LOG_FILE
 date >> $LOG_FILE
 printenv >> $LOG_FILE
 
-$PYTHON $SCRIPTS_DIR/pipelineCL.py -U -d -T 12 -j 8 -N 2 -i 5 -a "$OPTARGS_FILE" -w -t "$TOOLS_DIR" -l "$OUTPUT_DIR/output" -b "$INPUT_FILE" -C "$CLUSTERARGS_FILE" 2>&1 >> $LOG_FILE 
+if [[ "$REF_FILE" == "" ]]; then
+  REF_ARG=""
+else
+  REF_ARG="-r $REF_FILE -y"
+fi
+$PYTHON $SCRIPTS_DIR/pipelineCL.py -U -d "$REF_ARG" -T 12 -j 8 -N 2 -i 5 -a "$OPTARGS_FILE" -w -t "$TOOLS_DIR" -l "$OUTPUT_DIR/output" -b "$INPUT_FILE" -C "$CLUSTERARGS_FILE" 2>&1 >> $LOG_FILE 

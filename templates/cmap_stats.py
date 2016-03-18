@@ -40,19 +40,27 @@ def xmap_stats(file):
 	for align in XmapFile(file).parse():
 		length=abs(align.query_start-align.query_end)
 
-		proportion=float(length)/align.query_len
-		proportions.append(proportion)
-		if proportion < 0.9:
-			proportion_count_below_threshold+=1
+		try:
+			proportion=float(length)/align.query_len
+			proportions.append(proportion)
+			if proportion < 0.9:
+				proportion_count_below_threshold+=1
+		except:
+			proportion_count_below_threshold="unavailable"
 
 		total_length+=length
 		bloat+=length*align.confidence
 
 		total_anchor_length+=align.anchor_end-align.anchor_start
 	print("Average confidence (weighted): " + str(bloat/total_length))
-	print("Median proportion of BNG contigs in significant alignments: " + str(median(proportions)))
+	if proportion_count_below_threshold!="unavailable":
+		median_proportion=median(proportions)
+	else:
+		median_proportion="unavailable"
+	print("Median proportion of BNG contigs in significant alignments: " + str(median_proportion))
 	print("Number of BNG contigs less than 90% covered: " + str(proportion_count_below_threshold))
 	print("Total length of reference covered: " + str(total_anchor_length))
+	print("Total length of assembly covered: " + str(total_length))
 	
 
 file=argv[1]

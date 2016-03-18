@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/fslhome/jtpage/bin/python
 
 from sys import argv
 if len(argv)<2:
