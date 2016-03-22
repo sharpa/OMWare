@@ -5,6 +5,7 @@
 # 
 # The purpose of this module is to manipulate optical maps
 # as they appear in a variety of BNG file formats
+from collections import OrderedDict
 
 class File(object):
 	def __init__(self, input_file):
@@ -27,7 +28,7 @@ class File(object):
 		with open(self.input_file, "r") as i_file:
 			for line in i_file:
 				if line[0]=="#":
-					headers.append(line)
+					headers.append(line.strip())
 				else:
 					break
 		return headers
@@ -192,7 +193,20 @@ class CmapFile(File):
 # Enzyme1:      Nt.BbvCI
 #h CMapId       ContigLength    NumSites        SiteID  LabelChannel    Positio
 #f int  float   int     int     int     float   float   int     int\n""")
+	def loadContigs(self):
+		contigs={}
+		final_labels={}
+		for label in self.parse():
+			if not label.contig_id in contigs:
+				contigs[label.contig_id]=Contig()
+			contigs[label.contig_id].addLabel(label, sort=False)
 
+			final_labels[label.contig_id]=label
+
+		for contig_id in final_labels.keys():
+			contigs[contig_id].addLabel(final_labels[contig_id], sort=True)
+
+		return contigs
 
 class CmapFile_iter(File_iter):
 	def next(self):
@@ -244,6 +258,20 @@ class Label:
 	def __init__(self, contig_id, label_id):
 		self.contig_id=contig_id
 		self.label_id=label_id
+
+class Contig(object):
+	def __init__(self):
+		self.unordered_labels={}
+		self.labels=OrderedDict()
+	def addLabel(self, label, sort=True, reverse=False):
+		self.unordered_labels[label.position]=label
+
+		if sort:
+			self.labels=OrderedDict()
+			for position in sorted(self.unordered_labels.keys(), reverse=reverse):
+				self.labels[position]=self.unordered_labels[position]
+		else:
+			self.labels[label.position]=label
 
 class XmapFile(File):
 	@staticmethod
@@ -321,3 +349,128 @@ class Alignment:
 		self.anchor_id=anchor_id
 	def __repr__(self):
 		return str(self.__dict__)
+
+	def getLeftOverhang(self):
+		try:
+			return self.left_overhang
+		except:
+			pass
+
+		try:
+			query_len=self.query_len
+			anchor_len=self.anchor_len
+		except:
+			raise # extract query length from cmap_file?
+
+		left_start=self.anchor_start
+		if self.orientation=='+':
+			left_end=self.anchor_start-self.query_start
+		else:
+			left_end=self.anchor_start-(query_len-self.query_start)
+
+		self.left_overhang=Overhang(left_start, left_end, '-', anchor_len)
+		return self.left_overhang
+
+	def getRightOverhang(self):
+		try:
+			return self.right_overhang
+		except:
+			pass
+		try:
+			query_len=self.query_len
+			anchor_len=self.anchor_len
+		except:
+			raise # extract query length from cmap_file?
+
+		left_start=self.anchor_start
+		right_start=self.anchor_end
+		if self.orientation=='+':
+			left_end=self.anchor_start-self.query_start
+			right_end=self.anchor_end+(query_len-self.query_end)
+		else:
+			left_end=self.anchor_start-(query_len-self.query_start)
+			right_end=self.anchor_end+self.query_end
+
+		self.right_overhang=Overhang(right_start, right_end, '+', anchor_len)
+		return self.right_overhang
+
+	def getOverhangingLabels(self, overhang):
+		if not self.query or not self.anchor or not self.query_len or not self.anchor_len:
+			raise Exception("Illegal state: Cannot find overhanging labels without query or anchor contigs, or without query_len")
+
+		if overhang.orientation=="+":
+			start=overhang.start
+			end=overhang.end
+		else:
+			start=overhang.end
+			end=overhang.start
+		unordered_overhanging_labels={}
+		#remove .labels by adding __getitem__ to Contig class
+		for label_position in self.anchor.labels.keys():
+			if label_position>start and label_position<end:
+				unordered_overhanging_labels[label_position]=self.anchor.labels[label_position]
+
+		#if left overhang
+		if overhang.orientation=='-':
+			query_offsets={}
+			if self.orientation=='-':
+				#find labels between query_len and query_start
+				for label_position in self.query.labels.keys():
+					if label_position>self.query_len and label_position<self.query_start:
+						query_offsets[label_position-self.query_start]=self.query.labels[label_position]
+			else:
+				#find labels between zero and query_start
+				for label_position in self.query.labels.keys():
+					if label_position>0 and label_position<self.query_start:
+						query_offsets[self.query_start-label_position]=self.query.labels[label_position]
+
+			#convert to anchor position: anchor_start-distance
+			for query_offset in query_offsets.keys():
+				anchor_position=self.anchor_start-query_offset
+				unordered_overhanging_labels[anchor_position]=query_offsets[query_offset]
+			
+		#if right overhang
+		else:
+			query_offsets={}
+			if self.orientation=='-':
+				#find labels between query_end and 0
+				for query_position in self.query.labels.keys():
+					if query_position<self.query_end and query_position>0:
+						query_offsets[self.query_end-query_position]=self.query.labels[query_position]
+			else:
+				#find labels between query_end and query_len
+				for query_position in self.query.labels.keys():
+					if query_position>self.query_end and query_position<self.query_len:
+						query_offsets[query_position-self.query_end]=self.query.labels[query_position]
+
+			# convert to anchor position: anchor_end+distance
+			for query_offset in query_offsets.keys():
+				anchor_position=self.anchor_end+query_offset
+				unordered_overhanging_labels[anchor_position]=query_offsets[query_offset]
+
+		reverse=overhang.orientation=='-'
+		overhanging_labels=OrderedDict()
+		for label_position in sorted(unordered_overhanging_labels.keys(), reverse=reverse):
+			if label_position<0 or label_position>self.anchor_len:
+				continue
+			overhanging_labels[label_position]=unordered_overhanging_labels[label_position]
+		return overhanging_labels
+		
+		
+
+class Overhang(object):
+	def __init__(self, start, end, orientation, anchor_len):
+		self.anchor_len=anchor_len
+		self.start=start
+		self.orientation=orientation
+		if orientation=='-':
+			if end < 0:
+				end=0
+		if orientation=='+':
+			if end > anchor_len:
+				end=anchor_len
+		self.end=end
+	def __repr__(self):
+		return str(self.__dict__)
+	def getLength(self):
+		return abs(self.end-self.start)
