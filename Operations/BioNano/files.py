@@ -271,8 +271,10 @@ class XmapFile(File):
 		o_file.write("\t".join(fields) + "\n")
 		
 class XmapFile_iter(File_iter):
+	line_number=0
 	def next(self):
 		while True:
+			self.line_number+=1
 			try:
 				line=self.i_file.readline()
 				if line=='':
@@ -280,9 +282,9 @@ class XmapFile_iter(File_iter):
 					raise StopIteration
 				if line[0]=="#":
 					continue
-				alignment_data=line.split("\t")
+				alignment_data=line.strip().split("\t")
 				if len(alignment_data)<14:
-					raise Exception("this file is incorrectly formatted")
+					raise Exception("this file is incorrectly formatted (see line {0:d})".format(self.line_number))
 
 				alignment_id=int(alignment_data[0])
 				query_id=int(alignment_data[1])
@@ -307,7 +309,7 @@ class XmapFile_iter(File_iter):
 			except StopIteration:
 				raise
 			except IndexError:
-				raise Exception("this file is incorrectly formatted")
+				raise Exception("this file is incorrectly formatted (see line {0:d})".format(self.line_number))
 			except:
 				raise
 class Alignment:
