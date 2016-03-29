@@ -11,6 +11,17 @@ class Comparison(object):
 		self.xmap_file=xmap_file
 		self.query_file, self.anchor_file=self.seekCmaps()
 
+		error=False
+		error_message="Unable to find "
+		if self.query_file is None:
+			error=True
+			error_message+="query, "
+		if self.anchor_file is None:
+			error=True
+			error_message+="anchor"
+		if error:
+			raise FileArrangementException(error_message+" maps.")
+
 	def seekCmaps(self):
 		query_file=None
 		anchor_file=None
@@ -49,8 +60,14 @@ class Comparison(object):
 			except:
 				raise # extract query length from query_file
 
-			align.query=query_contigs[align.query_id]
-			align.anchor=anchor_contigs[align.anchor_id]
+			try:
+				align.anchor=anchor_contigs[align.anchor_id]
+			except:
+				raise FileMismatchException(self.xmap_file.input_file, self.anchor_file.input_file, align.anchor_id)
+			try:
+				align.query=query_contigs[align.query_id]
+			except:
+				raise FileMismatchException(self.xmap_file.input_file, self.query_file.input_file, align.query_id)
 
 			for overhang in [align.getLeftOverhang(), align.getRightOverhang()]:
 				proportion=overhang.getLength()/query_length
@@ -72,3 +89,5 @@ class Comparison(object):
 
 from Operations.BioNano.files import XmapFile
 from Operations.BioNano.files import CmapFile
+from Operations.BioNano.exceptions import FileArrangementException
+from Operations.BioNano.exceptions import FileMismatchException

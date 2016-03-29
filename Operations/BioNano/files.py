@@ -382,13 +382,10 @@ class Alignment:
 		except:
 			raise # extract query length from cmap_file?
 
-		left_start=self.anchor_start
 		right_start=self.anchor_end
 		if self.orientation=='+':
-			left_end=self.anchor_start-self.query_start
 			right_end=self.anchor_end+(query_len-self.query_end)
 		else:
-			left_end=self.anchor_start-(query_len-self.query_start)
 			right_end=self.anchor_end+self.query_end
 
 		self.right_overhang=Overhang(right_start, right_end, '+', anchor_len)
