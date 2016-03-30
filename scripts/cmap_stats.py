@@ -40,7 +40,8 @@ def xmap_stats(file):
 		length=abs(align.query_start-align.query_end)
 
 		try:
-			proportion=float(length)/align.query_len
+			overhang_length=align.getLeftOverhang().getLength()+align.getRightOverhang().getLength()
+			proportion=1-(overhang_length/align.query_len)
 			proportions.append(proportion)
 			if proportion < 0.9:
 				proportion_count_below_threshold+=1
